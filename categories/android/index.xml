@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Android | Romain Thomas</title><link>/categories/android/</link><atom:link href="/categories/android/index.xml" rel="self" type="application/rss+xml"/><description>Android</description><generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>Published with Academic Website Builder - Icons made by Freepik</copyright><lastBuildDate>Sun, 27 Sep 2020 00:00:00 +0000</lastBuildDate><image><url>/images/icon_hu2654a0fcc87c65a864822ac27b001d3b_698_512x512_fill_lanczos_center_2.png</url><title>Android</title><link>/categories/android/</link></image><item><title>r2-pay: whitebox (part 2)</title><link>/post/20-09-r2con-obfuscated-whitebox-part2/</link><pubDate>Sun, 27 Sep 2020 00:00:00 +0000</pubDate><guid>/post/20-09-r2con-obfuscated-whitebox-part2/</guid><description>&lt;style>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Android | Romain Thomas</title><link>https://www.romainthomas.fr/categories/android/</link><atom:link href="https://www.romainthomas.fr/categories/android/index.xml" rel="self" type="application/rss+xml"/><description>Android</description><generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>Published with Academic Website Builder - Icons made by Freepik</copyright><lastBuildDate>Sun, 27 Sep 2020 00:00:00 +0000</lastBuildDate><image><url>https://www.romainthomas.fr/images/icon_hu2654a0fcc87c65a864822ac27b001d3b_698_512x512_fill_lanczos_center_2.png</url><title>Android</title><link>https://www.romainthomas.fr/categories/android/</link></image><item><title>r2-pay: whitebox (part 2)</title><link>https://www.romainthomas.fr/post/20-09-r2con-obfuscated-whitebox-part2/</link><pubDate>Sun, 27 Sep 2020 00:00:00 +0000</pubDate><guid>https://www.romainthomas.fr/post/20-09-r2con-obfuscated-whitebox-part2/</guid><description>&lt;style>
 .green {
 color:green;
 font-family: 'Fira Code', monospace;
@@ -53,7 +53,7 @@ font-size: 87.5%;
 &lt;/style>
 &lt;h2 id="introduction">Introduction&lt;/h2>
 &lt;p>In the
-&lt;a href="/post/20-09-r2con-obfuscated-whitebox-part1/">first part&lt;/a> of this write-up, we described the
+&lt;a href="https://www.romainthomas.fr/post/20-09-r2con-obfuscated-whitebox-part1/">first part&lt;/a> of this write-up, we described the
 anti-frida, anti-debug and anti-root techniques used in the application and how to remove most of them.&lt;/p>
 &lt;p>This second part digs into the JNI function &lt;code>gXftm3iswpkVgBNDUp&lt;/code> and the underlying whitebox implementation.&lt;/p>
 &lt;h2 id="library-shimming">Library Shimming&lt;/h2>
@@ -330,7 +330,7 @@ Implementations&lt;/a> by Philippe Teuwen (
 &lt;p>It is the output of the function when entering &lt;code>1234&lt;/code> in the PIN field and &lt;code>4567&lt;/code> in the amount field.&amp;#160;&lt;a href="#fnref:4" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
 &lt;/li>
 &lt;/ol>
-&lt;/section></description></item><item><title>r2-pay: anti-debug, anti-root &amp; anti-frida (part 1)</title><link>/post/20-09-r2con-obfuscated-whitebox-part1/</link><pubDate>Sun, 20 Sep 2020 00:00:00 +0000</pubDate><guid>/post/20-09-r2con-obfuscated-whitebox-part1/</guid><description>&lt;style>
+&lt;/section></description></item><item><title>r2-pay: anti-debug, anti-root &amp; anti-frida (part 1)</title><link>https://www.romainthomas.fr/post/20-09-r2con-obfuscated-whitebox-part1/</link><pubDate>Sun, 20 Sep 2020 00:00:00 +0000</pubDate><guid>https://www.romainthomas.fr/post/20-09-r2con-obfuscated-whitebox-part1/</guid><description>&lt;style>
 .green {
 color:green;
 font-family: 'Fira Code', monospace;
@@ -805,7 +805,7 @@ For those who are interested in similar topics, you can take a look at the Quark
 &lt;a href="https://android.googlesource.com/platform/bionic/&amp;#43;/refs/tags/android-9.0.0_r60/linker/linker_soinfo.cpp#420" target="_blank" rel="noopener">&lt;code>linker/linker_soinfo.cpp:420&lt;/code>&lt;/a>&amp;#160;&lt;a href="#fnref:4" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
 &lt;/li>
 &lt;/ol>
-&lt;/section></description></item><item><title>A Glimpse Into Tencent's Legu Packer</title><link>/post/a-glimpse-into-tencents-legu-packer/</link><pubDate>Tue, 26 Nov 2019 00:00:00 +0000</pubDate><guid>/post/a-glimpse-into-tencents-legu-packer/</guid><description>&lt;style>
+&lt;/section></description></item><item><title>A Glimpse Into Tencent's Legu Packer</title><link>https://www.romainthomas.fr/post/a-glimpse-into-tencents-legu-packer/</link><pubDate>Tue, 26 Nov 2019 00:00:00 +0000</pubDate><guid>https://www.romainthomas.fr/post/a-glimpse-into-tencents-legu-packer/</guid><description>&lt;style>
 .packedfile {
 color:green;
 font-family: 'Lucida Console', monospace;
@@ -941,7 +941,7 @@ along with a suspicious application &lt;sup id="fnref:4">&lt;a href="#fn:4" clas
 &lt;p>&lt;a href="https://www.virustotal.com/gui/file/708e6967920dcf2789b7183d714e73ab79a2f8b3ca71929b12aadeb2c58c2867/detection">https://www.virustotal.com/gui/file/708e6967920dcf2789b7183d714e73ab79a2f8b3ca71929b12aadeb2c58c2867/detection&lt;/a>&amp;#160;&lt;a href="#fnref:4" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
 &lt;/li>
 &lt;/ol>
-&lt;/section></description></item><item><title>Android Native Library Analysis with QBDI</title><link>/post/android-native-library-analysis-with-qbdi/</link><pubDate>Mon, 03 Jun 2019 00:00:00 +0000</pubDate><guid>/post/android-native-library-analysis-with-qbdi/</guid><description>&lt;div class="alert alert-note">
+&lt;/section></description></item><item><title>Android Native Library Analysis with QBDI</title><link>https://www.romainthomas.fr/post/android-native-library-analysis-with-qbdi/</link><pubDate>Mon, 03 Jun 2019 00:00:00 +0000</pubDate><guid>https://www.romainthomas.fr/post/android-native-library-analysis-with-qbdi/</guid><description>&lt;div class="alert alert-note">
 &lt;div>
 This post has been originally posted on the &lt;a href=https://blog.quarkslab.com/android-native-library-analysis-with-qbdi.html>Quarkslab&amp;rsquo;s Blog&lt;/a>
 &lt;/div>
@@ -1376,7 +1376,7 @@ to work on the concepts involved in this DBI.&lt;/p>
 &lt;p>Nexus 5X - Android 8.1.0 - Rooted with Magisk.&amp;#160;&lt;a href="#fnref:8" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
 &lt;/li>
 &lt;/ol>
-&lt;/section></description></item><item><title>Android crackme challenge</title><link>/post/android-crackme/</link><pubDate>Tue, 20 Nov 2018 00:00:00 +0000</pubDate><guid>/post/android-crackme/</guid><description>&lt;div class="alert alert-note">
+&lt;/section></description></item><item><title>Android crackme challenge</title><link>https://www.romainthomas.fr/post/android-crackme/</link><pubDate>Tue, 20 Nov 2018 00:00:00 +0000</pubDate><guid>https://www.romainthomas.fr/post/android-crackme/</guid><description>&lt;div class="alert alert-note">
 &lt;div>
 This post has been originally posted on the &lt;a href=https://blog.quarkslab.com/android-challenge.html>Quarkslab&amp;rsquo;s Blog&lt;/a>
 &lt;/div>
@@ -1386,7 +1386,7 @@ This post has been originally posted on the &lt;a href=https://blog.quarkslab.co
 &lt;p>&lt;img src="screen.png" alt="success">&lt;/p>
 &lt;p>The application can be run on an emulator or a real device (whatever the architecture) but the Android version must be at &lt;strong>least Marshmallow&lt;/strong> (&amp;gt; 6.0).&lt;/p>
 &lt;p>
-&lt;a href="crackme-telegram.apk">crackme-telegram.apk&lt;/a> - &lt;code>SHA256: d66b82ebc14708b214a581760e99894af17e10598bcef95e75441a12b948bbf0&lt;/code>&lt;/p></description></item><item><title>Android OAT formats</title><link>/post/android-oat/</link><pubDate>Mon, 25 Jun 2018 00:00:00 +0000</pubDate><guid>/post/android-oat/</guid><description>&lt;p>Here are internal structures of Android OAT:&lt;/p>
+&lt;a href="crackme-telegram.apk">crackme-telegram.apk&lt;/a> - &lt;code>SHA256: d66b82ebc14708b214a581760e99894af17e10598bcef95e75441a12b948bbf0&lt;/code>&lt;/p></description></item><item><title>Android OAT formats</title><link>https://www.romainthomas.fr/post/android-oat/</link><pubDate>Mon, 25 Jun 2018 00:00:00 +0000</pubDate><guid>https://www.romainthomas.fr/post/android-oat/</guid><description>&lt;p>Here are internal structures of Android OAT:&lt;/p>
 &lt;h1 id="oat-124">OAT 124&lt;/h1>
 &lt;p>&lt;img src="oat_124.png" alt="OAT 124">&lt;/p>
 &lt;p>
@@ -1398,7 +1398,7 @@ This post has been originally posted on the &lt;a href=https://blog.quarkslab.co
 &lt;h1 id="oat-64">OAT 64&lt;/h1>
 &lt;p>&lt;img src="oat_64.png" alt="OAT 64">&lt;/p>
 &lt;p>
-&lt;a href="oat_64.pdf">PDF Version&lt;/a>&lt;/p></description></item><item><title>Android VDEX formats</title><link>/post/android-vdex/</link><pubDate>Mon, 25 Jun 2018 00:00:00 +0000</pubDate><guid>/post/android-vdex/</guid><description>&lt;p>Here are internal structures of Android VDEX:&lt;/p>
+&lt;a href="oat_64.pdf">PDF Version&lt;/a>&lt;/p></description></item><item><title>Android VDEX formats</title><link>https://www.romainthomas.fr/post/android-vdex/</link><pubDate>Mon, 25 Jun 2018 00:00:00 +0000</pubDate><guid>https://www.romainthomas.fr/post/android-vdex/</guid><description>&lt;p>Here are internal structures of Android VDEX:&lt;/p>
 &lt;h1 id="vdex-10">VDEX 10&lt;/h1>
 &lt;p>&lt;img src="vdex_10.png" alt="VDEX 10">&lt;/p>
 &lt;p>
@@ -1406,7 +1406,7 @@ This post has been originally posted on the &lt;a href=https://blog.quarkslab.co
 &lt;h1 id="vdex-06">VDEX 06&lt;/h1>
 &lt;p>&lt;img src="vdex_06.png" alt="VDEX 06">&lt;/p>
 &lt;p>
-&lt;a href="vdex_06.pdf">PDF Version&lt;/a>&lt;/p></description></item><item><title>How to use frida on a non-rooted device</title><link>/post/how-to-use-frida-on-a-non-rooted-device/</link><pubDate>Sat, 03 Mar 2018 00:00:00 +0000</pubDate><guid>/post/how-to-use-frida-on-a-non-rooted-device/</guid><description>&lt;p>This post is a part of LIEF tutorials. It explains how to combine
+&lt;a href="vdex_06.pdf">PDF Version&lt;/a>&lt;/p></description></item><item><title>How to use frida on a non-rooted device</title><link>https://www.romainthomas.fr/post/how-to-use-frida-on-a-non-rooted-device/</link><pubDate>Sat, 03 Mar 2018 00:00:00 +0000</pubDate><guid>https://www.romainthomas.fr/post/how-to-use-frida-on-a-non-rooted-device/</guid><description>&lt;p>This post is a part of LIEF tutorials. It explains how to combine
 &lt;a href="https://www.frida.re/" target="_blank" rel="noopener">Frida&lt;/a> and
 &lt;a href="https://lief-project.github.io/" target="_blank" rel="noopener">LIEF&lt;/a> to
 run &lt;code>frida-gadget&lt;/code> on a non rooted device.&lt;/p>

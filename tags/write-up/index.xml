@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>write-up | Romain Thomas</title><link>/tags/write-up/</link><atom:link href="/tags/write-up/index.xml" rel="self" type="application/rss+xml"/><description>write-up</description><generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>Published with Academic Website Builder - Icons made by Freepik</copyright><lastBuildDate>Sun, 27 Sep 2020 00:00:00 +0000</lastBuildDate><image><url>/images/icon_hu2654a0fcc87c65a864822ac27b001d3b_698_512x512_fill_lanczos_center_2.png</url><title>write-up</title><link>/tags/write-up/</link></image><item><title>r2-pay: whitebox (part 2)</title><link>/post/20-09-r2con-obfuscated-whitebox-part2/</link><pubDate>Sun, 27 Sep 2020 00:00:00 +0000</pubDate><guid>/post/20-09-r2con-obfuscated-whitebox-part2/</guid><description>&lt;style>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>write-up | Romain Thomas</title><link>https://www.romainthomas.fr/tags/write-up/</link><atom:link href="https://www.romainthomas.fr/tags/write-up/index.xml" rel="self" type="application/rss+xml"/><description>write-up</description><generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>Published with Academic Website Builder - Icons made by Freepik</copyright><lastBuildDate>Sun, 27 Sep 2020 00:00:00 +0000</lastBuildDate><image><url>https://www.romainthomas.fr/images/icon_hu2654a0fcc87c65a864822ac27b001d3b_698_512x512_fill_lanczos_center_2.png</url><title>write-up</title><link>https://www.romainthomas.fr/tags/write-up/</link></image><item><title>r2-pay: whitebox (part 2)</title><link>https://www.romainthomas.fr/post/20-09-r2con-obfuscated-whitebox-part2/</link><pubDate>Sun, 27 Sep 2020 00:00:00 +0000</pubDate><guid>https://www.romainthomas.fr/post/20-09-r2con-obfuscated-whitebox-part2/</guid><description>&lt;style>
 .green {
 color:green;
 font-family: 'Fira Code', monospace;
@@ -53,7 +53,7 @@ font-size: 87.5%;
 &lt;/style>
 &lt;h2 id="introduction">Introduction&lt;/h2>
 &lt;p>In the
-&lt;a href="/post/20-09-r2con-obfuscated-whitebox-part1/">first part&lt;/a> of this write-up, we described the
+&lt;a href="https://www.romainthomas.fr/post/20-09-r2con-obfuscated-whitebox-part1/">first part&lt;/a> of this write-up, we described the
 anti-frida, anti-debug and anti-root techniques used in the application and how to remove most of them.&lt;/p>
 &lt;p>This second part digs into the JNI function &lt;code>gXftm3iswpkVgBNDUp&lt;/code> and the underlying whitebox implementation.&lt;/p>
 &lt;h2 id="library-shimming">Library Shimming&lt;/h2>
@@ -330,7 +330,7 @@ Implementations&lt;/a> by Philippe Teuwen (
 &lt;p>It is the output of the function when entering &lt;code>1234&lt;/code> in the PIN field and &lt;code>4567&lt;/code> in the amount field.&amp;#160;&lt;a href="#fnref:4" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
 &lt;/li>
 &lt;/ol>
-&lt;/section></description></item><item><title>r2-pay: anti-debug, anti-root &amp; anti-frida (part 1)</title><link>/post/20-09-r2con-obfuscated-whitebox-part1/</link><pubDate>Sun, 20 Sep 2020 00:00:00 +0000</pubDate><guid>/post/20-09-r2con-obfuscated-whitebox-part1/</guid><description>&lt;style>
+&lt;/section></description></item><item><title>r2-pay: anti-debug, anti-root &amp; anti-frida (part 1)</title><link>https://www.romainthomas.fr/post/20-09-r2con-obfuscated-whitebox-part1/</link><pubDate>Sun, 20 Sep 2020 00:00:00 +0000</pubDate><guid>https://www.romainthomas.fr/post/20-09-r2con-obfuscated-whitebox-part1/</guid><description>&lt;style>
 .green {
 color:green;
 font-family: 'Fira Code', monospace;
@@ -805,7 +805,7 @@ For those who are interested in similar topics, you can take a look at the Quark
 &lt;a href="https://android.googlesource.com/platform/bionic/&amp;#43;/refs/tags/android-9.0.0_r60/linker/linker_soinfo.cpp#420" target="_blank" rel="noopener">&lt;code>linker/linker_soinfo.cpp:420&lt;/code>&lt;/a>&amp;#160;&lt;a href="#fnref:4" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
 &lt;/li>
 &lt;/ol>
-&lt;/section></description></item><item><title>HITB 2015 Write-up - Crypto 300</title><link>/post/writeup-hitb2015-crypto300/</link><pubDate>Tue, 03 Nov 2015 00:00:00 +0100</pubDate><guid>/post/writeup-hitb2015-crypto300/</guid><description>&lt;h2 id="introduction">Introduction&lt;/h2>
+&lt;/section></description></item><item><title>HITB 2015 Write-up - Crypto 300</title><link>https://www.romainthomas.fr/post/writeup-hitb2015-crypto300/</link><pubDate>Tue, 03 Nov 2015 00:00:00 +0100</pubDate><guid>https://www.romainthomas.fr/post/writeup-hitb2015-crypto300/</guid><description>&lt;h2 id="introduction">Introduction&lt;/h2>
 &lt;p>The crypto 300 challenge was about RSA with a special generation of the prime numbers $p$ and $q$.
 We were given a mail
 &lt;a href="mail.msg">mail.msg&lt;/a> which has been encrypted with RSA and whose the public key is in the
@@ -932,7 +932,7 @@ sage: q
 &lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">openssl smime -decrypt -in mail.msg -inkey private.pem
 hitb&lt;span style="color:#f92672">{&lt;/span>0b21cc2025534dbd2965390d2bcef45d&lt;span style="color:#f92672">}&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>The sources are available
-&lt;a href="hitb2015-crypto300.tar.gz">here&lt;/a>&lt;/p></description></item><item><title>HITB 2015 Write-up - Crypto 400</title><link>/post/writeup-hitb2015-crypto400/</link><pubDate>Tue, 03 Nov 2015 00:00:00 +0100</pubDate><guid>/post/writeup-hitb2015-crypto400/</guid><description>&lt;h2 id="introduction">Introduction&lt;/h2>
+&lt;a href="hitb2015-crypto300.tar.gz">here&lt;/a>&lt;/p></description></item><item><title>HITB 2015 Write-up - Crypto 400</title><link>https://www.romainthomas.fr/post/writeup-hitb2015-crypto400/</link><pubDate>Tue, 03 Nov 2015 00:00:00 +0100</pubDate><guid>https://www.romainthomas.fr/post/writeup-hitb2015-crypto400/</guid><description>&lt;h2 id="introduction">Introduction&lt;/h2>
 &lt;p>The crypto 400 challenge deals with the Even Mansour cryptosystem. To validate this challenge we have to send the flag to a server.
 The server checks if the answer matches the flag by encrypting the flag and the given message with a &lt;strong>random&lt;/strong> key.
 If both are equal the flag is correct otherwise it fails and the encrypted message is printed.&lt;/p>
@@ -965,7 +965,7 @@ block &lt;span style="color:#f92672">=&lt;/span> xor(block, key[&lt;span style="
 block &lt;span style="color:#f92672">=&lt;/span> step(block)
 &lt;span style="color:#66d9ef">return&lt;/span> block
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;code>step&lt;/code> uses a S-Box to transform the block in this way:&lt;/p>
-&lt;p>&lt;img src="/img/step.png" alt="">&lt;/p>
+&lt;p>&lt;img src="https://www.romainthomas.fr/img/step.png" alt="">&lt;/p>
 &lt;p>$\begin{cases}
 \text{block}^{n+1}_0 = \text{SBox}(\text{block}^{n}_{10} \oplus \text{block}^{n}_{12} \oplus \text{block}^{n}_{13} \oplus \text{block}^{n+1}_{15}) &amp;amp; k = 0 \\\&lt;br>
 \text{block}^{n+1}_k = \text{block}^{n}_{k - 1} &amp;amp; k &amp;gt; 0
@@ -974,7 +974,7 @@ block &lt;span style="color:#f92672">=&lt;/span> step(block)
 &lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">step&lt;/span>(block):
 &lt;span style="color:#66d9ef">return&lt;/span> chr( S[ ord(block[&lt;span style="color:#ae81ff">10&lt;/span>]) &lt;span style="color:#f92672">^&lt;/span> ord(block[&lt;span style="color:#ae81ff">12&lt;/span>]) &lt;span style="color:#f92672">^&lt;/span> ord(block[&lt;span style="color:#ae81ff">13&lt;/span>]) &lt;span style="color:#f92672">^&lt;/span> ord(block[&lt;span style="color:#ae81ff">15&lt;/span>]) ] ) &lt;span style="color:#f92672">+&lt;/span> block[:&lt;span style="color:#ae81ff">15&lt;/span>]
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>By ploting $y = \text{S-Box}(x)$ we can notice that the S-Box has a special construction:&lt;/p>
-&lt;p>&lt;img src="/img/figure_1-1.png" alt="">&lt;/p>
+&lt;p>&lt;img src="https://www.romainthomas.fr/img/figure_1-1.png" alt="">&lt;/p>
 &lt;p>I thought about computing the differential characteristics which is the probability that given the input difference
 $\Delta = x \oplus y$ we get the output delta: $\delta = S(x) \oplus S(y)$.
 We will call this probability $P(\Delta | \delta)$ and with

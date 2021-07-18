@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Romain Thomas</title><link>/</link><atom:link href="/index.xml" rel="self" type="application/rss+xml"/><description>Romain Thomas</description><generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>Published with Academic Website Builder - Icons made by Freepik</copyright><lastBuildDate>Sun, 18 Jul 2021 00:00:00 +0000</lastBuildDate><image><url>/images/icon_hu2654a0fcc87c65a864822ac27b001d3b_698_512x512_fill_lanczos_center_2.png</url><title>Romain Thomas</title><link>/</link></image><item><title>Gotta Catch 'Em All: Frida &amp; jailbreak detection</title><link>/post/21-07-pokemongo-anti-frida-jailbreak-bypass/</link><pubDate>Sun, 18 Jul 2021 00:00:00 +0000</pubDate><guid>/post/21-07-pokemongo-anti-frida-jailbreak-bypass/</guid><description>&lt;style>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Romain Thomas</title><link>https://www.romainthomas.fr/</link><atom:link href="https://www.romainthomas.fr/index.xml" rel="self" type="application/rss+xml"/><description>Romain Thomas</description><generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>Published with Academic Website Builder - Icons made by Freepik</copyright><lastBuildDate>Sun, 18 Jul 2021 00:00:00 +0000</lastBuildDate><image><url>https://www.romainthomas.fr/images/icon_hu2654a0fcc87c65a864822ac27b001d3b_698_512x512_fill_lanczos_center_2.png</url><title>Romain Thomas</title><link>https://www.romainthomas.fr/</link></image><item><title>Gotta Catch 'Em All: Frida &amp; jailbreak detection</title><link>https://www.romainthomas.fr/post/21-07-pokemongo-anti-frida-jailbreak-bypass/</link><pubDate>Sun, 18 Jul 2021 00:00:00 +0000</pubDate><guid>https://www.romainthomas.fr/post/21-07-pokemongo-anti-frida-jailbreak-bypass/</guid><description>&lt;style>
 .green {
 color:green;
 font-family: 'Fira Code', monospace;
@@ -789,7 +789,7 @@ and the string itself (see:
 &lt;a href="https://developers.google.com/protocol-buffers/docs/encoding#strings" target="_blank" rel="noopener">protocol-buffers/docs/encoding&lt;/a>)&amp;#160;&lt;a href="#fnref:6" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
 &lt;/li>
 &lt;/ol>
-&lt;/section></description></item><item><title>QBDL</title><link>/project/qbdl/</link><pubDate>Thu, 03 Jun 2021 00:00:00 +0000</pubDate><guid>/project/qbdl/</guid><description>&lt;p>QBDL (&lt;strong>Q&lt;/strong>uarksla&lt;strong>B&lt;/strong> &lt;strong>D&lt;/strong>ynamic &lt;strong>L&lt;/strong>oader) is a cross-platform library that enables
+&lt;/section></description></item><item><title>QBDL</title><link>https://www.romainthomas.fr/project/qbdl/</link><pubDate>Thu, 03 Jun 2021 00:00:00 +0000</pubDate><guid>https://www.romainthomas.fr/project/qbdl/</guid><description>&lt;p>QBDL (&lt;strong>Q&lt;/strong>uarksla&lt;strong>B&lt;/strong> &lt;strong>D&lt;/strong>ynamic &lt;strong>L&lt;/strong>oader) is a cross-platform library that enables
 to load ELF, PE and Mach-O binaries with an abstraction on the targeted system.
 It abstracts the memory model on which the binary is loaded
 and provides an enhanced API to the user to process symbols resolution.
@@ -826,7 +826,7 @@ self&lt;span style="color:#f92672">.&lt;/span>ctx &lt;span style="color:#f92672"
 x86_64_arch &lt;span style="color:#f92672">=&lt;/span> pyqbdl&lt;span style="color:#f92672">.&lt;/span>Arch(lief&lt;span style="color:#f92672">.&lt;/span>ARCHITECTURES&lt;span style="color:#f92672">.&lt;/span>X86, lief&lt;span style="color:#f92672">.&lt;/span>ENDIANNESS&lt;span style="color:#f92672">.&lt;/span>LITTLE, True)
 loader &lt;span style="color:#f92672">=&lt;/span> pyqbdl&lt;span style="color:#f92672">.&lt;/span>loaders&lt;span style="color:#f92672">.&lt;/span>MachO&lt;span style="color:#f92672">.&lt;/span>from_file(args&lt;span style="color:#f92672">.&lt;/span>filename, x86_64_arch,
 TritonSystem(x86_64_arch, ctx), pyqbdl&lt;span style="color:#f92672">.&lt;/span>Loader&lt;span style="color:#f92672">.&lt;/span>BIND&lt;span style="color:#f92672">.&lt;/span>NOW)
-&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>QBDL: QuarkslaB Dynamic Loader</title><link>/publication/21-sstic-qbdl/</link><pubDate>Thu, 03 Jun 2021 00:00:00 +0000</pubDate><guid>/publication/21-sstic-qbdl/</guid><description>&lt;h2 id="hahahugoshortcode-s0-hbhb-slides">
+&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>QBDL: QuarkslaB Dynamic Loader</title><link>https://www.romainthomas.fr/publication/21-sstic-qbdl/</link><pubDate>Thu, 03 Jun 2021 00:00:00 +0000</pubDate><guid>https://www.romainthomas.fr/publication/21-sstic-qbdl/</guid><description>&lt;h2 id="hahahugoshortcode-s0-hbhb-slides">
 &lt;i class="fas fa-copy pr-1 fa-fw">&lt;/i> Slides&lt;/h2>
 &lt;div class="pdfpreview shortcode shortcode--pdfpreview">
 &lt;embed src="SSTIC2021-Slides-qbdl_quarkslab_dynamic_loader-guinet_thomas.pdf" type="application/pdf" width="100%" height=450px />
@@ -835,7 +835,7 @@ TritonSystem(x86_64_arch, ctx), pyqbdl&lt;span style="color:#f92672">.&lt;/span>
 &lt;i class="fas fa-laptop-code pr-1 fa-fw">&lt;/i> Talk (In French)&lt;/h2>
 &lt;video controls >
 &lt;source src="https://static.sstic.org/videos2021/1080p/qbdl_quarkslab_dynamic_loader.mp4" type="video/mp4">
-&lt;/video></description></item><item><title>Dynamic Binary Instrumentation Techniques to Address Native Code Obfuscation</title><link>/publication/20-bh-asia-dbi/</link><pubDate>Thu, 01 Oct 2020 00:00:00 +0000</pubDate><guid>/publication/20-bh-asia-dbi/</guid><description>&lt;h2 id="hahahugoshortcode-s0-hbhb-slides">
+&lt;/video></description></item><item><title>Dynamic Binary Instrumentation Techniques to Address Native Code Obfuscation</title><link>https://www.romainthomas.fr/publication/20-bh-asia-dbi/</link><pubDate>Thu, 01 Oct 2020 00:00:00 +0000</pubDate><guid>https://www.romainthomas.fr/publication/20-bh-asia-dbi/</guid><description>&lt;h2 id="hahahugoshortcode-s0-hbhb-slides">
 &lt;i class="fas fa-copy pr-1 fa-fw">&lt;/i> Slides&lt;/h2>
 &lt;div class="pdfpreview shortcode shortcode--pdfpreview">
 &lt;embed src="asia-20-Thomas-Dynamic-Binary-Instrumentation-Techniques-to-Address-Native-Code-Obfuscation.pdf" type="application/pdf" width="100%" height=450px />
@@ -857,7 +857,7 @@ TritonSystem(x86_64_arch, ctx), pyqbdl&lt;span style="color:#f92672">.&lt;/span>
 &lt;video controls >
 &lt;source src="qbdi-tencent-packer.mp4" type="video/mp4">
 &lt;/video>
-&lt;p>&lt;em>Note: The videos are intentionally quick. Do not hesite to pause them.&lt;/em>&lt;/p></description></item><item><title>r2-pay: whitebox (part 2)</title><link>/post/20-09-r2con-obfuscated-whitebox-part2/</link><pubDate>Sun, 27 Sep 2020 00:00:00 +0000</pubDate><guid>/post/20-09-r2con-obfuscated-whitebox-part2/</guid><description>&lt;style>
+&lt;p>&lt;em>Note: The videos are intentionally quick. Do not hesite to pause them.&lt;/em>&lt;/p></description></item><item><title>r2-pay: whitebox (part 2)</title><link>https://www.romainthomas.fr/post/20-09-r2con-obfuscated-whitebox-part2/</link><pubDate>Sun, 27 Sep 2020 00:00:00 +0000</pubDate><guid>https://www.romainthomas.fr/post/20-09-r2con-obfuscated-whitebox-part2/</guid><description>&lt;style>
 .green {
 color:green;
 font-family: 'Fira Code', monospace;
@@ -912,7 +912,7 @@ font-size: 87.5%;
 &lt;/style>
 &lt;h2 id="introduction">Introduction&lt;/h2>
 &lt;p>In the
-&lt;a href="/post/20-09-r2con-obfuscated-whitebox-part1/">first part&lt;/a> of this write-up, we described the
+&lt;a href="https://www.romainthomas.fr/post/20-09-r2con-obfuscated-whitebox-part1/">first part&lt;/a> of this write-up, we described the
 anti-frida, anti-debug and anti-root techniques used in the application and how to remove most of them.&lt;/p>
 &lt;p>This second part digs into the JNI function &lt;code>gXftm3iswpkVgBNDUp&lt;/code> and the underlying whitebox implementation.&lt;/p>
 &lt;h2 id="library-shimming">Library Shimming&lt;/h2>
@@ -1189,7 +1189,7 @@ Implementations&lt;/a> by Philippe Teuwen (
 &lt;p>It is the output of the function when entering &lt;code>1234&lt;/code> in the PIN field and &lt;code>4567&lt;/code> in the amount field.&amp;#160;&lt;a href="#fnref:4" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
 &lt;/li>
 &lt;/ol>
-&lt;/section></description></item><item><title>r2-pay: anti-debug, anti-root &amp; anti-frida (part 1)</title><link>/post/20-09-r2con-obfuscated-whitebox-part1/</link><pubDate>Sun, 20 Sep 2020 00:00:00 +0000</pubDate><guid>/post/20-09-r2con-obfuscated-whitebox-part1/</guid><description>&lt;style>
+&lt;/section></description></item><item><title>r2-pay: anti-debug, anti-root &amp; anti-frida (part 1)</title><link>https://www.romainthomas.fr/post/20-09-r2con-obfuscated-whitebox-part1/</link><pubDate>Sun, 20 Sep 2020 00:00:00 +0000</pubDate><guid>https://www.romainthomas.fr/post/20-09-r2con-obfuscated-whitebox-part1/</guid><description>&lt;style>
 .green {
 color:green;
 font-family: 'Fira Code', monospace;
@@ -1664,7 +1664,7 @@ For those who are interested in similar topics, you can take a look at the Quark
 &lt;a href="https://android.googlesource.com/platform/bionic/&amp;#43;/refs/tags/android-9.0.0_r60/linker/linker_soinfo.cpp#420" target="_blank" rel="noopener">&lt;code>linker/linker_soinfo.cpp:420&lt;/code>&lt;/a>&amp;#160;&lt;a href="#fnref:4" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
 &lt;/li>
 &lt;/ol>
-&lt;/section></description></item><item><title>Tencent Legu Unpacker</title><link>/project/legu_unpacker/</link><pubDate>Thu, 23 Jan 2020 00:00:00 +0000</pubDate><guid>/project/legu_unpacker/</guid><description>&lt;h1 id="legu-unpacker">Legu Unpacker&lt;/h1>
+&lt;/section></description></item><item><title>Tencent Legu Unpacker</title><link>https://www.romainthomas.fr/project/legu_unpacker/</link><pubDate>Thu, 23 Jan 2020 00:00:00 +0000</pubDate><guid>https://www.romainthomas.fr/project/legu_unpacker/</guid><description>&lt;h1 id="legu-unpacker">Legu Unpacker&lt;/h1>
 &lt;p>Scripts to unpack Android applications protected by Tencent Legu. It only works with versions
 &lt;strong>4.1.0.15&lt;/strong> and &lt;strong>4.1.0.18&lt;/strong> of Legu.&lt;/p>
 &lt;p>Blog post: &lt;a href="https://blog.quarkslab.com/a-glimpse-into-tencents-legu-packer.html">https://blog.quarkslab.com/a-glimpse-into-tencents-legu-packer.html&lt;/a>&lt;/p>
@@ -1717,7 +1717,7 @@ that can be unpacked as follows:&lt;/p>
 &lt;li>Kaitai Struct&lt;/li>
 &lt;li>LIEF&lt;/li>
 &lt;li>pylegu&lt;/li>
-&lt;/ul></description></item><item><title>A Glimpse Into Tencent's Legu Packer</title><link>/post/a-glimpse-into-tencents-legu-packer/</link><pubDate>Tue, 26 Nov 2019 00:00:00 +0000</pubDate><guid>/post/a-glimpse-into-tencents-legu-packer/</guid><description>&lt;style>
+&lt;/ul></description></item><item><title>A Glimpse Into Tencent's Legu Packer</title><link>https://www.romainthomas.fr/post/a-glimpse-into-tencents-legu-packer/</link><pubDate>Tue, 26 Nov 2019 00:00:00 +0000</pubDate><guid>https://www.romainthomas.fr/post/a-glimpse-into-tencents-legu-packer/</guid><description>&lt;style>
 .packedfile {
 color:green;
 font-family: 'Lucida Console', monospace;
@@ -1853,7 +1853,7 @@ along with a suspicious application &lt;sup id="fnref:4">&lt;a href="#fn:4" clas
 &lt;p>&lt;a href="https://www.virustotal.com/gui/file/708e6967920dcf2789b7183d714e73ab79a2f8b3ca71929b12aadeb2c58c2867/detection">https://www.virustotal.com/gui/file/708e6967920dcf2789b7183d714e73ab79a2f8b3ca71929b12aadeb2c58c2867/detection&lt;/a>&amp;#160;&lt;a href="#fnref:4" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
 &lt;/li>
 &lt;/ol>
-&lt;/section></description></item><item><title>Android Native Library Analysis with QBDI</title><link>/post/android-native-library-analysis-with-qbdi/</link><pubDate>Mon, 03 Jun 2019 00:00:00 +0000</pubDate><guid>/post/android-native-library-analysis-with-qbdi/</guid><description>&lt;div class="alert alert-note">
+&lt;/section></description></item><item><title>Android Native Library Analysis with QBDI</title><link>https://www.romainthomas.fr/post/android-native-library-analysis-with-qbdi/</link><pubDate>Mon, 03 Jun 2019 00:00:00 +0000</pubDate><guid>https://www.romainthomas.fr/post/android-native-library-analysis-with-qbdi/</guid><description>&lt;div class="alert alert-note">
 &lt;div>
 This post has been originally posted on the &lt;a href=https://blog.quarkslab.com/android-native-library-analysis-with-qbdi.html>Quarkslab&amp;rsquo;s Blog&lt;/a>
 &lt;/div>
@@ -2288,10 +2288,10 @@ to work on the concepts involved in this DBI.&lt;/p>
 &lt;p>Nexus 5X - Android 8.1.0 - Rooted with Magisk.&amp;#160;&lt;a href="#fnref:8" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
 &lt;/li>
 &lt;/ol>
-&lt;/section></description></item><item><title>Android Runtime Restrictions Bypass (PoC)</title><link>/project/android-runtime-restrictions-bypass/</link><pubDate>Wed, 27 Mar 2019 00:00:00 +0000</pubDate><guid>/project/android-runtime-restrictions-bypass/</guid><description>&lt;p>PoC that demonstrates how to disable runtime restrictions (hidden-api and &lt;code>dlopen&lt;/code> namespaces) in user-land.&lt;/p>
+&lt;/section></description></item><item><title>Android Runtime Restrictions Bypass (PoC)</title><link>https://www.romainthomas.fr/project/android-runtime-restrictions-bypass/</link><pubDate>Wed, 27 Mar 2019 00:00:00 +0000</pubDate><guid>https://www.romainthomas.fr/project/android-runtime-restrictions-bypass/</guid><description>&lt;p>PoC that demonstrates how to disable runtime restrictions (hidden-api and &lt;code>dlopen&lt;/code> namespaces) in user-land.&lt;/p>
 &lt;center>
 &lt;i class="fab fa-github">&lt;/i> &lt;a href="https://github.com/quarkslab/android-restriction-bypass">https://github.com/quarkslab/android-restriction-bypass&lt;/a>
-&lt;/center></description></item><item><title>Android Runtime Restrictions Bypass</title><link>/publication/android-restrictions-bypass/</link><pubDate>Sat, 23 Mar 2019 00:00:00 +0000</pubDate><guid>/publication/android-restrictions-bypass/</guid><description>&lt;div class="alert alert-note">
+&lt;/center></description></item><item><title>Android Runtime Restrictions Bypass</title><link>https://www.romainthomas.fr/publication/android-restrictions-bypass/</link><pubDate>Sat, 23 Mar 2019 00:00:00 +0000</pubDate><guid>https://www.romainthomas.fr/publication/android-restrictions-bypass/</guid><description>&lt;div class="alert alert-note">
 &lt;div>
 This publication is also available on the &lt;a href="https://blog.quarkslab.com/android-runtime-restrictions-bypass.html">Quarkslab Blog&lt;/a>.
 &lt;/div>
@@ -2301,8 +2301,8 @@ This publication is also available on the &lt;a href="https://blog.quarkslab.com
 &lt;p>Whereas these limitations aim to be used for compatibility purposes, this article shows how we can take advantage of Android internal to disable them. We briefly explain how these restrictions work and how to disable them from an application without &lt;strong>privileges&lt;/strong>.&lt;/p>
 &lt;p>The first part deals with the native library loading restriction while the second is about Java internal framework restriction.&lt;/p>
 &lt;div class="pdfpreview shortcode shortcode--pdfpreview">
-&lt;embed src="/publication/android-restrictions-bypass/report.pdf" type="application/pdf" width="100%" height=900px />
-&lt;/div></description></item><item><title>Slides</title><link>/slides/example/</link><pubDate>Tue, 05 Feb 2019 00:00:00 +0000</pubDate><guid>/slides/example/</guid><description>&lt;h1 id="welcome-to-slides">Welcome to Slides&lt;/h1>
+&lt;embed src="https://www.romainthomas.fr/publication/android-restrictions-bypass/report.pdf" type="application/pdf" width="100%" height=900px />
+&lt;/div></description></item><item><title>Slides</title><link>https://www.romainthomas.fr/slides/example/</link><pubDate>Tue, 05 Feb 2019 00:00:00 +0000</pubDate><guid>https://www.romainthomas.fr/slides/example/</guid><description>&lt;h1 id="welcome-to-slides">Welcome to Slides&lt;/h1>
 &lt;p>
 &lt;a href="https://sourcethemes.com/academic/" target="_blank" rel="noopener">Academic&lt;/a>&lt;/p>
 &lt;hr>
@@ -2416,7 +2416,7 @@ data-background-image="/img/boards.jpg"
 &lt;p>
 &lt;a href="https://discourse.gohugo.io" target="_blank" rel="noopener">Ask&lt;/a>&lt;/p>
 &lt;p>
-&lt;a href="https://sourcethemes.com/academic/docs/" target="_blank" rel="noopener">Documentation&lt;/a>&lt;/p></description></item><item><title>Android crackme challenge</title><link>/post/android-crackme/</link><pubDate>Tue, 20 Nov 2018 00:00:00 +0000</pubDate><guid>/post/android-crackme/</guid><description>&lt;div class="alert alert-note">
+&lt;a href="https://sourcethemes.com/academic/docs/" target="_blank" rel="noopener">Documentation&lt;/a>&lt;/p></description></item><item><title>Android crackme challenge</title><link>https://www.romainthomas.fr/post/android-crackme/</link><pubDate>Tue, 20 Nov 2018 00:00:00 +0000</pubDate><guid>https://www.romainthomas.fr/post/android-crackme/</guid><description>&lt;div class="alert alert-note">
 &lt;div>
 This post has been originally posted on the &lt;a href=https://blog.quarkslab.com/android-challenge.html>Quarkslab&amp;rsquo;s Blog&lt;/a>
 &lt;/div>
@@ -2426,7 +2426,7 @@ This post has been originally posted on the &lt;a href=https://blog.quarkslab.co
 &lt;p>&lt;img src="screen.png" alt="success">&lt;/p>
 &lt;p>The application can be run on an emulator or a real device (whatever the architecture) but the Android version must be at &lt;strong>least Marshmallow&lt;/strong> (&amp;gt; 6.0).&lt;/p>
 &lt;p>
-&lt;a href="crackme-telegram.apk">crackme-telegram.apk&lt;/a> - &lt;code>SHA256: d66b82ebc14708b214a581760e99894af17e10598bcef95e75441a12b948bbf0&lt;/code>&lt;/p></description></item><item><title>Android OAT formats</title><link>/post/android-oat/</link><pubDate>Mon, 25 Jun 2018 00:00:00 +0000</pubDate><guid>/post/android-oat/</guid><description>&lt;p>Here are internal structures of Android OAT:&lt;/p>
+&lt;a href="crackme-telegram.apk">crackme-telegram.apk&lt;/a> - &lt;code>SHA256: d66b82ebc14708b214a581760e99894af17e10598bcef95e75441a12b948bbf0&lt;/code>&lt;/p></description></item><item><title>Android OAT formats</title><link>https://www.romainthomas.fr/post/android-oat/</link><pubDate>Mon, 25 Jun 2018 00:00:00 +0000</pubDate><guid>https://www.romainthomas.fr/post/android-oat/</guid><description>&lt;p>Here are internal structures of Android OAT:&lt;/p>
 &lt;h1 id="oat-124">OAT 124&lt;/h1>
 &lt;p>&lt;img src="oat_124.png" alt="OAT 124">&lt;/p>
 &lt;p>
@@ -2438,7 +2438,7 @@ This post has been originally posted on the &lt;a href=https://blog.quarkslab.co
 &lt;h1 id="oat-64">OAT 64&lt;/h1>
 &lt;p>&lt;img src="oat_64.png" alt="OAT 64">&lt;/p>
 &lt;p>
-&lt;a href="oat_64.pdf">PDF Version&lt;/a>&lt;/p></description></item><item><title>Android VDEX formats</title><link>/post/android-vdex/</link><pubDate>Mon, 25 Jun 2018 00:00:00 +0000</pubDate><guid>/post/android-vdex/</guid><description>&lt;p>Here are internal structures of Android VDEX:&lt;/p>
+&lt;a href="oat_64.pdf">PDF Version&lt;/a>&lt;/p></description></item><item><title>Android VDEX formats</title><link>https://www.romainthomas.fr/post/android-vdex/</link><pubDate>Mon, 25 Jun 2018 00:00:00 +0000</pubDate><guid>https://www.romainthomas.fr/post/android-vdex/</guid><description>&lt;p>Here are internal structures of Android VDEX:&lt;/p>
 &lt;h1 id="vdex-10">VDEX 10&lt;/h1>
 &lt;p>&lt;img src="vdex_10.png" alt="VDEX 10">&lt;/p>
 &lt;p>
@@ -2446,18 +2446,18 @@ This post has been originally posted on the &lt;a href=https://blog.quarkslab.co
 &lt;h1 id="vdex-06">VDEX 06&lt;/h1>
 &lt;p>&lt;img src="vdex_06.png" alt="VDEX 06">&lt;/p>
 &lt;p>
-&lt;a href="vdex_06.pdf">PDF Version&lt;/a>&lt;/p></description></item><item><title>Static Instrumentation Based on Executable Formats</title><link>/publication/static-instrumentation/</link><pubDate>Wed, 20 Jun 2018 00:00:00 +0000</pubDate><guid>/publication/static-instrumentation/</guid><description>&lt;p>Many instrumentation techniques are based on modifying code or system environment of the target. It can be suitable for scenarios but it could not work under certain circumstance (integrity checking, non-rooted environment…) In this talk we propose similar techniques by only modifying the executable format. This enables to be architecture independent, injection and hooking does not require privileged environment.&lt;/p>
+&lt;a href="vdex_06.pdf">PDF Version&lt;/a>&lt;/p></description></item><item><title>Static Instrumentation Based on Executable Formats</title><link>https://www.romainthomas.fr/publication/static-instrumentation/</link><pubDate>Wed, 20 Jun 2018 00:00:00 +0000</pubDate><guid>https://www.romainthomas.fr/publication/static-instrumentation/</guid><description>&lt;p>Many instrumentation techniques are based on modifying code or system environment of the target. It can be suitable for scenarios but it could not work under certain circumstance (integrity checking, non-rooted environment…) In this talk we propose similar techniques by only modifying the executable format. This enables to be architecture independent, injection and hooking does not require privileged environment.&lt;/p>
 &lt;p>Talk given at
 &lt;a href="https://recon.cx/2018/montreal/" target="_blank" rel="noopener">Recon Montréal&lt;/a> and
 &lt;a href="https://2018.pass-the-salt.org/schedule/#instrumentation" target="_blank" rel="noopener">Pass The Salt&lt;/a>&lt;/p>
 &lt;div class="pdfpreview shortcode shortcode--pdfpreview">
 &lt;embed src="18-06-Recon18-Formats-Instrumentation.pdf" type="application/pdf" width="100%" height=600px />
-&lt;/div></description></item><item><title>When SideChannelMarvels meet LIEF</title><link>/post/when-sidechannelmarvels-meet-lief/</link><pubDate>Thu, 03 May 2018 00:00:00 +0000</pubDate><guid>/post/when-sidechannelmarvels-meet-lief/</guid><description/></item><item><title>How to use frida on a non-rooted device</title><link>/post/how-to-use-frida-on-a-non-rooted-device/</link><pubDate>Sat, 03 Mar 2018 00:00:00 +0000</pubDate><guid>/post/how-to-use-frida-on-a-non-rooted-device/</guid><description>&lt;p>This post is a part of LIEF tutorials. It explains how to combine
+&lt;/div></description></item><item><title>When SideChannelMarvels meet LIEF</title><link>https://www.romainthomas.fr/post/when-sidechannelmarvels-meet-lief/</link><pubDate>Thu, 03 May 2018 00:00:00 +0000</pubDate><guid>https://www.romainthomas.fr/post/when-sidechannelmarvels-meet-lief/</guid><description/></item><item><title>How to use frida on a non-rooted device</title><link>https://www.romainthomas.fr/post/how-to-use-frida-on-a-non-rooted-device/</link><pubDate>Sat, 03 Mar 2018 00:00:00 +0000</pubDate><guid>https://www.romainthomas.fr/post/how-to-use-frida-on-a-non-rooted-device/</guid><description>&lt;p>This post is a part of LIEF tutorials. It explains how to combine
 &lt;a href="https://www.frida.re/" target="_blank" rel="noopener">Frida&lt;/a> and
 &lt;a href="https://lief-project.github.io/" target="_blank" rel="noopener">LIEF&lt;/a> to
 run &lt;code>frida-gadget&lt;/code> on a non rooted device.&lt;/p>
 &lt;p>
-&lt;a href="https://lief-project.github.io/doc/latest/tutorials/09_frida_lief.html" target="_blank" rel="noopener">See more&lt;/a>&lt;/p></description></item><item><title>Transforming an ELF executable into a library</title><link>/post/transforming-an-elf-executable-into-a-library/</link><pubDate>Sat, 03 Feb 2018 00:00:00 +0000</pubDate><guid>/post/transforming-an-elf-executable-into-a-library/</guid><description/></item><item><title>Have fun with LIEF and Executable Formats</title><link>/post/have-fun-with-lief-and-executable-formats/</link><pubDate>Thu, 02 Nov 2017 00:00:00 +0100</pubDate><guid>/post/have-fun-with-lief-and-executable-formats/</guid><description/></item><item><title>LIEF: Library to Instrument Executable Formats</title><link>/publication/lief/</link><pubDate>Tue, 04 Jul 2017 00:00:00 +0000</pubDate><guid>/publication/lief/</guid><description>&lt;p>When analyzing executable, the first layer of information is the format in which the executable is wrapped. It turns out that a lot of tools and libraries exist to analyze and instrument machine code wrapped by the format, but there is not such library to handle the three mainstream executable formats and to both read and modify these formats. LIEF has been developed to that end.&lt;/p>
+&lt;a href="https://lief-project.github.io/doc/latest/tutorials/09_frida_lief.html" target="_blank" rel="noopener">See more&lt;/a>&lt;/p></description></item><item><title>Transforming an ELF executable into a library</title><link>https://www.romainthomas.fr/post/transforming-an-elf-executable-into-a-library/</link><pubDate>Sat, 03 Feb 2018 00:00:00 +0000</pubDate><guid>https://www.romainthomas.fr/post/transforming-an-elf-executable-into-a-library/</guid><description/></item><item><title>Have fun with LIEF and Executable Formats</title><link>https://www.romainthomas.fr/post/have-fun-with-lief-and-executable-formats/</link><pubDate>Thu, 02 Nov 2017 00:00:00 +0100</pubDate><guid>https://www.romainthomas.fr/post/have-fun-with-lief-and-executable-formats/</guid><description/></item><item><title>LIEF: Library to Instrument Executable Formats</title><link>https://www.romainthomas.fr/publication/lief/</link><pubDate>Tue, 04 Jul 2017 00:00:00 +0000</pubDate><guid>https://www.romainthomas.fr/publication/lief/</guid><description>&lt;p>When analyzing executable, the first layer of information is the format in which the executable is wrapped. It turns out that a lot of tools and libraries exist to analyze and instrument machine code wrapped by the format, but there is not such library to handle the three mainstream executable formats and to both read and modify these formats. LIEF has been developed to that end.&lt;/p>
 &lt;p>In the talk we will explain the rationale behind LIEF architecture choices, what LIEF allows to do and have a look at use cases.&lt;/p>
 &lt;p>LIEF is a cross platform library and it can be used through a Python, C++ and C API. The library enables to parse standard structures as well as more complex ones like PE Signature (Authenticode) and ELF hash table. As use cases we can inject code into a binary or a library, we can also redirect the control flow to hook functions and it can be used to obfuscate some parts of a binary. Another feature of LIEF is that common characteristics of these formats are factorized so that we can develop a single script which works for the three formats.&lt;/p>
 &lt;p>&lt;img src="lief.png" alt="LIEF">&lt;/p>
@@ -2468,7 +2468,7 @@ run &lt;code>frida-gadget&lt;/code> on a non rooted device.&lt;/p>
 &lt;/div>
 &lt;p>You can also grab the slides of the talk given at
 &lt;a href="https://project.inria.fr/FranceJapanICST/wokshops/2017-program/presentations/" target="_blank" rel="noopener">Cybersecurity France-Japan&lt;/a>:
-&lt;a href="17-04-cybersecurity-frjp-LIEF.pdf">17-04-cybersecurity-frjp-LIEF.pdf&lt;/a>&lt;/p></description></item><item><title>Open-sourcing LIEF</title><link>/post/lief-release/</link><pubDate>Tue, 04 Apr 2017 00:00:00 +0200</pubDate><guid>/post/lief-release/</guid><description>&lt;div class="alert alert-note">
+&lt;a href="17-04-cybersecurity-frjp-LIEF.pdf">17-04-cybersecurity-frjp-LIEF.pdf&lt;/a>&lt;/p></description></item><item><title>Open-sourcing LIEF</title><link>https://www.romainthomas.fr/post/lief-release/</link><pubDate>Tue, 04 Apr 2017 00:00:00 +0200</pubDate><guid>https://www.romainthomas.fr/post/lief-release/</guid><description>&lt;div class="alert alert-note">
 &lt;div>
 This post has been originally posted on the &lt;a href=https://blog.quarkslab.com/lief-library-to-instrument-executable-formats.html>Quarkslab&amp;rsquo;s blog&lt;/a>
 &lt;/div>
@@ -2590,15 +2590,15 @@ Subject: C=US, ST=Washington, L=Redmond, O=Microsoft Corporation, CN=Microsoft W
 &lt;li>Builder: Transform the binary object into a valid file.&lt;/li>
 &lt;/ul>
 &lt;figure >
-&lt;a data-fancybox="" href="/post/lief-release/archi_hu024b005ec7f37fb1d2d0938672876ebf_142621_2000x2000_fit_lanczos_2.png" >
-&lt;img data-src="/post/lief-release/archi_hu024b005ec7f37fb1d2d0938672876ebf_142621_2000x2000_fit_lanczos_2.png" class="lazyload" alt="" width="1080" height="437">
+&lt;a data-fancybox="" href="https://www.romainthomas.fr/post/lief-release/archi_hu024b005ec7f37fb1d2d0938672876ebf_142621_2000x2000_fit_lanczos_2.png" >
+&lt;img data-src="https://www.romainthomas.fr/post/lief-release/archi_hu024b005ec7f37fb1d2d0938672876ebf_142621_2000x2000_fit_lanczos_2.png" class="lazyload" alt="" width="1080" height="437">
 &lt;/a>
 &lt;/figure>
 &lt;p>To factor common characteristics in formats we have an inheritance relationship between these characteristics.&lt;/p>
 &lt;p>For symbols it gives the following diagram:&lt;/p>
 &lt;figure >
-&lt;a data-fancybox="" href="/post/lief-release/symbol_inheritance_hua2c0eb4d7ecbdd62ff298ed98b99d1dc_6049_2000x2000_fit_lanczos_2.png" >
-&lt;img data-src="/post/lief-release/symbol_inheritance_hua2c0eb4d7ecbdd62ff298ed98b99d1dc_6049_2000x2000_fit_lanczos_2.png" class="lazyload" alt="" width="511" height="133">
+&lt;a data-fancybox="" href="https://www.romainthomas.fr/post/lief-release/symbol_inheritance_hua2c0eb4d7ecbdd62ff298ed98b99d1dc_6049_2000x2000_fit_lanczos_2.png" >
+&lt;img data-src="https://www.romainthomas.fr/post/lief-release/symbol_inheritance_hua2c0eb4d7ecbdd62ff298ed98b99d1dc_6049_2000x2000_fit_lanczos_2.png" class="lazyload" alt="" width="511" height="133">
 &lt;/a>
 &lt;/figure>
 &lt;p>It enables to write cross-format utility like &lt;code>nm&lt;/code>. &lt;code>nm&lt;/code> is a Unix utility to list symbols in an executable. The source code is available here:
@@ -2638,7 +2638,7 @@ sys&lt;span style="color:#f92672">.&lt;/span>exit(r)
 &lt;a href="https://gitter.im/lief-project" target="_blank" rel="noopener">lief-project&lt;/a>&lt;/li>
 &lt;/ul>
 &lt;h1 id="thanks">Thanks&lt;/h1>
-&lt;p>Thanks to Serge Guelton and Adrien Guinet for their advice about the design and their code review. Thanks to Quarkslab for making this project open-source.&lt;/p></description></item><item><title>How Triton can help to reverse virtual machine based software protections</title><link>/publication/triton-vm-protection/</link><pubDate>Thu, 10 Nov 2016 00:00:00 +0000</pubDate><guid>/publication/triton-vm-protection/</guid><description>&lt;h2 id="hahahugoshortcode-s0-hbhb-slides">
+&lt;p>Thanks to Serge Guelton and Adrien Guinet for their advice about the design and their code review. Thanks to Quarkslab for making this project open-source.&lt;/p></description></item><item><title>How Triton can help to reverse virtual machine based software protections</title><link>https://www.romainthomas.fr/publication/triton-vm-protection/</link><pubDate>Thu, 10 Nov 2016 00:00:00 +0000</pubDate><guid>https://www.romainthomas.fr/publication/triton-vm-protection/</guid><description>&lt;h2 id="hahahugoshortcode-s0-hbhb-slides">
 &lt;i class="fas fa-file-pdf pr-1 fa-fw">&lt;/i> Slides&lt;/h2>
 &lt;div class="pdfpreview shortcode shortcode--pdfpreview">
 &lt;embed src="csaw2016-sos-rthomas-jsalwan.pdf" type="application/pdf" width="100%" height=600px />
@@ -2647,11 +2647,11 @@ sys&lt;span style="color:#f92672">.&lt;/span>exit(r)
 &lt;i class="fas fa-file-video pr-1 fa-fw">&lt;/i> Video&lt;/h2>
 &lt;video controls >
 &lt;source src="how-triton-can-help-to-reverse-virtual-machine-based-software-protections.mp4" type="video/mp4">
-&lt;/video></description></item><item><title>LIEF</title><link>/project/lief/</link><pubDate>Wed, 27 Apr 2016 00:00:00 +0000</pubDate><guid>/project/lief/</guid><description>&lt;p>The purpose of this project is to provide a cross platform library to parse, modify and abstract ELF, PE and MachO formats.&lt;/p>
+&lt;/video></description></item><item><title>LIEF</title><link>https://www.romainthomas.fr/project/lief/</link><pubDate>Wed, 27 Apr 2016 00:00:00 +0000</pubDate><guid>https://www.romainthomas.fr/project/lief/</guid><description>&lt;p>The purpose of this project is to provide a cross platform library to parse, modify and abstract ELF, PE and MachO formats.&lt;/p>
 &lt;p>It turns out that many projects need to parse executable formats and they usually re-implement their own parser. Moreover these parsers are usually bound to one language.&lt;/p>
-&lt;p>LIEF attempts to fill this void.&lt;/p></description></item><item><title>QList</title><link>/projects-images/qlist/</link><pubDate>Wed, 27 Apr 2016 00:00:00 +0000</pubDate><guid>/projects-images/qlist/</guid><description/></item><item><title>QString</title><link>/projects-images/qstring/</link><pubDate>Wed, 27 Apr 2016 00:00:00 +0000</pubDate><guid>/projects-images/qstring/</guid><description/></item><item><title>Dynamic Binary Analysis and Obfuscated Codes</title><link>/publication/dynamic-binary-analysis-and-obfuscation/</link><pubDate>Fri, 08 Apr 2016 00:00:00 +0000</pubDate><guid>/publication/dynamic-binary-analysis-and-obfuscation/</guid><description>&lt;div class="pdfpreview shortcode shortcode--pdfpreview">
+&lt;p>LIEF attempts to fill this void.&lt;/p></description></item><item><title>QList</title><link>https://www.romainthomas.fr/projects-images/qlist/</link><pubDate>Wed, 27 Apr 2016 00:00:00 +0000</pubDate><guid>https://www.romainthomas.fr/projects-images/qlist/</guid><description/></item><item><title>QString</title><link>https://www.romainthomas.fr/projects-images/qstring/</link><pubDate>Wed, 27 Apr 2016 00:00:00 +0000</pubDate><guid>https://www.romainthomas.fr/projects-images/qstring/</guid><description/></item><item><title>Dynamic Binary Analysis and Obfuscated Codes</title><link>https://www.romainthomas.fr/publication/dynamic-binary-analysis-and-obfuscation/</link><pubDate>Fri, 08 Apr 2016 00:00:00 +0000</pubDate><guid>https://www.romainthomas.fr/publication/dynamic-binary-analysis-and-obfuscation/</guid><description>&lt;div class="pdfpreview shortcode shortcode--pdfpreview">
 &lt;embed src="sthack2016-rthomas-jsalwan.pdf" type="application/pdf" width="100%" height=600px />
-&lt;/div></description></item><item><title>HITB 2015 Write-up - Crypto 300</title><link>/post/writeup-hitb2015-crypto300/</link><pubDate>Tue, 03 Nov 2015 00:00:00 +0100</pubDate><guid>/post/writeup-hitb2015-crypto300/</guid><description>&lt;h2 id="introduction">Introduction&lt;/h2>
+&lt;/div></description></item><item><title>HITB 2015 Write-up - Crypto 300</title><link>https://www.romainthomas.fr/post/writeup-hitb2015-crypto300/</link><pubDate>Tue, 03 Nov 2015 00:00:00 +0100</pubDate><guid>https://www.romainthomas.fr/post/writeup-hitb2015-crypto300/</guid><description>&lt;h2 id="introduction">Introduction&lt;/h2>
 &lt;p>The crypto 300 challenge was about RSA with a special generation of the prime numbers $p$ and $q$.
 We were given a mail
 &lt;a href="mail.msg">mail.msg&lt;/a> which has been encrypted with RSA and whose the public key is in the
@@ -2778,7 +2778,7 @@ sage: q
 &lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">openssl smime -decrypt -in mail.msg -inkey private.pem
 hitb&lt;span style="color:#f92672">{&lt;/span>0b21cc2025534dbd2965390d2bcef45d&lt;span style="color:#f92672">}&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>The sources are available
-&lt;a href="hitb2015-crypto300.tar.gz">here&lt;/a>&lt;/p></description></item><item><title>HITB 2015 Write-up - Crypto 400</title><link>/post/writeup-hitb2015-crypto400/</link><pubDate>Tue, 03 Nov 2015 00:00:00 +0100</pubDate><guid>/post/writeup-hitb2015-crypto400/</guid><description>&lt;h2 id="introduction">Introduction&lt;/h2>
+&lt;a href="hitb2015-crypto300.tar.gz">here&lt;/a>&lt;/p></description></item><item><title>HITB 2015 Write-up - Crypto 400</title><link>https://www.romainthomas.fr/post/writeup-hitb2015-crypto400/</link><pubDate>Tue, 03 Nov 2015 00:00:00 +0100</pubDate><guid>https://www.romainthomas.fr/post/writeup-hitb2015-crypto400/</guid><description>&lt;h2 id="introduction">Introduction&lt;/h2>
 &lt;p>The crypto 400 challenge deals with the Even Mansour cryptosystem. To validate this challenge we have to send the flag to a server.
 The server checks if the answer matches the flag by encrypting the flag and the given message with a &lt;strong>random&lt;/strong> key.
 If both are equal the flag is correct otherwise it fails and the encrypted message is printed.&lt;/p>
@@ -2811,7 +2811,7 @@ block &lt;span style="color:#f92672">=&lt;/span> xor(block, key[&lt;span style="
 block &lt;span style="color:#f92672">=&lt;/span> step(block)
 &lt;span style="color:#66d9ef">return&lt;/span> block
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;code>step&lt;/code> uses a S-Box to transform the block in this way:&lt;/p>
-&lt;p>&lt;img src="/img/step.png" alt="">&lt;/p>
+&lt;p>&lt;img src="https://www.romainthomas.fr/img/step.png" alt="">&lt;/p>
 &lt;p>$\begin{cases}
 \text{block}^{n+1}_0 = \text{SBox}(\text{block}^{n}_{10} \oplus \text{block}^{n}_{12} \oplus \text{block}^{n}_{13} \oplus \text{block}^{n+1}_{15}) &amp;amp; k = 0 \\\&lt;br>
 \text{block}^{n+1}_k = \text{block}^{n}_{k - 1} &amp;amp; k &amp;gt; 0
@@ -2820,7 +2820,7 @@ block &lt;span style="color:#f92672">=&lt;/span> step(block)
 &lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">step&lt;/span>(block):
 &lt;span style="color:#66d9ef">return&lt;/span> chr( S[ ord(block[&lt;span style="color:#ae81ff">10&lt;/span>]) &lt;span style="color:#f92672">^&lt;/span> ord(block[&lt;span style="color:#ae81ff">12&lt;/span>]) &lt;span style="color:#f92672">^&lt;/span> ord(block[&lt;span style="color:#ae81ff">13&lt;/span>]) &lt;span style="color:#f92672">^&lt;/span> ord(block[&lt;span style="color:#ae81ff">15&lt;/span>]) ] ) &lt;span style="color:#f92672">+&lt;/span> block[:&lt;span style="color:#ae81ff">15&lt;/span>]
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>By ploting $y = \text{S-Box}(x)$ we can notice that the S-Box has a special construction:&lt;/p>
-&lt;p>&lt;img src="/img/figure_1-1.png" alt="">&lt;/p>
+&lt;p>&lt;img src="https://www.romainthomas.fr/img/figure_1-1.png" alt="">&lt;/p>
 &lt;p>I thought about computing the differential characteristics which is the probability that given the input difference
 $\Delta = x \oplus y$ we get the output delta: $\delta = S(x) \oplus S(y)$.
 We will call this probability $P(\Delta | \delta)$ and with
@@ -2960,6 +2960,6 @@ M_2 &amp;amp; = &amp;amp; F^{-1}(F(M_1) \oplus C_1 \oplus C_2)
 &lt;p>Which is far more easier to resolve.&lt;/p>
 &lt;p>Thanks to &lt;strong>jb^&lt;/strong> who help me and who find the previous technique.&lt;/p>
 &lt;p>Sources are available
-&lt;a href="hitb2015-crypto400.tar.gz">here&lt;/a>&lt;/p></description></item><item><title>Code coverage using a dynamic symbolic execution</title><link>/post/triton-code-coverage/</link><pubDate>Mon, 12 Oct 2015 00:00:00 +0200</pubDate><guid>/post/triton-code-coverage/</guid><description/></item><item><title>How Triton may help to analyse obfuscated binaries</title><link>/publication/triton/</link><pubDate>Tue, 01 Sep 2015 00:00:00 +0000</pubDate><guid>/publication/triton/</guid><description>&lt;div class="pdfpreview shortcode shortcode--pdfpreview">
+&lt;a href="hitb2015-crypto400.tar.gz">here&lt;/a>&lt;/p></description></item><item><title>Code coverage using a dynamic symbolic execution</title><link>https://www.romainthomas.fr/post/triton-code-coverage/</link><pubDate>Mon, 12 Oct 2015 00:00:00 +0200</pubDate><guid>https://www.romainthomas.fr/post/triton-code-coverage/</guid><description/></item><item><title>How Triton may help to analyse obfuscated binaries</title><link>https://www.romainthomas.fr/publication/triton/</link><pubDate>Tue, 01 Sep 2015 00:00:00 +0000</pubDate><guid>https://www.romainthomas.fr/publication/triton/</guid><description>&lt;div class="pdfpreview shortcode shortcode--pdfpreview">
 &lt;embed src="misc82-triton.pdf" type="application/pdf" width="100%" height=900px />
 &lt;/div></description></item></channel></rss>
