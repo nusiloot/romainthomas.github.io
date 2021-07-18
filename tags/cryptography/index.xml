@@ -1,0 +1,642 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>cryptography | Romain Thomas</title><link>/tags/cryptography/</link><atom:link href="/tags/cryptography/index.xml" rel="self" type="application/rss+xml"/><description>cryptography</description><generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>Published with Academic Website Builder - Icons made by Freepik</copyright><lastBuildDate>Sun, 27 Sep 2020 00:00:00 +0000</lastBuildDate><image><url>/images/icon_hu2654a0fcc87c65a864822ac27b001d3b_698_512x512_fill_lanczos_center_2.png</url><title>cryptography</title><link>/tags/cryptography/</link></image><item><title>r2-pay: whitebox (part 2)</title><link>/post/20-09-r2con-obfuscated-whitebox-part2/</link><pubDate>Sun, 27 Sep 2020 00:00:00 +0000</pubDate><guid>/post/20-09-r2con-obfuscated-whitebox-part2/</guid><description>&lt;style>
+.green {
+color:green;
+font-family: 'Fira Code', monospace;
+font-size: 87.5%;
+}
+.blue {
+color: blue;
+font-family: 'Fira Code', monospace;
+font-size: 87.5%;
+}
+.orange {
+color: #FF6347;
+font-family: 'Fira Code', monospace;
+font-size: 87.5%;
+}
+.red {
+color: #df2b04;
+font-family: 'Fira Code', monospace;
+font-size: 87.5%;
+}
+.hl-comment {
+color: #df2b04;
+font-family: 'Fira Code', monospace;
+font-size: 87.5%;
+}
+.hl-keyword {
+color: #A90D91;
+font-family: 'Fira Code', monospace;
+font-size: 87.5%;
+}
+.hl-literal {
+color: #1C01CE;
+font-family: 'Fira Code', monospace;
+font-size: 87.5%;
+}
+.hl-preproc {
+color: #633820;
+font-family: 'Fira Code', monospace;
+font-size: 87.5%;
+}
+.hl-strings {
+color: #C41A16;
+font-family: 'Fira Code', monospace;
+font-size: 87.5%;
+}
+.yellow {
+color: #CC7000;
+font-family: 'Fira Code', monospace;
+font-size: 87.5%;
+}
+#
+&lt;/style>
+&lt;h2 id="introduction">Introduction&lt;/h2>
+&lt;p>In the
+&lt;a href="/post/20-09-r2con-obfuscated-whitebox-part1/">first part&lt;/a> of this write-up, we described the
+anti-frida, anti-debug and anti-root techniques used in the application and how to remove most of them.&lt;/p>
+&lt;p>This second part digs into the JNI function &lt;code>gXftm3iswpkVgBNDUp&lt;/code> and the underlying whitebox implementation.&lt;/p>
+&lt;h2 id="library-shimming">Library Shimming&lt;/h2>
+&lt;p>The inputs of the function &lt;code>gXftm3iswpkVgBNDUp&lt;/code> are provided by the GUI widgets and the function
+is triggered when we press the &lt;em>Generate R2Coin&lt;/em> button.
+Nevertheless, the behavior of &lt;code>gXftm3iswpkVgBNDUp&lt;/code> does not rely on UI features nor
+the application&amp;rsquo;s context&lt;sup id="fnref:1">&lt;a href="#fn:1" class="footnote-ref" role="doc-noteref">1&lt;/a>&lt;/sup>.&lt;/p>
+&lt;p>To take a closer look at the logic of &lt;code>gXftm3iswpkVgBNDUp&lt;/code>, it would be pretty useful to be able to feed
+the function&amp;rsquo;s inputs with our &lt;strong>own standalone binary&lt;/strong>. Basically, we would like to achieve this kind
+of interface:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="color:#66d9ef">int&lt;/span> &lt;span style="color:#a6e22e">main&lt;/span>(&lt;span style="color:#66d9ef">int&lt;/span> argc, &lt;span style="color:#66d9ef">char&lt;/span>&lt;span style="color:#f92672">**&lt;/span> argv) {
+&lt;span style="color:#66d9ef">void&lt;/span>&lt;span style="color:#f92672">*&lt;/span> dlopen(&lt;span style="color:#e6db74">&amp;#34;libnative-lib.so&amp;#34;&lt;/span>, RTLD_NOW);
+...
+jbyteArray out &lt;span style="color:#f92672">=&lt;/span> gXftm3iswpkVgBNDUp(env, ...);
+&lt;span style="color:#66d9ef">return&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>;
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>This technique is not new and has been already described in a blog post by
+&lt;a href="https://twitter.com/caleb_fenton" target="_blank" rel="noopener">Caleb Fenton&lt;/a>&lt;sup id="fnref:2">&lt;a href="#fn:2" class="footnote-ref" role="doc-noteref">2&lt;/a>&lt;/sup>. The idea is to get
+the &lt;code>JNIEnv* env&lt;/code> variable with &lt;code>JNI_CreateJavaVM&lt;/code> which is exported by the Android runtime: &lt;code>libart.so&lt;/code>.&lt;/p>
+&lt;p>Once we have this variable, we can call the &lt;code>gXftm3iswpkVgBNDUp&lt;/code> function as well as manipulating the JNI buffers:&lt;/p>
+&lt;ul>
+&lt;li>&lt;code>env-&amp;gt;NewByteArray()&lt;/code>&lt;/li>
+&lt;li>&lt;code>env-&amp;gt;GetArrayLength()&lt;/code>&lt;/li>
+&lt;li>&amp;hellip;&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="shim_mechanism.png" alt="Shimming of whitebox library">&lt;/p>
+&lt;p>Long story short, we can instantiate the Android runtime with the following piece of code:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="color:#66d9ef">int&lt;/span> &lt;span style="color:#a6e22e">main&lt;/span>(&lt;span style="color:#66d9ef">int&lt;/span> argc, &lt;span style="color:#66d9ef">char&lt;/span>&lt;span style="color:#f92672">**&lt;/span> argv) {
+JavaVMOption opt[&lt;span style="color:#ae81ff">2&lt;/span>];
+opt[&lt;span style="color:#ae81ff">0&lt;/span>].optionString &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;-Djava.class.path=/data/local/tmp/re.pwnme.1.0.apk&amp;#34;&lt;/span>;
+opt[&lt;span style="color:#ae81ff">1&lt;/span>].optionString &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;-Djava.library.path=/data/local/tmp&amp;#34;&lt;/span>;
+JavaVMInitArgs args;
+args.version &lt;span style="color:#f92672">=&lt;/span> JNI_VERSION_1_6;
+args.options &lt;span style="color:#f92672">=&lt;/span> opt;
+args.nOptions &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">2&lt;/span>;
+args.ignoreUnrecognized &lt;span style="color:#f92672">=&lt;/span> JNI_FALSE;
+&lt;span style="color:#66d9ef">void&lt;/span>&lt;span style="color:#f92672">*&lt;/span> handler &lt;span style="color:#f92672">=&lt;/span> dlopen(&lt;span style="color:#e6db74">&amp;#34;/system/lib64/libart.so&amp;#34;&lt;/span>, RTLD_NOW);
+&lt;span style="color:#66d9ef">auto&lt;/span> JNI_CreateJavaVM_f &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#66d9ef">reinterpret_cast&lt;/span>&lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#66d9ef">decltype&lt;/span>(JNI_CreateJavaVM)&lt;span style="color:#f92672">*&amp;gt;&lt;/span>(dlsym(handler, &lt;span style="color:#e6db74">&amp;#34;JNI_CreateJavaVM&amp;#34;&lt;/span>));
+JNI_CreateJavaVM_f(&lt;span style="color:#f92672">&amp;amp;&lt;/span>jvm, &lt;span style="color:#f92672">&amp;amp;&lt;/span>env, &lt;span style="color:#f92672">&amp;amp;&lt;/span>args);
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Then, we can resolve the &lt;code>gXftm3iswpkVgBNDUp&lt;/code> function with the base address of &lt;code>libnative-lib.so&lt;/code>
+and its offset &lt;code>0x9B41C&lt;/code>:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="color:#66d9ef">void&lt;/span>&lt;span style="color:#f92672">*&lt;/span> hdl &lt;span style="color:#f92672">=&lt;/span> dlopen(&lt;span style="color:#e6db74">&amp;#34;libnative-lib.so&amp;#34;&lt;/span>, RTLD_NOW);
+uintptr_t base_address &lt;span style="color:#f92672">=&lt;/span> get_base_address(&lt;span style="color:#e6db74">&amp;#34;libnative-lib.so&amp;#34;&lt;/span>);
+&lt;span style="color:#66d9ef">using&lt;/span> gXftm3iswpkVgBNDUp_t &lt;span style="color:#f92672">=&lt;/span> jbyteArray(&lt;span style="color:#f92672">*&lt;/span>)(JNIEnv&lt;span style="color:#f92672">*&lt;/span>, jobject, jbyteArray, jbyte);
+gXftm3iswpkVgBNDUp &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#66d9ef">reinterpret_cast&lt;/span>&lt;span style="color:#f92672">&amp;lt;&lt;/span>gXftm3iswpkVgBNDUp_t&lt;span style="color:#f92672">&amp;gt;&lt;/span>(base_address &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#ae81ff">0x9B41C&lt;/span>);
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Finally, we can run the function with our own inputs:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">std&lt;span style="color:#f92672">::&lt;/span>string pin_amount &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;0000123400004567&amp;#34;&lt;/span>;
+jbyteArray array &lt;span style="color:#f92672">=&lt;/span> convert_to_jbyteArray(pin_amount, ptr);
+jbyteArray jencrypted_buffer &lt;span style="color:#f92672">=&lt;/span> gXftm3iswpkVgBNDUp(env, &lt;span style="color:#66d9ef">nullptr&lt;/span>, array, &lt;span style="color:#ae81ff">0xF0&lt;/span>);
+&lt;span style="color:#66d9ef">const&lt;/span> std&lt;span style="color:#f92672">::&lt;/span>vector&lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#66d9ef">uint8_t&lt;/span>&lt;span style="color:#f92672">&amp;gt;&lt;/span> encrypted_buffer &lt;span style="color:#f92672">=&lt;/span> from_jbytes(jencrypted_buffer);
+std&lt;span style="color:#f92672">::&lt;/span>string hex_str &lt;span style="color:#f92672">=&lt;/span> to_hex(encrypted_buffer);
+LOG_INFO(&lt;span style="color:#e6db74">&amp;#34;{} --&amp;gt; {}&amp;#34;&lt;/span>, pin_amount, ref_str);
+&lt;/code>&lt;/pre>&lt;/div>&lt;div class="alert alert-note">
+&lt;div>
+The whole implementation is available &lt;a href="https://github.com/romainthomas/r2pay/blob/master/shim-whitebox">here &lt;i class="fab fa-github">&lt;/i>&lt;/a>.
+&lt;/div>
+&lt;/div>
+&lt;h2 id="function-tracing">Function Tracing&lt;/h2>
+&lt;p>Now that we are able to run the &lt;code>gXftm3iswpkVgBNDUp&lt;/code> function without the GUI layer, we can easily
+create an interface with
+&lt;a href="https://qbdi.quarkslab.com" target="_blank" rel="noopener">QBDI&lt;/a>:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">VM vm;
+vm.addInstrumentedModule(&lt;span style="color:#e6db74">&amp;#34;libnative-lib.so&amp;#34;&lt;/span>);
+...
+jbyteArray array &lt;span style="color:#f92672">=&lt;/span> to_jarray(pin_amount, ptr);
+jbyteArray qbdi_encrypted_buffer;
+vm.call(
+&lt;span style="color:#75715e">/* ret */&lt;/span> &lt;span style="color:#66d9ef">reinterpret_cast&lt;/span>&lt;span style="color:#f92672">&amp;lt;&lt;/span>uintptr_t&lt;span style="color:#f92672">*&amp;gt;&lt;/span>(&lt;span style="color:#f92672">&amp;amp;&lt;/span>qbdi_encrypted_buffer),
+&lt;span style="color:#75715e">/* target */&lt;/span> &lt;span style="color:#66d9ef">reinterpret_cast&lt;/span>&lt;span style="color:#f92672">&amp;lt;&lt;/span>uintptr_t&lt;span style="color:#f92672">&amp;gt;&lt;/span>(gXftm3iswpkVgBNDUp),
+&lt;span style="color:#75715e">/* params */&lt;/span> {
+&lt;span style="color:#75715e">/* p_0: JNIEnv* */&lt;/span> &lt;span style="color:#66d9ef">reinterpret_cast&lt;/span>&lt;span style="color:#f92672">&amp;lt;&lt;/span>rword&lt;span style="color:#f92672">&amp;gt;&lt;/span>(env),
+&lt;span style="color:#75715e">/* p_1: jobject thiz */&lt;/span> &lt;span style="color:#66d9ef">reinterpret_cast&lt;/span>&lt;span style="color:#f92672">&amp;lt;&lt;/span>rword&lt;span style="color:#f92672">&amp;gt;&lt;/span>(&lt;span style="color:#66d9ef">nullptr&lt;/span>),
+&lt;span style="color:#75715e">/* p_2: inbuffer */&lt;/span> &lt;span style="color:#66d9ef">reinterpret_cast&lt;/span>&lt;span style="color:#f92672">&amp;lt;&lt;/span>rword&lt;span style="color:#f92672">&amp;gt;&lt;/span>(array),
+&lt;span style="color:#ae81ff">0xF0&lt;/span>
+}
+);
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>The execution in QBDI &lt;strong>without user&amp;rsquo;s callbacks&lt;/strong> takes about &lt;strong>3min 30s&lt;/strong> which is quite huge compared to
+the &lt;strong>real execution&lt;/strong> that takes about &lt;strong>853ms&lt;/strong>:&lt;/p>
+&lt;p>&lt;img src="benchmark.svg" alt="Performances with different configurations">&lt;/p>
+&lt;p>This overhead is mostly due to the function &lt;code>0x1038f0&lt;/code> that is executed ~20 000 times. After a quick
+analysis, it turns out that this function is not relevant to instrument to break the whitebox.
+We can force its &lt;em>real&lt;/em> execution
+(i.e. outside QBDI) &lt;strong>by removing the function&amp;rsquo;s address from the instrumented range&lt;/strong>&lt;sup id="fnref:3">&lt;a href="#fn:3" class="footnote-ref" role="doc-noteref">3&lt;/a>&lt;/sup>.&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="color:#66d9ef">static&lt;/span> &lt;span style="color:#66d9ef">constexpr&lt;/span> uintptr_t HEAVY_FUNCTION &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">0x1038f0&lt;/span>;
+vm.removeInstrumentedRange(
+base_address &lt;span style="color:#f92672">+&lt;/span> HEAVY_FUNCTION,
+base_address &lt;span style="color:#f92672">+&lt;/span> HEAVY_FUNCTION &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#ae81ff">1&lt;/span>
+);
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>This small adjustment &lt;strong>drops the execution to 3'30sec&lt;/strong>.&lt;/p>
+&lt;hr>
+&lt;p>Some cryptographic algorithms can be fingerprinted either with predefined constants or with their memory accesses.
+According to the Quarkslab&amp;rsquo;s blog post:
+&lt;a href="https://blog.quarkslab.com/differential-fault-analysis-on-white-box-aes-implementations.html" target="_blank" rel="noopener">Differential Fault Analysis on White-box AES Implementations&lt;/a>,
+the whitebox lookup tables are likely to be stored in the &lt;code>.data, .rodata, ...&lt;/code> sections.&lt;/p>
+&lt;p>By looking at the sizes of these sections, only the &lt;code>.data&lt;/code> section seems to have an appropriate size.
+We can generate a memory trace on this section to see if we can outline some patterns.
+It can be made with the following piece of code:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">vm.recordMemoryAccess(MEMORY_READ_WRITE);
+vm.addMemRangeCB(
+&lt;span style="color:#75715e">/* .data start address */&lt;/span> base_address &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#ae81ff">0x127000&lt;/span>,
+&lt;span style="color:#75715e">/* .data end address */&lt;/span> base_address &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#ae81ff">0x127000&lt;/span> &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#ae81ff">0x8e000&lt;/span>,
+&lt;span style="color:#75715e">/* Record both: reads and writes */&lt;/span> MEMORY_READ_WRITE,
+&lt;span style="color:#75715e">/* Memory callback */&lt;/span>
+[] (VM&lt;span style="color:#f92672">*&lt;/span> vm, GPRState&lt;span style="color:#f92672">*&lt;/span>, FPRState&lt;span style="color:#f92672">*&lt;/span>, &lt;span style="color:#66d9ef">void&lt;/span>&lt;span style="color:#f92672">*&lt;/span> data) {
+&lt;span style="color:#66d9ef">auto&lt;/span> ctx &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#66d9ef">reinterpret_cast&lt;/span>&lt;span style="color:#f92672">&amp;lt;&lt;/span>qbdi_ctx&lt;span style="color:#f92672">*&amp;gt;&lt;/span>(data);
+&lt;span style="color:#75715e">/*
+&lt;/span>&lt;span style="color:#75715e"> * &amp;#39;for&amp;#39; loop since on AArch64 we can have multiple reads / writes
+&lt;/span>&lt;span style="color:#75715e"> * at once. (e.g. stp x0, x1, [sp, #128])
+&lt;/span>&lt;span style="color:#75715e"> */&lt;/span>
+&lt;span style="color:#66d9ef">for&lt;/span> (&lt;span style="color:#66d9ef">const&lt;/span> MemoryAccess&lt;span style="color:#f92672">&amp;amp;&lt;/span> mem_access : vm&lt;span style="color:#f92672">-&amp;gt;&lt;/span>getInstMemoryAccess()) {
+ctx&lt;span style="color:#f92672">-&amp;gt;&lt;/span>trace&lt;span style="color:#f92672">-&amp;gt;&lt;/span>push_back({
+mem_access.instAddress &lt;span style="color:#f92672">-&lt;/span> base_address,
+mem_access.accessAddress &lt;span style="color:#f92672">-&lt;/span> base_address,
+mem_access.size,
+});
+}
+&lt;span style="color:#66d9ef">return&lt;/span> VMAction&lt;span style="color:#f92672">::&lt;/span>CONTINUE;
+}, &lt;span style="color:#f92672">&amp;amp;&lt;/span>ctx);
+&lt;/code>&lt;/pre>&lt;/div>&lt;div class="alert alert-note">
+&lt;div>
+Generating the memory trace takes about 11sec which is acceptable.
+&lt;/div>
+&lt;/div>
+&lt;p>It leads to the following graph in which we can notice a characteristic pattern at the end of the trace:&lt;/p>
+&lt;p>&lt;img src="memory_trace.png" alt="Memory trace generated with QBDI">&lt;/p>
+&lt;h2 id="fault-injection">Fault Injection&lt;/h2>
+&lt;p>The pattern at the end of the trace is quite characteristic of AES-128 where we can identify 10 rounds.
+&lt;img src="rounds.png" alt="AES rounds">&lt;/p>
+&lt;p>We now have all the necessary information to make a &lt;em>fault injection attack&lt;/em>:&lt;/p>
+&lt;ol>
+&lt;li>We can identify the 9th round&lt;/li>
+&lt;li>We can &lt;strong>accurately&lt;/strong> fault the &lt;code>.data&lt;/code> section thanks to the memory trace&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="injection.png" alt="Fault injection in the 9th round">&lt;/p>
+&lt;div class="alert alert-note">
+&lt;div>
+The memory trace is available in the &lt;a href="https://github.com/romainthomas/r2pay/blob/master/assets/mem_trace.json">&lt;i class="fab fa-github">&lt;/i> mem_trace.json&lt;/a> file of the repository.
+&lt;/div>
+&lt;/div>
+&lt;p>To efficiently make
+the injection, we can first reduce the memory addresses to only keep those that are used in the last 2 rounds:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">trace_file &lt;span style="color:#f92672">=&lt;/span> CWD &lt;span style="color:#f92672">/&lt;/span> &lt;span style="color:#e6db74">&amp;#34;..&amp;#34;&lt;/span> &lt;span style="color:#f92672">/&lt;/span> &lt;span style="color:#e6db74">&amp;#34;assets&amp;#34;&lt;/span> &lt;span style="color:#f92672">/&lt;/span> &lt;span style="color:#e6db74">&amp;#34;mem_trace.json&amp;#34;&lt;/span>
+trace &lt;span style="color:#f92672">=&lt;/span> json&lt;span style="color:#f92672">.&lt;/span>loads(trace_file&lt;span style="color:#f92672">.&lt;/span>read_bytes())[&lt;span style="color:#ae81ff">0&lt;/span>]
+&lt;span style="color:#75715e"># Keep the entries that are involved in the last 2-rounds (empirical number)&lt;/span>
+nice_trace &lt;span style="color:#f92672">=&lt;/span> trace[&lt;span style="color:#f92672">-&lt;/span>&lt;span style="color:#ae81ff">1000&lt;/span>:]
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Then, we can use our shim mechanism to inject the faults in the &lt;code>.data&lt;/code> section with the addresses previously selected.
+Moreover, we can reduce the set of &lt;code>.data&lt;/code> addresses with the faults that introduce exactly &lt;strong>4 differences&lt;/strong> in the ciphertext:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="color:#75715e">// Make sure the .data section is writable
+&lt;/span>&lt;span style="color:#75715e">&lt;/span>mprotect(
+&lt;span style="color:#66d9ef">reinterpret_cast&lt;/span>&lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#66d9ef">void&lt;/span>&lt;span style="color:#f92672">*&amp;gt;&lt;/span>(base_address &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#75715e">/* .data */&lt;/span> &lt;span style="color:#ae81ff">0x127000&lt;/span>),
+&lt;span style="color:#ae81ff">0x8e000&lt;/span>,
+PROT_READ &lt;span style="color:#f92672">|&lt;/span> PROT_WRITE
+);
+&lt;span style="color:#66d9ef">for&lt;/span> (uintptr_t fault_addr : selected_addresses) {
+&lt;span style="color:#66d9ef">uint8_t&lt;/span>&lt;span style="color:#f92672">&amp;amp;&lt;/span> target_byte &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#f92672">*&lt;/span>&lt;span style="color:#66d9ef">reinterpret_cast&lt;/span>&lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#66d9ef">uint8_t&lt;/span>&lt;span style="color:#f92672">*&amp;gt;&lt;/span>(base_address &lt;span style="color:#f92672">+&lt;/span> fault_addr);
+&lt;span style="color:#66d9ef">uint8_t&lt;/span> backup &lt;span style="color:#f92672">=&lt;/span> target_byte;
+&lt;span style="color:#75715e">// Fault 1 byte:
+&lt;/span>&lt;span style="color:#75715e">&lt;/span> target_byte &lt;span style="color:#f92672">^=&lt;/span> &lt;span style="color:#ae81ff">0x33&lt;/span>;
+&lt;span style="color:#75715e">// Run the whitebox with the faulty byte
+&lt;/span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">const&lt;/span> std&lt;span style="color:#f92672">::&lt;/span>vector&lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#66d9ef">uint8_t&lt;/span>&lt;span style="color:#f92672">&amp;gt;&lt;/span> encrypted &lt;span style="color:#f92672">=&lt;/span> encrypt(msg);
+&lt;span style="color:#75715e">// Restore the original byte
+&lt;/span>&lt;span style="color:#75715e">&lt;/span> target_byte &lt;span style="color:#f92672">=&lt;/span> backup;
+&lt;span style="color:#75715e">// Compute the number of errors
+&lt;/span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#75715e">// ...
+&lt;/span>&lt;span style="color:#75715e">&lt;/span>}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Finally, with the subset of the addresses that affect exactly 4 bytes, we can generate several faults for a given
+address:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="color:#66d9ef">for&lt;/span> (uintptr_t nice_fault_addr : four_bytes_fault_addresses) {
+&lt;span style="color:#66d9ef">for&lt;/span> (size_t i &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>; i &lt;span style="color:#f92672">&amp;lt;&lt;/span> &lt;span style="color:#ae81ff">255&lt;/span>; &lt;span style="color:#f92672">++&lt;/span>i) {
+&lt;span style="color:#66d9ef">const&lt;/span> std&lt;span style="color:#f92672">::&lt;/span>vector&lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#66d9ef">uint8_t&lt;/span>&lt;span style="color:#f92672">&amp;gt;&amp;amp;&lt;/span> output &lt;span style="color:#f92672">=&lt;/span> inject_fault(addr, PIN_AMOUNT, i);
+&lt;span style="color:#66d9ef">const&lt;/span> size_t nb_errors &lt;span style="color:#f92672">=&lt;/span> get_error(genuine_value, output);
+&lt;span style="color:#66d9ef">if&lt;/span> (nb_errors &lt;span style="color:#f92672">==&lt;/span> &lt;span style="color:#ae81ff">4&lt;/span> and unique.insert(output).second) {
+&lt;span style="color:#75715e">// Record the entry ...
+&lt;/span>&lt;span style="color:#75715e">&lt;/span> }
+}
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>The aforementioned code gives an idea about how to generate the faults. One can find the whole implementation in
+this file:
+&lt;a href="https://github.com/romainthomas/r2pay/blob/master/shim-whitebox/src/main.cpp#L343-L365" target="_blank" rel="noopener">shim-whitebox/src/main.cpp&lt;/a> that produces
+this set of files
+&lt;a href="https://github.com/romainthomas/r2pay/blob/master/assets/wb-traces" target="_blank" rel="noopener">assets/wb-traces&lt;/a>.&lt;/p>
+&lt;h2 id="key-extraction">Key Extraction&lt;/h2>
+&lt;p>Thanks to the
+&lt;a href="https://github.com/SideChannelMarvels" target="_blank" rel="noopener">&lt;i class="fab fa-github">&lt;/i> Side-Channel Marvels&lt;/a> project,
+we can use
+&lt;a href="https://github.com/SideChannelMarvels/JeanGrey" target="_blank" rel="noopener">JeanGrey&lt;/a> &amp;mdash; developed by Philippe Teuwen &amp;mdash; to recover the whitebox&amp;rsquo;s key from the faulty traces:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">&lt;span style="color:#f92672">import&lt;/span> pathlib
+&lt;span style="color:#f92672">import&lt;/span> phoenixAES
+CWD &lt;span style="color:#f92672">=&lt;/span> pathlib&lt;span style="color:#f92672">.&lt;/span>Path(__file__)&lt;span style="color:#f92672">.&lt;/span>parent
+trace_dir &lt;span style="color:#f92672">=&lt;/span> CWD &lt;span style="color:#f92672">/&lt;/span> &lt;span style="color:#e6db74">&amp;#34;..&amp;#34;&lt;/span> &lt;span style="color:#f92672">/&lt;/span> &lt;span style="color:#e6db74">&amp;#34;assets&amp;#34;&lt;/span> &lt;span style="color:#f92672">/&lt;/span> &lt;span style="color:#e6db74">&amp;#34;wb-traces&amp;#34;&lt;/span>
+&lt;span style="color:#66d9ef">for&lt;/span> f &lt;span style="color:#f92672">in&lt;/span> trace_dir&lt;span style="color:#f92672">.&lt;/span>iterdir():
+x &lt;span style="color:#f92672">=&lt;/span> phoenixAES&lt;span style="color:#f92672">.&lt;/span>crack_file(f)
+&lt;span style="color:#66d9ef">if&lt;/span> x &lt;span style="color:#f92672">is&lt;/span> &lt;span style="color:#f92672">not&lt;/span> None:
+&lt;span style="color:#66d9ef">print&lt;/span>(x, f&lt;span style="color:#f92672">.&lt;/span>name)
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>It provides the following results which enable to retrieve the key:&lt;/p>
+&lt;pre>&lt;code class="language-console" data-lang="console">$ python wb_key_recovery.py
+..8D....7F............9A....79.. injection-1a930d.trace
+..8D....7F............9A....79.. injection-1a95bd.trace
+....19....62....B0............8F injection-1a91b2.trace
+....19....62....B0............8F injection-1a8fdf.trace
+76............1E....D3....E1.... injection-1a8549.trace
+......E1....A0....CD....28...... injection-1a8978.trace
+....19....62....B0............8F injection-1a90ce.trace
+....19....62....B0............8F injection-1a8efd.trace
+r 2 p 4 y 1 s N 0 w S e c u r 3
+&lt;/code>&lt;/pre>&lt;p>Finally, we can verify that &lt;strong>r2p4y1sN0wSecur3&lt;/strong> is the right key by trying to decrypt &lt;code>9497cdf1df2600e7f63778d0ae91dcbb&lt;/code>&lt;sup id="fnref:4">&lt;a href="#fn:4" class="footnote-ref" role="doc-noteref">4&lt;/a>&lt;/sup>:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">&lt;span style="color:#f92672">from&lt;/span> Crypto.Cipher &lt;span style="color:#f92672">import&lt;/span> AES
+WB_KEY &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">b&lt;/span>&lt;span style="color:#e6db74">&amp;#34;r2p4y1sN0wSecur3&amp;#34;&lt;/span>
+cipher &lt;span style="color:#f92672">=&lt;/span> AES&lt;span style="color:#f92672">.&lt;/span>new(WB_KEY, AES&lt;span style="color:#f92672">.&lt;/span>MODE_ECB)
+output &lt;span style="color:#f92672">=&lt;/span> cipher&lt;span style="color:#f92672">.&lt;/span>decrypt(bytes&lt;span style="color:#f92672">.&lt;/span>fromhex(&lt;span style="color:#e6db74">&amp;#34;9497cdf1df2600e7f63778d0ae91dcbb&amp;#34;&lt;/span>))
+&lt;span style="color:#66d9ef">print&lt;/span>(output&lt;span style="color:#f92672">.&lt;/span>decode())
+&lt;/code>&lt;/pre>&lt;/div>&lt;pre>&lt;code class="language-console" data-lang="console">$ python ./aes_test.py
+0000123400004567
+&lt;/code>&lt;/pre>&lt;h2 id="side-note-about-the-data-section">Side note about the &lt;code>.data&lt;/code> section&lt;/h2>
+&lt;p>Most of the obfuscators encode strings so that we don&amp;rsquo;t have any clue about functions' logic. The obfuscator
+used in the challenge follows this rule and running the &lt;code>strings&lt;/code> utility on the library does not reveal any interesting information.&lt;/p>
+&lt;p>Nevertheless, we can find a lot of &lt;code>.datadiv_decode&amp;lt;random hex&amp;gt;&lt;/code> in the ELF constructors of the library.
+As explained in the previous part, they are generated by the obfuscator and aimed to decode the strings.&lt;/p>
+&lt;p>Since these functions are in the &lt;strong>ELF constructors&lt;/strong>, this means that they are executed as soon as the library is loaded.
+In particular, when calling &lt;code>dlopen(...)&lt;/code> these constructors are executed. It can be confirmed by
+dumping the &lt;code>.data&lt;/code> section right after &lt;code>dlopen()&lt;/code>:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">dlopen(&lt;span style="color:#e6db74">&amp;#34;libnative-lib.so&amp;#34;&lt;/span>, RTLD_NOW);
+std&lt;span style="color:#f92672">::&lt;/span>ofstream ofs{fmt&lt;span style="color:#f92672">::&lt;/span>format(&lt;span style="color:#e6db74">&amp;#34;/data/local/tmp/{}&amp;#34;&lt;/span>, output)};
+&lt;span style="color:#66d9ef">auto&lt;/span> start &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#66d9ef">reinterpret_cast&lt;/span>&lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#66d9ef">char&lt;/span>&lt;span style="color:#f92672">*&amp;gt;&lt;/span>(base_address &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#ae81ff">0x127000&lt;/span>);
+ofs.write(start, &lt;span style="color:#75715e">/* sizeof(.data) */&lt;/span> &lt;span style="color:#ae81ff">0x8d49f&lt;/span>);
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Then, we can compare the bytes distribution with
+&lt;a href="https://binvis.io/" target="_blank" rel="noopener">binvis.io&lt;/a>:&lt;/p>
+&lt;p>&lt;img src="data_strings.png" alt="Bytes distribution in the .data section">&lt;/p>
+&lt;p>At the end of the in-memory &lt;code>.data&lt;/code> section, we can found interesting strings used to detect Frida and the
+device&amp;rsquo;s root state.&lt;/p>
+&lt;h2 id="conclusion">Conclusion&lt;/h2>
+&lt;p>Thanks again to &lt;u>Eduardo Novella&lt;/u> (
+&lt;a href="https://twitter.com/enovella_" target="_blank" rel="noopener">@enovella_&lt;/a>)
+and &lt;u>Gautam Arvind&lt;/u> (
+&lt;a href="https://twitter.com/darvincisec" target="_blank" rel="noopener">@darvincisec&lt;/a>) for this second part of the challenge :)&lt;/p>
+&lt;p>Also thanks to &lt;u>
+&lt;a href="https://www.quarkslab.com" target="_blank" rel="noopener">Quarkslab&lt;/a>&lt;/u> that allowed this publication.
+One can find related blog posts about whitebox attacks on the Quarkslab&amp;rsquo;s blog:&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>
+&lt;a href="https://blog.quarkslab.com/introduction-to-whiteboxes-and-collision-based-attacks-with-qbdi.html" target="_blank" rel="noopener">Introduction to Whiteboxes and Collision-Based Attacks With QBDI
+&lt;/a> by Paul Hernault (
+&lt;a href="https://twitter.com/0xAcid" target="_blank" rel="noopener">@0xAcid&lt;/a>)&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>
+&lt;a href="https://blog.quarkslab.com/when-sidechannelmarvels-meet-lief.html" target="_blank" rel="noopener">When SideChannelMarvels meet LIEF &lt;/a>&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>
+&lt;a href="https://blog.quarkslab.com/differential-fault-analysis-on-white-box-aes-implementations.html" target="_blank" rel="noopener">Differential Fault Analysis on White-box AES
+Implementations&lt;/a> by Philippe Teuwen (
+&lt;a href="https://twitter.com/doegox" target="_blank" rel="noopener">@doegox&lt;/a>).
+&lt;em>I used this blog post as a reference to resolve this part of the challenge.&lt;/em>&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h3 id="references">References&lt;/h3>
+&lt;section class="footnotes" role="doc-endnotes">
+&lt;hr>
+&lt;ol>
+&lt;li id="fn:1" role="doc-endnote">
+&lt;p>&lt;a href="https://developer.android.com/reference/android/content/Context">https://developer.android.com/reference/android/content/Context&lt;/a>&amp;#160;&lt;a href="#fnref:1" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li id="fn:2" role="doc-endnote">
+&lt;p>&lt;a href="https://calebfenton.github.io/2017/04/05/creating_java_vm_from_android_native_code/">https://calebfenton.github.io/2017/04/05/creating_java_vm_from_android_native_code/&lt;/a>&amp;#160;&lt;a href="#fnref:2" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li id="fn:3" role="doc-endnote">
+&lt;p>QBDI will execute the function using the
+&lt;a href="https://qbdi.readthedocs.io/en/stable/api_cpp.html#execution-filtering" target="_blank" rel="noopener">ExecBroker&lt;/a> mechanism.&amp;#160;&lt;a href="#fnref:3" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li id="fn:4" role="doc-endnote">
+&lt;p>It is the output of the function when entering &lt;code>1234&lt;/code> in the PIN field and &lt;code>4567&lt;/code> in the amount field.&amp;#160;&lt;a href="#fnref:4" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;/section></description></item><item><title>HITB 2015 Write-up - Crypto 300</title><link>/post/writeup-hitb2015-crypto300/</link><pubDate>Tue, 03 Nov 2015 00:00:00 +0100</pubDate><guid>/post/writeup-hitb2015-crypto300/</guid><description>&lt;h2 id="introduction">Introduction&lt;/h2>
+&lt;p>The crypto 300 challenge was about RSA with a special generation of the prime numbers $p$ and $q$.
+We were given a mail
+&lt;a href="mail.msg">mail.msg&lt;/a> which has been encrypted with RSA and whose the public key is in the
+&lt;a href="hitbctf.crt">hitbctf.crt&lt;/a> certificate.&lt;/p>
+&lt;h2 id="rsas-parameters-construction">RSA&amp;rsquo;s Parameters Construction&lt;/h2>
+&lt;p>The modulus $N$ is built by choosing randomly a first prime number $p$, the second prime number $q$ is constructed in the following way:&lt;/p>
+&lt;p>$$\alpha \cdot (p - 1) \equiv 1 \pmod{e}$$&lt;/p>
+&lt;p>$$q = (p\alpha \bmod e) + k\cdot e$$&lt;/p>
+&lt;p>$k$ is a positive integer such as $q$ is a prime number and $e$ is the public exponent which is also a random prime number.&lt;/p>
+&lt;p>The following code is the implementation in Python:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">gen_rsa_parameters&lt;/span>():
+r &lt;span style="color:#f92672">=&lt;/span> os&lt;span style="color:#f92672">.&lt;/span>urandom(&lt;span style="color:#ae81ff">63&lt;/span>)
+e &lt;span style="color:#f92672">=&lt;/span> int(r&lt;span style="color:#f92672">.&lt;/span>encode(&lt;span style="color:#e6db74">&amp;#39;hex&amp;#39;&lt;/span>), &lt;span style="color:#ae81ff">16&lt;/span>)
+e &lt;span style="color:#f92672">=&lt;/span> next_prime(e)
+r &lt;span style="color:#f92672">=&lt;/span> os&lt;span style="color:#f92672">.&lt;/span>urandom(&lt;span style="color:#ae81ff">64&lt;/span>)
+p &lt;span style="color:#f92672">=&lt;/span> int(r&lt;span style="color:#f92672">.&lt;/span>encode(&lt;span style="color:#e6db74">&amp;#39;hex&amp;#39;&lt;/span>), &lt;span style="color:#ae81ff">16&lt;/span>)
+p &lt;span style="color:#f92672">=&lt;/span> next_prime(p)
+q &lt;span style="color:#f92672">=&lt;/span> (p&lt;span style="color:#f92672">*&lt;/span>modinv(p&lt;span style="color:#f92672">-&lt;/span>&lt;span style="color:#ae81ff">1&lt;/span>, e)&lt;span style="color:#f92672">%&lt;/span>e)
+&lt;span style="color:#66d9ef">while&lt;/span> &lt;span style="color:#f92672">not&lt;/span> is_prime(q):
+q &lt;span style="color:#f92672">+=&lt;/span> e
+N &lt;span style="color:#f92672">=&lt;/span> p&lt;span style="color:#f92672">*&lt;/span>q
+phi &lt;span style="color:#f92672">=&lt;/span> (p&lt;span style="color:#f92672">-&lt;/span>&lt;span style="color:#ae81ff">1&lt;/span>)&lt;span style="color:#f92672">*&lt;/span>(q&lt;span style="color:#f92672">-&lt;/span>&lt;span style="color:#ae81ff">1&lt;/span>)
+d &lt;span style="color:#f92672">=&lt;/span> modinv(e,phi)
+&lt;span style="color:#66d9ef">return&lt;/span> N,e,d,p,q
+&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="theoretical-attack">Theoretical attack&lt;/h2>
+&lt;p>Let&amp;rsquo;s $N^{\prime} = N \bmod{e}$. So we have&lt;/p>
+&lt;p>\begin{eqnarray}
+N^{\prime} &amp;amp; \equiv &amp;amp; p \cdot q \pmod{e} \\\&lt;br>
+&amp;amp; \equiv &amp;amp; p \cdot ((p\alpha \bmod e) + k\cdot e) \pmod{e} \\\&lt;br>
+&amp;amp; \equiv &amp;amp; p^2\alpha \pmod{e} \\\&lt;br>
+\end{eqnarray}&lt;/p>
+&lt;p>We have $\alpha$ in the equation so we can introduce $p - 1$ to remove $\alpha$&lt;/p>
+&lt;p>\begin{eqnarray}
+N^{\prime} &amp;amp; \equiv &amp;amp; (p - 1 + 1)^2\alpha \pmod{e} \\\&lt;br>
+&amp;amp; \equiv &amp;amp; (p - 1)^2\alpha + 2(p - 1)\alpha + \alpha \pmod{e} \\\&lt;br>
+&amp;amp; \equiv &amp;amp; (p - 1) + 2 + \alpha \pmod{e} \\\&lt;br>
+(p - 1)N^{\prime} &amp;amp; \equiv &amp;amp; (p - 1)^2 + 2(p - 1) + 1 \pmod{e}
+\end{eqnarray}&lt;/p>
+&lt;p>$$\boxed{(p - 1)^2 - (N^{\prime} - 2)(p - 1) + 1 \equiv 0 \pmod{e}}$$&lt;/p>
+&lt;p>Now we have a quadratic equation which only depends on $p$.&lt;/p>
+&lt;p>Let&amp;rsquo;s $X = p - 1$ and suppose that $N^{\prime} - 2$ is even and $N^{\prime} - 2 = 2b$.&lt;/p>
+&lt;p>\begin{eqnarray}
+X^2 - 2bX + 1 &amp;amp; \equiv &amp;amp; 0 &amp;amp; \pmod{e} \\\&lt;br>
+(X - b)^2 - b^2 + 1 &amp;amp; \equiv &amp;amp; 0 &amp;amp; \pmod{e}\\\&lt;br>
+(X - b)^2 &amp;amp; \equiv &amp;amp; b^2 - 1 &amp;amp; \pmod{e}
+\end{eqnarray}&lt;/p>
+&lt;p>by using
+&lt;a href="https://en.wikipedia.org/wiki/Quadratic_residue" target="_blank" rel="noopener">quadratic residue&lt;/a> we can find a solution. We can also use &lt;em>SAGE&lt;/em> and the &lt;code>sqrt()&lt;/code> function:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">Np &lt;span style="color:#f92672">=&lt;/span> N &lt;span style="color:#f92672">%&lt;/span> e
+b &lt;span style="color:#f92672">=&lt;/span> (Np &lt;span style="color:#f92672">-&lt;/span> &lt;span style="color:#ae81ff">2&lt;/span>) &lt;span style="color:#f92672">/&lt;/span> &lt;span style="color:#ae81ff">2&lt;/span>
+p &lt;span style="color:#f92672">=&lt;/span> Mod(pow(b, &lt;span style="color:#ae81ff">2&lt;/span>) &lt;span style="color:#f92672">-&lt;/span> &lt;span style="color:#ae81ff">1&lt;/span>, e)&lt;span style="color:#f92672">.&lt;/span>sqrt() &lt;span style="color:#f92672">+&lt;/span> b &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#ae81ff">1&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>At this point, we find $p \bmod{e}$ but not $p$ !&lt;/p>
+&lt;p>I tried to find $p$ by adding some $e$ but the &lt;em>distance&lt;/em> between $p$ and $p \bmod{e}$ is huge. So I had to find another way.&lt;/p>
+&lt;p>By knowing $p \bmod{e}$ we can compute $\alpha$. Remember $$\alpha \cdot (p - 1) \equiv 1 \pmod{e}$$ and by having $\alpha$ and $p \bmod{e}$ we can brute force $q$ by adding $e$ until $(p\alpha \bmod e) + k\cdot e$ is prime and it divide $N$.&lt;/p>
+&lt;p>We did the assumption that $N^{\prime} - 2$ has to be even (so $N^{\prime}$ must be even) and in the certificate $N^{\prime}$ is even so everything is right.&lt;/p>
+&lt;h2 id="pratical-attack">Pratical Attack&lt;/h2>
+&lt;p>First we have to extract the modulus $N$ and the public key $e$ from the certificate:&lt;/p>
+&lt;pre>&lt;code class="language-console" data-lang="console">$ openssl x509 -in hitbctf.crt -text -noout
+Certificate:
+Data:
+Version: 1 (0x0)
+Serial Number: 18379438180976429416 (0xff10e1a5ac5a0968)
+Signature Algorithm: sha1WithRSAEncryption
+Issuer: C=NL, ST=Noord-Holland, L=Amsterdam, O=HITB, OU=CTF
+Validity
+Not Before: May 24 09:58:26 2015 GMT
+Not After : May 23 09:58:26 2016 GMT
+Subject: C=NL, ST=Noord-Holland, L=Amsterdam, O=HITB, OU=CTF
+Subject Public Key Info:
+Public Key Algorithm: rsaEncryption
+Public-Key: (1024 bit)
+Modulus:
+00:e6:eb:89:c1:8d:49:c9:a2:02:2b:e0:b4:65:14:
+6e:0f:90:45:1e:a3:4c:6b:60:56:00:4e:bd:15:59:
+55:b1:35:96:c2:d6:83:ad:2f:23:6b:0b:2c:0e:0b:
+88:83:b5:d6:cb:8a:0b:4f:f9:b7:eb:64:8c:95:2b:
+6b:ef:5a:6f:04:f5:64:17:f5:1c:a9:14:d9:ea:73:
+e7:dd:c5:f2:0d:ce:c3:9c:e8:4b:72:2a:0c:f3:d8:
+5e:80:ce:78:64:63:e1:44:f6:1d:b5:9c:cf:45:ff:
+0e:d3:7f:d0:ce:bd:37:a5:8d:8a:4b:08:33:9e:a3:
+2c:bc:ab:61:64:03:fd:2c:c5
+Exponent:
+69:60:2d:93:8a:81:5f:14:cf:9f:b8:36:c2:e0:4d:
+4d:De:82:ba:fc:8d:56:c2:6d:8c:89:ef:3c:40:69:
+5d:d5:d4:ef:a7:36:36:43:15:14:95:f3:8c:bf:24:
+ae:94:30:92:40:79:12:00:1b:17:f5:53:33:9e:92:
+70:70:49
+Signature Algorithm: sha1WithRSAEncryption
+17:2b:ea:be:90:ad:98:f2:2b:ff:f5:61:d3:ea:af:fb:35:3a:
+67:10:91:13:db:60:55:d9:09:8b:c2:1a:cf:6b:c6:1f:f2:10:
+7a:d1:7b:9d:ff:10:f2:f2:c0:a9:f5:aa:2e:09:93:40:88:92:
+7d:98:ff:e1:cb:dc:db:35:8d:e0:4b:21:99:76:bf:db:04:a2:
+62:a4:18:4e:fc:bb:a7:53:be:6a:a1:ef:ec:15:86:c1:f1:1e:
+87:6a:e9:af:fe:d1:08:eb:de:22:28:c4:5e:be:f1:41:0a:ca:
+cf:cf:da:63:b1:c1:56:e8:0c:8e:56:7f:08:94:0d:2b:2a:08:
+&lt;/code>&lt;/pre>&lt;p>&lt;code>N = 1621575882314321757502664197090844942567381491984167028188381926885851&lt;/code>
+&lt;code>995558397927547394115469298694885747314992315746872071523931715177680193273&lt;/code>
+&lt;code>386465775883129725436206653605910592810579794603402792446164893148622893121&lt;/code>
+&lt;code>957048204358672599654432857497196823273138934901636721473789115585263150131&lt;/code>
+&lt;code>66594183212229&lt;/code>&lt;/p>
+&lt;p>&lt;code>e = 21558488234539889837938770635971330903489839146766895224490179041465516&lt;/code>
+&lt;code>1931455822669631548838317075220811407344210520390992334648372016602816069805&lt;/code>
+&lt;code>30249&lt;/code>&lt;/p>
+&lt;p>With SAGE:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">sage: Np &lt;span style="color:#f92672">=&lt;/span> N &lt;span style="color:#f92672">%&lt;/span> e
+sage: b &lt;span style="color:#f92672">=&lt;/span> (Np &lt;span style="color:#f92672">-&lt;/span> &lt;span style="color:#ae81ff">2&lt;/span>) &lt;span style="color:#f92672">/&lt;/span> &lt;span style="color:#ae81ff">2&lt;/span>
+sage: pp &lt;span style="color:#f92672">=&lt;/span> int(Mod(pow(b, &lt;span style="color:#ae81ff">2&lt;/span>) &lt;span style="color:#f92672">-&lt;/span> &lt;span style="color:#ae81ff">1&lt;/span>, e)&lt;span style="color:#f92672">.&lt;/span>sqrt()) &lt;span style="color:#f92672">+&lt;/span> b &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#ae81ff">1&lt;/span>
+sage: alpha &lt;span style="color:#f92672">=&lt;/span> inverse_mod(int(X), int(e))
+sage: q &lt;span style="color:#f92672">=&lt;/span> (pp &lt;span style="color:#f92672">*&lt;/span> alpha) &lt;span style="color:#f92672">%&lt;/span> e
+sage: &lt;span style="color:#66d9ef">while&lt;/span> &lt;span style="color:#f92672">not&lt;/span> is_prime(q) &lt;span style="color:#f92672">and&lt;/span> N &lt;span style="color:#f92672">%&lt;/span> q &lt;span style="color:#f92672">!=&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>:
+&lt;span style="color:#f92672">....&lt;/span>: q &lt;span style="color:#f92672">+=&lt;/span> e
+sage: p &lt;span style="color:#f92672">=&lt;/span> N &lt;span style="color:#f92672">/&lt;/span> q
+sage: p
+&lt;span style="color:#ae81ff">13317713478157317654574552532079837937895228108820477140030796245493222349714497856652987583926206280627498615972491072112647669795345566943409669535038641&lt;/span>
+sage: q
+&lt;span style="color:#ae81ff">12176083266650126897170100375931110708350668494730113414987801764299563774952801449439933220072280766145748279998832962142839152786620322097065894585706069&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>We can now generate the private key by using
+&lt;a href="rsatool.py">rsatool&lt;/a>:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">$ ./rsatools.py -o private.pem &lt;span style="color:#ae81ff">\
+&lt;/span>&lt;span style="color:#ae81ff">&lt;/span>-e &lt;span style="color:#ae81ff">21558488234539889837938770635971330903489839146766895224490179041465516193145582266963154883831707522081140734421052039099233464837201660281606980530249&lt;/span> &lt;span style="color:#ae81ff">\
+&lt;/span>&lt;span style="color:#ae81ff">&lt;/span>-p &lt;span style="color:#ae81ff">13317713478157317654574552532079837937895228108820477140030796245493222349714497856652987583926206280627498615972491072112647669795345566943409669535038641&lt;/span> &lt;span style="color:#ae81ff">\
+&lt;/span>&lt;span style="color:#ae81ff">&lt;/span>-q &lt;span style="color:#ae81ff">12176083266650126897170100375931110708350668494730113414987801764299563774952801449439933220072280766145748279998832962142839152786620322097065894585706069&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Finally, we can decrypt the message:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">openssl smime -decrypt -in mail.msg -inkey private.pem
+hitb&lt;span style="color:#f92672">{&lt;/span>0b21cc2025534dbd2965390d2bcef45d&lt;span style="color:#f92672">}&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>The sources are available
+&lt;a href="hitb2015-crypto300.tar.gz">here&lt;/a>&lt;/p></description></item><item><title>HITB 2015 Write-up - Crypto 400</title><link>/post/writeup-hitb2015-crypto400/</link><pubDate>Tue, 03 Nov 2015 00:00:00 +0100</pubDate><guid>/post/writeup-hitb2015-crypto400/</guid><description>&lt;h2 id="introduction">Introduction&lt;/h2>
+&lt;p>The crypto 400 challenge deals with the Even Mansour cryptosystem. To validate this challenge we have to send the flag to a server.
+The server checks if the answer matches the flag by encrypting the flag and the given message with a &lt;strong>random&lt;/strong> key.
+If both are equal the flag is correct otherwise it fails and the encrypted message is printed.&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">key &lt;span style="color:#f92672">=&lt;/span> os&lt;span style="color:#f92672">.&lt;/span>urandom(&lt;span style="color:#ae81ff">32&lt;/span>)
+enc_flag &lt;span style="color:#f92672">=&lt;/span> encrypt(flag, key)
+enc &lt;span style="color:#f92672">=&lt;/span> encrypt(answer, key)
+&lt;span style="color:#66d9ef">if&lt;/span> enc &lt;span style="color:#f92672">==&lt;/span> enc_flag:
+response &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;You lucky bastard, &lt;/span>&lt;span style="color:#e6db74">%s&lt;/span>&lt;span style="color:#e6db74"> is indeed the correct flag!&lt;/span>&lt;span style="color:#ae81ff">\n&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span> &lt;span style="color:#f92672">%&lt;/span> flag
+&lt;span style="color:#66d9ef">else&lt;/span>:
+response &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;Unfortunately that is not our flag :(&lt;/span>&lt;span style="color:#ae81ff">\n&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>
+response &lt;span style="color:#f92672">+=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;Your guess encrypts as&lt;/span>&lt;span style="color:#ae81ff">\n&lt;/span>&lt;span style="color:#e6db74">%s&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span> &lt;span style="color:#f92672">%&lt;/span> enc
+response &lt;span style="color:#f92672">+=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;whereas our flag encrypts as&lt;/span>&lt;span style="color:#ae81ff">\n&lt;/span>&lt;span style="color:#e6db74">%s&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span> &lt;span style="color:#f92672">%&lt;/span> enc_flag
+&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="even-mansour-scheme">Even Mansour scheme&lt;/h2>
+&lt;p>In this Even-Masour scheme the size of a block is 16-bytes and the key &amp;mdash; on 32-bytes &amp;mdash; is split in two: $k_1$ and $k_2$ each one on 16-bytes.
+At first, the message $M$ is xor-ed with $k_1$ then $M \oplus k_1$ is going through a $F$ function which
+will be discussed later. Finally the output is xor-ed with $k_2$.&lt;/p>
+&lt;p>&lt;img src="evenmansour.png" alt="">&lt;/p>
+&lt;p>So we have:&lt;/p>
+&lt;p>$$C = F(M \oplus k_1) \oplus k_2$$&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">EvenMansour&lt;/span>(block, key):
+block &lt;span style="color:#f92672">=&lt;/span> xor(block, key[:&lt;span style="color:#ae81ff">16&lt;/span>])
+block &lt;span style="color:#f92672">=&lt;/span> F(block)
+block &lt;span style="color:#f92672">=&lt;/span> xor(block, key[&lt;span style="color:#ae81ff">16&lt;/span>:])
+&lt;span style="color:#66d9ef">return&lt;/span> block
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>In this challenge, the weakness comes from the $F$ function.&lt;/p>
+&lt;h2 id="f-function">$F$ function&lt;/h2>
+&lt;p>The $F$ function is composed of 64-rounds that perform the &lt;code>step(...)&lt;/code> transformation:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">F&lt;/span>(block):
+&lt;span style="color:#66d9ef">for&lt;/span> i &lt;span style="color:#f92672">in&lt;/span> range(&lt;span style="color:#ae81ff">64&lt;/span>):
+block &lt;span style="color:#f92672">=&lt;/span> step(block)
+&lt;span style="color:#66d9ef">return&lt;/span> block
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;code>step&lt;/code> uses a S-Box to transform the block in this way:&lt;/p>
+&lt;p>&lt;img src="/img/step.png" alt="">&lt;/p>
+&lt;p>$\begin{cases}
+\text{block}^{n+1}_0 = \text{SBox}(\text{block}^{n}_{10} \oplus \text{block}^{n}_{12} \oplus \text{block}^{n}_{13} \oplus \text{block}^{n+1}_{15}) &amp;amp; k = 0 \\\&lt;br>
+\text{block}^{n+1}_k = \text{block}^{n}_{k - 1} &amp;amp; k &amp;gt; 0
+\end{cases}$&lt;/p>
+&lt;p>$\text{block}^{n}_k$ is the byte $k$ of the &lt;em>block&lt;/em> at round $n$ ($0 \leq k &amp;lt; 16$ and $0 \leq n &amp;lt; 64$)&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">step&lt;/span>(block):
+&lt;span style="color:#66d9ef">return&lt;/span> chr( S[ ord(block[&lt;span style="color:#ae81ff">10&lt;/span>]) &lt;span style="color:#f92672">^&lt;/span> ord(block[&lt;span style="color:#ae81ff">12&lt;/span>]) &lt;span style="color:#f92672">^&lt;/span> ord(block[&lt;span style="color:#ae81ff">13&lt;/span>]) &lt;span style="color:#f92672">^&lt;/span> ord(block[&lt;span style="color:#ae81ff">15&lt;/span>]) ] ) &lt;span style="color:#f92672">+&lt;/span> block[:&lt;span style="color:#ae81ff">15&lt;/span>]
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>By ploting $y = \text{S-Box}(x)$ we can notice that the S-Box has a special construction:&lt;/p>
+&lt;p>&lt;img src="/img/figure_1-1.png" alt="">&lt;/p>
+&lt;p>I thought about computing the differential characteristics which is the probability that given the input difference
+$\Delta = x \oplus y$ we get the output delta: $\delta = S(x) \oplus S(y)$.
+We will call this probability $P(\Delta | \delta)$ and with
+following function, we can compute this probability:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">P&lt;/span>(dx ,dy):
+count &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>;
+&lt;span style="color:#66d9ef">for&lt;/span> x &lt;span style="color:#f92672">in&lt;/span> range(len(SBox)):
+dY &lt;span style="color:#f92672">=&lt;/span> SBox[x] &lt;span style="color:#f92672">^&lt;/span> SBox[x &lt;span style="color:#f92672">^&lt;/span> dx]
+&lt;span style="color:#66d9ef">if&lt;/span> dY &lt;span style="color:#f92672">==&lt;/span> dy:
+count &lt;span style="color:#f92672">+=&lt;/span> &lt;span style="color:#ae81ff">1&lt;/span>;
+&lt;span style="color:#66d9ef">return&lt;/span> float(count) &lt;span style="color:#f92672">/&lt;/span> float(&lt;span style="color:#ae81ff">256&lt;/span>)
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>For all $\Delta$ and $\delta$, we notice that this probability is either 0 or 1. Consequently if we know $\delta$ we are sure to find $\Delta$. This will be useful for the differential attack.&lt;/p>
+&lt;h2 id="differential-attack">Differential Attack&lt;/h2>
+&lt;p>To find the flag, we will perform a differential attack. We have a message $M_1$ that we know and we have an unknown second message $M_2$
+that is the flag. We also know $C_1$ and $C_2$ such as:&lt;/p>
+&lt;p>$$\begin{eqnarray}
+C_1 &amp;amp; = &amp;amp; F(M_1 \oplus k_1) \oplus k_2 \\\&lt;br>
+C_2 &amp;amp; = &amp;amp; F(M_2 \oplus k_1) \oplus k_2
+\end{eqnarray}$$&lt;/p>
+&lt;p>&lt;img src="diff.png" alt="">&lt;/p>
+&lt;p>By xor-ing $C_1$ and $C_2$ we can get $\Delta W = W_1 \oplus W_2 = C_1 \oplus C_2$. If somehow we can resolve $\Delta V$:&lt;/p>
+&lt;p>$$\begin{eqnarray}
+\Delta V &amp;amp; = &amp;amp; V_1 \oplus V_2 \\\&lt;br>
+&amp;amp; = &amp;amp; M_1 \oplus k_1 \oplus M_2 \oplus k_1\\\&lt;br>
+&amp;amp; = &amp;amp; M_1 \oplus M_2.
+\end{eqnarray}$$&lt;/p>
+&lt;p>We can extract $M_2$ with:&lt;/p>
+&lt;p>$$M_2 = \Delta V \oplus M_1$$&lt;/p>
+&lt;h2 id="recovering-delta-v">Recovering $\Delta V$&lt;/h2>
+&lt;p>Now, let&amp;rsquo;s see how to resolve $\Delta V$ from $\Delta W$.&lt;/p>
+&lt;p>From the &lt;code>step&lt;/code> function, we know that $\text{block}^{n+1}_k = \text{block}^{n}_{k - 1}$ therefore:&lt;/p>
+&lt;p>$$\Delta W^{n-1}_k = \Delta W^{n}_{k + 1} \forall k &amp;lt; 15$$&lt;/p>
+&lt;p>We know also $\Delta W^{n-1}_{0,1,2 \ldots 14}$ but not $\Delta W^{n-1}_{15}$&lt;/p>
+&lt;p>To find $\Delta W^{n-1}_{15}$ we will use the fact that $P(\Delta X | \Delta W^{n-1}_{15}) = 1$ for a given $\Delta X$.
+Concretely, I built a table &lt;em>diffTable&lt;/em> which maps $\delta$ to $\Delta$.&lt;/p>
+&lt;p>$\begin{eqnarray}
+\text{diffTable}(\Delta W^{n}_{0}) &amp;amp; = &amp;amp; \Delta W^{n-1}_{10} \oplus \Delta W^{n-1}_{12} \oplus \Delta W^{n-1}_{13} \oplus \Delta W^{n-1}_{15} \\\&lt;br>
+&amp;amp; = &amp;amp; \Delta W^{n}_{11} \oplus \Delta W^{n}_{13} \oplus \Delta W^{n}_{14} \oplus \Delta W^{n-1}_{15}\\\&lt;br>
+\Delta W^{n-1}_{15} &amp;amp; = &amp;amp; \text{diffTable}(\Delta W^{n}_{0}) \oplus \Delta W^{n}_{11} \oplus \Delta W^{n}_{13} \oplus \Delta W^{n}_{14}
+\end{eqnarray}$&lt;/p>
+&lt;p>Which enables to recover $\Delta W^{n - 1}$ from $\Delta W^{n}$.
+Then, with recursion we can compute $\Delta W^{0} = \Delta V$&lt;/p>
+&lt;h2 id="implementation">Implementation&lt;/h2>
+&lt;p>The following script is the implementation of the attack:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">&lt;span style="color:#75715e">#!/usr/bin/python2.7&lt;/span>
+&lt;span style="color:#75715e"># -*- coding: utf-8 -*-&lt;/span>
+&lt;span style="color:#f92672">import&lt;/span> os
+S &lt;span style="color:#f92672">=&lt;/span> [
+&lt;span style="color:#ae81ff">0xa5&lt;/span>,&lt;span style="color:#ae81ff">0xc6&lt;/span>,&lt;span style="color:#ae81ff">0x62&lt;/span>,&lt;span style="color:#ae81ff">0x01&lt;/span>,&lt;span style="color:#ae81ff">0x49&lt;/span>,&lt;span style="color:#ae81ff">0x2a&lt;/span>,&lt;span style="color:#ae81ff">0x8e&lt;/span>,&lt;span style="color:#ae81ff">0xed&lt;/span>,&lt;span style="color:#ae81ff">0x1f&lt;/span>,&lt;span style="color:#ae81ff">0x7c&lt;/span>,&lt;span style="color:#ae81ff">0xd8&lt;/span>,&lt;span style="color:#ae81ff">0xbb&lt;/span>,&lt;span style="color:#ae81ff">0xf3&lt;/span>,&lt;span style="color:#ae81ff">0x90&lt;/span>,&lt;span style="color:#ae81ff">0x34&lt;/span>,&lt;span style="color:#ae81ff">0x57&lt;/span>,
+&lt;span style="color:#ae81ff">0xb3&lt;/span>,&lt;span style="color:#ae81ff">0xd0&lt;/span>,&lt;span style="color:#ae81ff">0x74&lt;/span>,&lt;span style="color:#ae81ff">0x17&lt;/span>,&lt;span style="color:#ae81ff">0x5f&lt;/span>,&lt;span style="color:#ae81ff">0x3c&lt;/span>,&lt;span style="color:#ae81ff">0x98&lt;/span>,&lt;span style="color:#ae81ff">0xfb&lt;/span>,&lt;span style="color:#ae81ff">0x09&lt;/span>,&lt;span style="color:#ae81ff">0x6a&lt;/span>,&lt;span style="color:#ae81ff">0xce&lt;/span>,&lt;span style="color:#ae81ff">0xad&lt;/span>,&lt;span style="color:#ae81ff">0xe5&lt;/span>,&lt;span style="color:#ae81ff">0x86&lt;/span>,&lt;span style="color:#ae81ff">0x22&lt;/span>,&lt;span style="color:#ae81ff">0x41&lt;/span>,
+&lt;span style="color:#ae81ff">0x89&lt;/span>,&lt;span style="color:#ae81ff">0xea&lt;/span>,&lt;span style="color:#ae81ff">0x4e&lt;/span>,&lt;span style="color:#ae81ff">0x2d&lt;/span>,&lt;span style="color:#ae81ff">0x65&lt;/span>,&lt;span style="color:#ae81ff">0x06&lt;/span>,&lt;span style="color:#ae81ff">0xa2&lt;/span>,&lt;span style="color:#ae81ff">0xc1&lt;/span>,&lt;span style="color:#ae81ff">0x33&lt;/span>,&lt;span style="color:#ae81ff">0x50&lt;/span>,&lt;span style="color:#ae81ff">0xf4&lt;/span>,&lt;span style="color:#ae81ff">0x97&lt;/span>,&lt;span style="color:#ae81ff">0xdf&lt;/span>,&lt;span style="color:#ae81ff">0xbc&lt;/span>,&lt;span style="color:#ae81ff">0x18&lt;/span>,&lt;span style="color:#ae81ff">0x7b&lt;/span>,
+&lt;span style="color:#ae81ff">0x9f&lt;/span>,&lt;span style="color:#ae81ff">0xfc&lt;/span>,&lt;span style="color:#ae81ff">0x58&lt;/span>,&lt;span style="color:#ae81ff">0x3b&lt;/span>,&lt;span style="color:#ae81ff">0x73&lt;/span>,&lt;span style="color:#ae81ff">0x10&lt;/span>,&lt;span style="color:#ae81ff">0xb4&lt;/span>,&lt;span style="color:#ae81ff">0xd7&lt;/span>,&lt;span style="color:#ae81ff">0x25&lt;/span>,&lt;span style="color:#ae81ff">0x46&lt;/span>,&lt;span style="color:#ae81ff">0xe2&lt;/span>,&lt;span style="color:#ae81ff">0x81&lt;/span>,&lt;span style="color:#ae81ff">0xc9&lt;/span>,&lt;span style="color:#ae81ff">0xaa&lt;/span>,&lt;span style="color:#ae81ff">0x0e&lt;/span>,&lt;span style="color:#ae81ff">0x6d&lt;/span>,
+&lt;span style="color:#ae81ff">0xfd&lt;/span>,&lt;span style="color:#ae81ff">0x9e&lt;/span>,&lt;span style="color:#ae81ff">0x3a&lt;/span>,&lt;span style="color:#ae81ff">0x59&lt;/span>,&lt;span style="color:#ae81ff">0x11&lt;/span>,&lt;span style="color:#ae81ff">0x72&lt;/span>,&lt;span style="color:#ae81ff">0xd6&lt;/span>,&lt;span style="color:#ae81ff">0xb5&lt;/span>,&lt;span style="color:#ae81ff">0x47&lt;/span>,&lt;span style="color:#ae81ff">0x24&lt;/span>,&lt;span style="color:#ae81ff">0x80&lt;/span>,&lt;span style="color:#ae81ff">0xe3&lt;/span>,&lt;span style="color:#ae81ff">0xab&lt;/span>,&lt;span style="color:#ae81ff">0xc8&lt;/span>,&lt;span style="color:#ae81ff">0x6c&lt;/span>,&lt;span style="color:#ae81ff">0x0f&lt;/span>,
+&lt;span style="color:#ae81ff">0xeb&lt;/span>,&lt;span style="color:#ae81ff">0x88&lt;/span>,&lt;span style="color:#ae81ff">0x2c&lt;/span>,&lt;span style="color:#ae81ff">0x4f&lt;/span>,&lt;span style="color:#ae81ff">0x07&lt;/span>,&lt;span style="color:#ae81ff">0x64&lt;/span>,&lt;span style="color:#ae81ff">0xc0&lt;/span>,&lt;span style="color:#ae81ff">0xa3&lt;/span>,&lt;span style="color:#ae81ff">0x51&lt;/span>,&lt;span style="color:#ae81ff">0x32&lt;/span>,&lt;span style="color:#ae81ff">0x96&lt;/span>,&lt;span style="color:#ae81ff">0xf5&lt;/span>,&lt;span style="color:#ae81ff">0xbd&lt;/span>,&lt;span style="color:#ae81ff">0xde&lt;/span>,&lt;span style="color:#ae81ff">0x7a&lt;/span>,&lt;span style="color:#ae81ff">0x19&lt;/span>,
+&lt;span style="color:#ae81ff">0xd1&lt;/span>,&lt;span style="color:#ae81ff">0xb2&lt;/span>,&lt;span style="color:#ae81ff">0x16&lt;/span>,&lt;span style="color:#ae81ff">0x75&lt;/span>,&lt;span style="color:#ae81ff">0x3d&lt;/span>,&lt;span style="color:#ae81ff">0x5e&lt;/span>,&lt;span style="color:#ae81ff">0xfa&lt;/span>,&lt;span style="color:#ae81ff">0x99&lt;/span>,&lt;span style="color:#ae81ff">0x6b&lt;/span>,&lt;span style="color:#ae81ff">0x08&lt;/span>,&lt;span style="color:#ae81ff">0xac&lt;/span>,&lt;span style="color:#ae81ff">0xcf&lt;/span>,&lt;span style="color:#ae81ff">0x87&lt;/span>,&lt;span style="color:#ae81ff">0xe4&lt;/span>,&lt;span style="color:#ae81ff">0x40&lt;/span>,&lt;span style="color:#ae81ff">0x23&lt;/span>,
+&lt;span style="color:#ae81ff">0xc7&lt;/span>,&lt;span style="color:#ae81ff">0xa4&lt;/span>,&lt;span style="color:#ae81ff">0x00&lt;/span>,&lt;span style="color:#ae81ff">0x63&lt;/span>,&lt;span style="color:#ae81ff">0x2b&lt;/span>,&lt;span style="color:#ae81ff">0x48&lt;/span>,&lt;span style="color:#ae81ff">0xec&lt;/span>,&lt;span style="color:#ae81ff">0x8f&lt;/span>,&lt;span style="color:#ae81ff">0x7d&lt;/span>,&lt;span style="color:#ae81ff">0x1e&lt;/span>,&lt;span style="color:#ae81ff">0xba&lt;/span>,&lt;span style="color:#ae81ff">0xd9&lt;/span>,&lt;span style="color:#ae81ff">0x91&lt;/span>,&lt;span style="color:#ae81ff">0xf2&lt;/span>,&lt;span style="color:#ae81ff">0x56&lt;/span>,&lt;span style="color:#ae81ff">0x35&lt;/span>,
+&lt;span style="color:#ae81ff">0x14&lt;/span>,&lt;span style="color:#ae81ff">0x77&lt;/span>,&lt;span style="color:#ae81ff">0xd3&lt;/span>,&lt;span style="color:#ae81ff">0xb0&lt;/span>,&lt;span style="color:#ae81ff">0xf8&lt;/span>,&lt;span style="color:#ae81ff">0x9b&lt;/span>,&lt;span style="color:#ae81ff">0x3f&lt;/span>,&lt;span style="color:#ae81ff">0x5c&lt;/span>,&lt;span style="color:#ae81ff">0xae&lt;/span>,&lt;span style="color:#ae81ff">0xcd&lt;/span>,&lt;span style="color:#ae81ff">0x69&lt;/span>,&lt;span style="color:#ae81ff">0x0a&lt;/span>,&lt;span style="color:#ae81ff">0x42&lt;/span>,&lt;span style="color:#ae81ff">0x21&lt;/span>,&lt;span style="color:#ae81ff">0x85&lt;/span>,&lt;span style="color:#ae81ff">0xe6&lt;/span>,
+&lt;span style="color:#ae81ff">0x02&lt;/span>,&lt;span style="color:#ae81ff">0x61&lt;/span>,&lt;span style="color:#ae81ff">0xc5&lt;/span>,&lt;span style="color:#ae81ff">0xa6&lt;/span>,&lt;span style="color:#ae81ff">0xee&lt;/span>,&lt;span style="color:#ae81ff">0x8d&lt;/span>,&lt;span style="color:#ae81ff">0x29&lt;/span>,&lt;span style="color:#ae81ff">0x4a&lt;/span>,&lt;span style="color:#ae81ff">0xb8&lt;/span>,&lt;span style="color:#ae81ff">0xdb&lt;/span>,&lt;span style="color:#ae81ff">0x7f&lt;/span>,&lt;span style="color:#ae81ff">0x1c&lt;/span>,&lt;span style="color:#ae81ff">0x54&lt;/span>,&lt;span style="color:#ae81ff">0x37&lt;/span>,&lt;span style="color:#ae81ff">0x93&lt;/span>,&lt;span style="color:#ae81ff">0xf0&lt;/span>,
+&lt;span style="color:#ae81ff">0x38&lt;/span>,&lt;span style="color:#ae81ff">0x5b&lt;/span>,&lt;span style="color:#ae81ff">0xff&lt;/span>,&lt;span style="color:#ae81ff">0x9c&lt;/span>,&lt;span style="color:#ae81ff">0xd4&lt;/span>,&lt;span style="color:#ae81ff">0xb7&lt;/span>,&lt;span style="color:#ae81ff">0x13&lt;/span>,&lt;span style="color:#ae81ff">0x70&lt;/span>,&lt;span style="color:#ae81ff">0x82&lt;/span>,&lt;span style="color:#ae81ff">0xe1&lt;/span>,&lt;span style="color:#ae81ff">0x45&lt;/span>,&lt;span style="color:#ae81ff">0x26&lt;/span>,&lt;span style="color:#ae81ff">0x6e&lt;/span>,&lt;span style="color:#ae81ff">0x0d&lt;/span>,&lt;span style="color:#ae81ff">0xa9&lt;/span>,&lt;span style="color:#ae81ff">0xca&lt;/span>,
+&lt;span style="color:#ae81ff">0x2e&lt;/span>,&lt;span style="color:#ae81ff">0x4d&lt;/span>,&lt;span style="color:#ae81ff">0xe9&lt;/span>,&lt;span style="color:#ae81ff">0x8a&lt;/span>,&lt;span style="color:#ae81ff">0xc2&lt;/span>,&lt;span style="color:#ae81ff">0xa1&lt;/span>,&lt;span style="color:#ae81ff">0x05&lt;/span>,&lt;span style="color:#ae81ff">0x66&lt;/span>,&lt;span style="color:#ae81ff">0x94&lt;/span>,&lt;span style="color:#ae81ff">0xf7&lt;/span>,&lt;span style="color:#ae81ff">0x53&lt;/span>,&lt;span style="color:#ae81ff">0x30&lt;/span>,&lt;span style="color:#ae81ff">0x78&lt;/span>,&lt;span style="color:#ae81ff">0x1b&lt;/span>,&lt;span style="color:#ae81ff">0xbf&lt;/span>,&lt;span style="color:#ae81ff">0xdc&lt;/span>,
+&lt;span style="color:#ae81ff">0x4c&lt;/span>,&lt;span style="color:#ae81ff">0x2f&lt;/span>,&lt;span style="color:#ae81ff">0x8b&lt;/span>,&lt;span style="color:#ae81ff">0xe8&lt;/span>,&lt;span style="color:#ae81ff">0xa0&lt;/span>,&lt;span style="color:#ae81ff">0xc3&lt;/span>,&lt;span style="color:#ae81ff">0x67&lt;/span>,&lt;span style="color:#ae81ff">0x04&lt;/span>,&lt;span style="color:#ae81ff">0xf6&lt;/span>,&lt;span style="color:#ae81ff">0x95&lt;/span>,&lt;span style="color:#ae81ff">0x31&lt;/span>,&lt;span style="color:#ae81ff">0x52&lt;/span>,&lt;span style="color:#ae81ff">0x1a&lt;/span>,&lt;span style="color:#ae81ff">0x79&lt;/span>,&lt;span style="color:#ae81ff">0xdd&lt;/span>,&lt;span style="color:#ae81ff">0xbe&lt;/span>,
+&lt;span style="color:#ae81ff">0x5a&lt;/span>,&lt;span style="color:#ae81ff">0x39&lt;/span>,&lt;span style="color:#ae81ff">0x9d&lt;/span>,&lt;span style="color:#ae81ff">0xfe&lt;/span>,&lt;span style="color:#ae81ff">0xb6&lt;/span>,&lt;span style="color:#ae81ff">0xd5&lt;/span>,&lt;span style="color:#ae81ff">0x71&lt;/span>,&lt;span style="color:#ae81ff">0x12&lt;/span>,&lt;span style="color:#ae81ff">0xe0&lt;/span>,&lt;span style="color:#ae81ff">0x83&lt;/span>,&lt;span style="color:#ae81ff">0x27&lt;/span>,&lt;span style="color:#ae81ff">0x44&lt;/span>,&lt;span style="color:#ae81ff">0x0c&lt;/span>,&lt;span style="color:#ae81ff">0x6f&lt;/span>,&lt;span style="color:#ae81ff">0xcb&lt;/span>,&lt;span style="color:#ae81ff">0xa8&lt;/span>,
+&lt;span style="color:#ae81ff">0x60&lt;/span>,&lt;span style="color:#ae81ff">0x03&lt;/span>,&lt;span style="color:#ae81ff">0xa7&lt;/span>,&lt;span style="color:#ae81ff">0xc4&lt;/span>,&lt;span style="color:#ae81ff">0x8c&lt;/span>,&lt;span style="color:#ae81ff">0xef&lt;/span>,&lt;span style="color:#ae81ff">0x4b&lt;/span>,&lt;span style="color:#ae81ff">0x28&lt;/span>,&lt;span style="color:#ae81ff">0xda&lt;/span>,&lt;span style="color:#ae81ff">0xb9&lt;/span>,&lt;span style="color:#ae81ff">0x1d&lt;/span>,&lt;span style="color:#ae81ff">0x7e&lt;/span>,&lt;span style="color:#ae81ff">0x36&lt;/span>,&lt;span style="color:#ae81ff">0x55&lt;/span>,&lt;span style="color:#ae81ff">0xf1&lt;/span>,&lt;span style="color:#ae81ff">0x92&lt;/span>,
+&lt;span style="color:#ae81ff">0x76&lt;/span>,&lt;span style="color:#ae81ff">0x15&lt;/span>,&lt;span style="color:#ae81ff">0xb1&lt;/span>,&lt;span style="color:#ae81ff">0xd2&lt;/span>,&lt;span style="color:#ae81ff">0x9a&lt;/span>,&lt;span style="color:#ae81ff">0xf9&lt;/span>,&lt;span style="color:#ae81ff">0x5d&lt;/span>,&lt;span style="color:#ae81ff">0x3e&lt;/span>,&lt;span style="color:#ae81ff">0xcc&lt;/span>,&lt;span style="color:#ae81ff">0xaf&lt;/span>,&lt;span style="color:#ae81ff">0x0b&lt;/span>,&lt;span style="color:#ae81ff">0x68&lt;/span>,&lt;span style="color:#ae81ff">0x20&lt;/span>,&lt;span style="color:#ae81ff">0x43&lt;/span>,&lt;span style="color:#ae81ff">0xe7&lt;/span>,&lt;span style="color:#ae81ff">0x84&lt;/span>
+]
+&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">xor&lt;/span>(block1, block2):
+&lt;span style="color:#66d9ef">return&lt;/span> &lt;span style="color:#e6db74">&amp;#34;&amp;#34;&lt;/span>&lt;span style="color:#f92672">.&lt;/span>join( chr(ord(a) &lt;span style="color:#f92672">^&lt;/span> ord(b)) &lt;span style="color:#66d9ef">for&lt;/span> (a,b) &lt;span style="color:#f92672">in&lt;/span> zip(block1, block2))
+&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">step&lt;/span>(block):
+&lt;span style="color:#66d9ef">return&lt;/span> chr(S[ord(block[&lt;span style="color:#ae81ff">10&lt;/span>]) &lt;span style="color:#f92672">^&lt;/span> ord(block[&lt;span style="color:#ae81ff">12&lt;/span>]) &lt;span style="color:#f92672">^&lt;/span> ord(block[&lt;span style="color:#ae81ff">13&lt;/span>]) &lt;span style="color:#f92672">^&lt;/span> ord(block[&lt;span style="color:#ae81ff">15&lt;/span>])]) &lt;span style="color:#f92672">+&lt;/span> block[:&lt;span style="color:#ae81ff">15&lt;/span>]
+&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">F&lt;/span>(block):
+&lt;span style="color:#66d9ef">for&lt;/span> i &lt;span style="color:#f92672">in&lt;/span> xrange(&lt;span style="color:#ae81ff">64&lt;/span>):
+block &lt;span style="color:#f92672">=&lt;/span> step(block)
+&lt;span style="color:#66d9ef">return&lt;/span> block
+&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">EvenMansour&lt;/span>(block, key):
+block &lt;span style="color:#f92672">=&lt;/span> xor(block, key[:&lt;span style="color:#ae81ff">16&lt;/span>])
+block &lt;span style="color:#f92672">=&lt;/span> F(block)
+block &lt;span style="color:#f92672">=&lt;/span> xor(block, key[&lt;span style="color:#ae81ff">16&lt;/span>:])
+&lt;span style="color:#66d9ef">return&lt;/span> block
+&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">encrypt&lt;/span>(data, key):
+data, num_blocks &lt;span style="color:#f92672">=&lt;/span> pad(data)
+res &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;&amp;#34;&lt;/span>
+&lt;span style="color:#66d9ef">for&lt;/span> i &lt;span style="color:#f92672">in&lt;/span> xrange(num_blocks):
+block &lt;span style="color:#f92672">=&lt;/span> EvenMansour(data[&lt;span style="color:#ae81ff">16&lt;/span>&lt;span style="color:#f92672">*&lt;/span>i:&lt;span style="color:#ae81ff">16&lt;/span>&lt;span style="color:#f92672">*&lt;/span>i&lt;span style="color:#f92672">+&lt;/span>&lt;span style="color:#ae81ff">16&lt;/span>], key)
+res &lt;span style="color:#f92672">+=&lt;/span> block
+&lt;span style="color:#66d9ef">return&lt;/span> res
+&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">pad&lt;/span>(data):
+&lt;span style="color:#66d9ef">while&lt;/span> True:
+data &lt;span style="color:#f92672">+=&lt;/span> &lt;span style="color:#e6db74">&amp;#39;&lt;/span>&lt;span style="color:#ae81ff">\x00&lt;/span>&lt;span style="color:#e6db74">&amp;#39;&lt;/span>
+&lt;span style="color:#66d9ef">if&lt;/span> len(data) &lt;span style="color:#f92672">%&lt;/span> &lt;span style="color:#ae81ff">16&lt;/span> &lt;span style="color:#f92672">==&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>:
+&lt;span style="color:#66d9ef">return&lt;/span> data, len(data) &lt;span style="color:#f92672">/&lt;/span> &lt;span style="color:#ae81ff">16&lt;/span>
+&lt;span style="color:#75715e">#&lt;/span>
+&lt;span style="color:#75715e"># Table T[a] = b such as&lt;/span>
+&lt;span style="color:#75715e"># S[x] ^ S[y] = a and b = x ^ y&lt;/span>
+&lt;span style="color:#75715e">#&lt;/span>
+&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">DiffTable&lt;/span>(S):
+table &lt;span style="color:#f92672">=&lt;/span> [&lt;span style="color:#ae81ff">0&lt;/span> &lt;span style="color:#66d9ef">for&lt;/span> i &lt;span style="color:#f92672">in&lt;/span> range(len(S))]
+&lt;span style="color:#66d9ef">for&lt;/span> delta &lt;span style="color:#f92672">in&lt;/span> range(len(S)):
+&lt;span style="color:#66d9ef">for&lt;/span> x &lt;span style="color:#f92672">in&lt;/span> range(len(S)):
+dY &lt;span style="color:#f92672">=&lt;/span> S[x] &lt;span style="color:#f92672">^&lt;/span> S[x &lt;span style="color:#f92672">^&lt;/span> delta]
+table[dY] &lt;span style="color:#f92672">=&lt;/span> delta
+&lt;span style="color:#66d9ef">return&lt;/span> table
+&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">main&lt;/span>():
+key &lt;span style="color:#f92672">=&lt;/span> os&lt;span style="color:#f92672">.&lt;/span>urandom(&lt;span style="color:#ae81ff">32&lt;/span>)
+M1 &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;hitb{0123456789abcdef}&amp;#34;&lt;/span>
+M2 &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;aaaaaaaaaaaaaaaaaaaaaa&amp;#34;&lt;/span>
+C1 &lt;span style="color:#f92672">=&lt;/span> encrypt(M1, key)
+C2 &lt;span style="color:#f92672">=&lt;/span> encrypt(M2, key)
+numberOfBlocks &lt;span style="color:#f92672">=&lt;/span> len(C2) &lt;span style="color:#f92672">/&lt;/span> &lt;span style="color:#ae81ff">16&lt;/span>
+diffTable &lt;span style="color:#f92672">=&lt;/span> DiffTable(S)
+clearText &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;&amp;#34;&lt;/span>
+&lt;span style="color:#66d9ef">for&lt;/span> block &lt;span style="color:#f92672">in&lt;/span> range(numberOfBlocks):
+dW &lt;span style="color:#f92672">=&lt;/span> xor(C1,C2)[&lt;span style="color:#ae81ff">16&lt;/span> &lt;span style="color:#f92672">*&lt;/span> block : &lt;span style="color:#ae81ff">16&lt;/span> &lt;span style="color:#f92672">*&lt;/span> (block &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#ae81ff">1&lt;/span>)]
+&lt;span style="color:#66d9ef">for&lt;/span> i &lt;span style="color:#f92672">in&lt;/span> range(&lt;span style="color:#ae81ff">64&lt;/span>):
+dWtemp &lt;span style="color:#f92672">=&lt;/span> [dW[i &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#ae81ff">1&lt;/span>] &lt;span style="color:#66d9ef">for&lt;/span> i &lt;span style="color:#f92672">in&lt;/span> range(&lt;span style="color:#ae81ff">15&lt;/span>)]
+delta &lt;span style="color:#f92672">=&lt;/span> diffTable[ord(dW[&lt;span style="color:#ae81ff">0&lt;/span>])]
+dW15 &lt;span style="color:#f92672">=&lt;/span> chr(ord(dW[&lt;span style="color:#ae81ff">11&lt;/span>]) &lt;span style="color:#f92672">^&lt;/span> ord(dW[&lt;span style="color:#ae81ff">13&lt;/span>]) &lt;span style="color:#f92672">^&lt;/span> ord(dW[&lt;span style="color:#ae81ff">14&lt;/span>]) &lt;span style="color:#f92672">^&lt;/span> delta)
+dWtemp&lt;span style="color:#f92672">.&lt;/span>append(dW15)
+dW &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;&amp;#34;&lt;/span>&lt;span style="color:#f92672">.&lt;/span>join(dWtemp)
+M &lt;span style="color:#f92672">=&lt;/span> xor(dW, M2[&lt;span style="color:#ae81ff">16&lt;/span> &lt;span style="color:#f92672">*&lt;/span> block : &lt;span style="color:#ae81ff">16&lt;/span> &lt;span style="color:#f92672">*&lt;/span> (block &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#ae81ff">1&lt;/span>)])
+clearText &lt;span style="color:#f92672">+=&lt;/span> M
+&lt;span style="color:#66d9ef">print&lt;/span> clearText
+&lt;span style="color:#66d9ef">if&lt;/span> __name__ &lt;span style="color:#f92672">==&lt;/span> &lt;span style="color:#e6db74">&amp;#39;__main__&amp;#39;&lt;/span>:
+main()
+&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="conclusion">Conclusion&lt;/h2>
+&lt;p>In fact by noticing that&lt;/p>
+&lt;p>$$F(x \oplus y) = F(x) \oplus F(y) \oplus C^{te}$$&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">&lt;span style="color:#66d9ef">for&lt;/span> b &lt;span style="color:#f92672">in&lt;/span> xrange(&lt;span style="color:#ae81ff">10&lt;/span>):
+u &lt;span style="color:#f92672">=&lt;/span> os&lt;span style="color:#f92672">.&lt;/span>urandom(&lt;span style="color:#ae81ff">16&lt;/span>);
+v &lt;span style="color:#f92672">=&lt;/span> os&lt;span style="color:#f92672">.&lt;/span>urandom(&lt;span style="color:#ae81ff">16&lt;/span>);
+d &lt;span style="color:#f92672">=&lt;/span> xor(F(xor(u,v)), xor(F(u), F(v)))
+&lt;span style="color:#66d9ef">print&lt;/span> d&lt;span style="color:#f92672">.&lt;/span>encode(&lt;span style="color:#e6db74">&amp;#34;hex&amp;#34;&lt;/span>)
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>We have:&lt;/p>
+&lt;p>\begin{eqnarray}
+F(M_1 \oplus k_1) \oplus F(M_2 \oplus k_1) &amp;amp; = &amp;amp; F(M_1) \oplus F(M_2)\&lt;br>
+M_2 &amp;amp; = &amp;amp; F^{-1}(F(M_1) \oplus C_1 \oplus C_2)
+\end{eqnarray}&lt;/p>
+&lt;p>Which is far more easier to resolve.&lt;/p>
+&lt;p>Thanks to &lt;strong>jb^&lt;/strong> who help me and who find the previous technique.&lt;/p>
+&lt;p>Sources are available
+&lt;a href="hitb2015-crypto400.tar.gz">here&lt;/a>&lt;/p></description></item></channel></rss>

@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>packer | Romain Thomas</title><link>/tags/packer/</link><atom:link href="/tags/packer/index.xml" rel="self" type="application/rss+xml"/><description>packer</description><generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>Published with Academic Website Builder - Icons made by Freepik</copyright><lastBuildDate>Tue, 26 Nov 2019 00:00:00 +0000</lastBuildDate><image><url>/images/icon_hu2654a0fcc87c65a864822ac27b001d3b_698_512x512_fill_lanczos_center_2.png</url><title>packer</title><link>/tags/packer/</link></image><item><title>A Glimpse Into Tencent's Legu Packer</title><link>/post/a-glimpse-into-tencents-legu-packer/</link><pubDate>Tue, 26 Nov 2019 00:00:00 +0000</pubDate><guid>/post/a-glimpse-into-tencents-legu-packer/</guid><description>&lt;style>
+.packedfile {
+color:green;
+font-family: 'Lucida Console', monospace;
+}
+.keyfile {
+color: blue;
+font-family: 'Lucida Console', monospace;
+}
+.libshell {
+color: #FF6347;
+font-family: 'Lucida Console', monospace;
+}
+.tencentclass {
+color: #df2b04;
+font-family: 'Lucida Console', monospace;
+}
+&lt;/style>
+&lt;div class="alert alert-note">
+&lt;div>
+This post has been originally posted on the &lt;a href=https://blog.quarkslab.com/a-glimpse-into-tencents-legu-packer.html>Quarkslab&amp;rsquo;s Blog&lt;/a>
+&lt;/div>
+&lt;/div>
+&lt;h2 id="introduction">Introduction&lt;/h2>
+&lt;p>This blog post deals with the Legu packer, an Android protector developed by Tencent that is currently one of the
+state-of-the-art solutions to protect APK DEX files. The packer is updated frequently and this blog post focuses on
+versions &lt;code>4.1.0.15&lt;/code> and &lt;code>4.1.0.18&lt;/code>.&lt;/p>
+&lt;h2 id="overview">Overview&lt;/h2>
+&lt;p>An application protected with Legu is composed of two native libraries: &lt;span class="libshell">libshell-super.2019.so&lt;/span>
+and &lt;code>libshella-4.1.0.XY.so&lt;/code> as well as raw binary files embedded in the resources of the APK:&lt;/p>
+&lt;ul>
+&lt;li>&lt;span class="keyfile">tosversion&lt;/span>&lt;/li>
+&lt;li>&lt;span class="packedfile">0OO00l111l1l&lt;/span>&lt;/li>
+&lt;li>&lt;code>0OO00oo01l1l&lt;/code>&lt;/li>
+&lt;li>&lt;code>o0oooOO0ooOo.dat&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;p>The main logic of the packer is located in the native library &lt;span class="libshell">libshell-super.2019.so&lt;/span> which basically
+unpacks and loads the protected DEX files from the resources.&lt;/p>
+&lt;p>Some functions of the library are obfuscated but thanks to Frida/QBDI their analysis is not a big deal.&lt;/p>
+&lt;h2 id="internals">Internals&lt;/h2>
+&lt;p>Basically, the original DEX files are located in the &lt;span class="packedfile">assets/0OO00l111l1l&lt;/span> file along with the information required to
+unpack them.&lt;/p>
+&lt;p>The following figure lays out the structure of this file.&lt;/p>
+&lt;p>&lt;img src="packed_file.png" alt="">&lt;/p>
+&lt;p>In the &lt;span class="packedfile">assets/0OO00l111l1l&lt;/span> file, the first part contains the original DEX files with the same number of &lt;code>classes&amp;lt;N&amp;gt;.dex&lt;/code> according to the multi-DEX feature of the original APK. These
+DEX files are not exactly the original ones, as their Dalvik bytecode have been &lt;em>NOP-ed&lt;/em> by Legu.
+Therefore, a dump of these files only gives information about the classes' names, not the code logic:&lt;/p>
+&lt;p>&lt;img src="noped.png" alt="">&lt;/p>
+&lt;p>Then follows what we called a &lt;em>hashmap&lt;/em> that is used to link a class name (e.g. &lt;span class="tencentclass">Lcom/tencent/mmkv/MMKV;&lt;/span>) to an offset in
+the data block located in the third part of the file.
+This data block contains the original Dalvik bytecode of the methods.&lt;/p>
+&lt;p>Actually, the first part that contains the altered DEX files, is compressed with &lt;strong>NRV&lt;/strong> &lt;sup id="fnref:1">&lt;a href="#fn:1" class="footnote-ref" role="doc-noteref">1&lt;/a>&lt;/sup>.
+The second part — the hashmap — is also compressed with NRV but the packer adds a layer of
+encryption through a slightly modified version of &lt;strong>XTEA&lt;/strong> &lt;sup id="fnref:2">&lt;a href="#fn:2" class="footnote-ref" role="doc-noteref">2&lt;/a>&lt;/sup>. Finally, the last part is compressed and encrypted with the
+same algorithms as the previous one.&lt;/p>
+&lt;p>Regarding the &lt;em>hashmap&lt;/em>, it uses a custom structure that has been reversed and lead to a Kaitai structure available
+here:
+&lt;a href="https://github.com/quarkslab/legu_unpacker_2019/blob/master/legu_packed_file.ksy" target="_blank" rel="noopener">legu_packed_file.ksy&lt;/a>,
+&lt;a href="https://github.com/quarkslab/legu_unpacker_2019/blob/master/legu_hashmap.ksy" target="_blank" rel="noopener">legu_hashmap.ksy&lt;/a>&lt;/p>
+&lt;p>Its overall layout is exposed in the next figure:&lt;/p>
+&lt;p>&lt;img src="hashmap.png" alt="">&lt;/p>
+&lt;h2 id="unpacking-process">Unpacking process&lt;/h2>
+&lt;p>Let&amp;rsquo;s say that the application needs to use the packed Java class &lt;span class="tencentclass">Lcom/tencent/mmkv/MMKV;&lt;/span>.&lt;/p>
+&lt;p>First, the packer&amp;rsquo;s runtime transforms the class name into an integer with the &lt;code>dvmComputeUtf8Hash()&lt;/code> hash function &lt;sup id="fnref:3">&lt;a href="#fn:3" class="footnote-ref" role="doc-noteref">3&lt;/a>&lt;/sup>. This integer is then used
+as an index into the &lt;em>hashmap&lt;/em> whose value is a structure that contains information about the class in the packed data (blue area in
+the figure). The first attribute of this structure — &lt;code>utf8_hash&lt;/code> — is a copy of the hash value which is used to check that it is the right key/value association.&lt;/p>
+&lt;p>The &lt;code>class_info&lt;/code> structure (blue block in the figure) next contains the packed method information (yellow area in the figure) whose size is the same as the original number of
+methods in the class. This structure makes the relationship between the NOP-ed bytecode offset in the altered DEX
+files and the offset in the original bytecode (red block).
+Finally, the packer copies the original bytecode into the altered DEX files.&lt;/p>
+&lt;p>To summarize, the first part contains the original DEX files with the Dalvik bytecode removed (&lt;em>NOP-ed&lt;/em>).
+The last part contains the missing Dalvik bytecode and the second part makes the
+bridge between the altered DEX files and the Dalvik bytecode.&lt;/p>
+&lt;h1 id="compression--encryption">Compression &amp;amp; Encryption&lt;/h1>
+&lt;p>To decrypt the hashmap and the Dalvik bytecode, the packer uses the first 16 bytes of &lt;span class="keyfile">assets/tosversion&lt;/span>
+xored with a hard-coded key: &lt;code>^hHc7Ql]N9Z4:+1m~nTcA&amp;amp;3a7|?GB1z@&lt;/code>.&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">LIB_KEY &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">b&lt;/span>&lt;span style="color:#e6db74">&amp;#34;^hHc7Ql]N9Z4:+1m~nTcA&amp;amp;3a7|?GB1z@&amp;#34;&lt;/span>
+&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">key_derivation&lt;/span>(key: bytes) &lt;span style="color:#f92672">-&amp;gt;&lt;/span> bytes:
+&lt;span style="color:#66d9ef">return&lt;/span> bytes(x1 &lt;span style="color:#f92672">^&lt;/span> x2 &lt;span style="color:#66d9ef">for&lt;/span> x1, x2 &lt;span style="color:#f92672">in&lt;/span> zip(LIB_KEY, cycle(key)))
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Then, it uses a slightly modified version of XTEA that is given in the next listing:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="color:#66d9ef">int&lt;/span> &lt;span style="color:#a6e22e">xtea_decrypt&lt;/span>(&lt;span style="color:#66d9ef">uint32_t&lt;/span>&lt;span style="color:#f92672">*&lt;/span> key, &lt;span style="color:#66d9ef">uint32_t&lt;/span>&lt;span style="color:#f92672">*&lt;/span> buf, size_t ilen, size_t nb_round) {
+&lt;span style="color:#66d9ef">const&lt;/span> size_t count &lt;span style="color:#f92672">=&lt;/span> ilen &lt;span style="color:#f92672">/&lt;/span> &lt;span style="color:#ae81ff">8&lt;/span>;
+&lt;span style="color:#66d9ef">const&lt;/span> size_t key_off &lt;span style="color:#f92672">=&lt;/span> (ilen &lt;span style="color:#f92672">&amp;amp;&lt;/span> &lt;span style="color:#ae81ff">8&lt;/span>) &lt;span style="color:#f92672">/&lt;/span> &lt;span style="color:#ae81ff">4&lt;/span>;
+&lt;span style="color:#66d9ef">static&lt;/span> &lt;span style="color:#66d9ef">constexpr&lt;/span> &lt;span style="color:#66d9ef">uint32_t&lt;/span> DELTA &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">0x9e3779b9&lt;/span>;
+&lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#66d9ef">uint32_t&lt;/span> key_0 &lt;span style="color:#f92672">=&lt;/span> key[key_off &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>];
+&lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#66d9ef">uint32_t&lt;/span> key_1 &lt;span style="color:#f92672">=&lt;/span> key[key_off &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#ae81ff">1&lt;/span>];
+&lt;span style="color:#66d9ef">for&lt;/span> (size_t i &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>; i &lt;span style="color:#f92672">&amp;lt;&lt;/span> count &lt;span style="color:#f92672">*&lt;/span> &lt;span style="color:#ae81ff">2&lt;/span>; i &lt;span style="color:#f92672">+=&lt;/span> &lt;span style="color:#ae81ff">2&lt;/span>) {
+buf[i &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>] &lt;span style="color:#f92672">^=&lt;/span> key_0;
+buf[i &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#ae81ff">1&lt;/span>] &lt;span style="color:#f92672">^=&lt;/span> key_1;
+&lt;span style="color:#66d9ef">uint32_t&lt;/span> sum &lt;span style="color:#f92672">=&lt;/span> DELTA &lt;span style="color:#f92672">*&lt;/span> nb_round;
+&lt;span style="color:#66d9ef">uint32_t&lt;/span> temp0 &lt;span style="color:#f92672">=&lt;/span> buf[i &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>];
+&lt;span style="color:#66d9ef">uint32_t&lt;/span> temp1 &lt;span style="color:#f92672">=&lt;/span> buf[i &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#ae81ff">1&lt;/span>];
+&lt;span style="color:#66d9ef">for&lt;/span> (size_t j &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>; j &lt;span style="color:#f92672">&amp;lt;&lt;/span> nb_round; &lt;span style="color:#f92672">++&lt;/span>j) {
+temp1 &lt;span style="color:#f92672">-=&lt;/span> (key[&lt;span style="color:#ae81ff">2&lt;/span>] &lt;span style="color:#f92672">+&lt;/span> (temp0 &lt;span style="color:#f92672">&amp;lt;&amp;lt;&lt;/span> &lt;span style="color:#ae81ff">4&lt;/span>)) &lt;span style="color:#f92672">^&lt;/span> (key[&lt;span style="color:#ae81ff">3&lt;/span>] &lt;span style="color:#f92672">+&lt;/span> (temp0 &lt;span style="color:#f92672">&amp;gt;&amp;gt;&lt;/span> &lt;span style="color:#ae81ff">5&lt;/span>)) &lt;span style="color:#f92672">^&lt;/span> (temp0 &lt;span style="color:#f92672">+&lt;/span> sum);
+temp0 &lt;span style="color:#f92672">-=&lt;/span> (key[&lt;span style="color:#ae81ff">0&lt;/span>] &lt;span style="color:#f92672">+&lt;/span> (temp1 &lt;span style="color:#f92672">&amp;lt;&amp;lt;&lt;/span> &lt;span style="color:#ae81ff">4&lt;/span>)) &lt;span style="color:#f92672">^&lt;/span> (key[&lt;span style="color:#ae81ff">1&lt;/span>] &lt;span style="color:#f92672">+&lt;/span> (temp1 &lt;span style="color:#f92672">&amp;gt;&amp;gt;&lt;/span> &lt;span style="color:#ae81ff">5&lt;/span>)) &lt;span style="color:#f92672">^&lt;/span> (temp1 &lt;span style="color:#f92672">+&lt;/span> sum);
+sum &lt;span style="color:#f92672">-=&lt;/span> DELTA;
+}
+buf[i &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>] &lt;span style="color:#f92672">=&lt;/span> temp0;
+buf[i &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#ae81ff">1&lt;/span>] &lt;span style="color:#f92672">=&lt;/span> temp1;
+}
+&lt;span style="color:#66d9ef">return&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>;
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>After the decryption routine, the packer decompresses the data with &lt;code>NRV&lt;/code>, the same algorithm used to compress the altered DEX
+files:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">key &lt;span style="color:#f92672">=&lt;/span> key_derivation(open(&lt;span style="color:#e6db74">&amp;#34;assets/tosversion&amp;#34;&lt;/span>, &lt;span style="color:#e6db74">&amp;#34;rb&amp;#34;&lt;/span>)&lt;span style="color:#f92672">.&lt;/span>read()[:&lt;span style="color:#ae81ff">16&lt;/span>])
+&lt;span style="color:#66d9ef">for&lt;/span> i &lt;span style="color:#f92672">in&lt;/span> range(nb_dex_files):
+hashmap[i] &lt;span style="color:#f92672">=&lt;/span> nrv_decompress(xtea_decrypt(blob1, key))
+dalvik_bytecodes[i] &lt;span style="color:#f92672">=&lt;/span> nrv_decompress(xtea_decrypt(blob2, key))
+&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="unpacking">Unpacking&lt;/h2>
+&lt;p>Putting all the pieces together, we can &lt;strong>statically&lt;/strong> unpack protected APKs and recover the original bytecode:&lt;/p>
+&lt;p>&lt;img src="unpacked.png" alt="">&lt;/p>
+&lt;p>Hence, as we can automatically unpack such APKs, the unpacking process could be integrated into an automatic analysis pipeline.&lt;/p>
+&lt;p>The script and the Kaitai structures are available on the Quarkslab&amp;rsquo;s repository:
+&lt;a href="https://github.com/quarkslab/legu_unpacker_2019" target="_blank" rel="noopener">legu_unpacker_2019&lt;/a>,
+along with a suspicious application &lt;sup id="fnref:4">&lt;a href="#fn:4" class="footnote-ref" role="doc-noteref">4&lt;/a>&lt;/sup>,
+&lt;a href="https://github.com/quarkslab/legu_unpacker_2019/blob/master/samples/com.intotherain.voicechange.apk" target="_blank" rel="noopener">packed&lt;/a> and
+&lt;a href="https://github.com/quarkslab/legu_unpacker_2019/blob/master/samples/com.intotherain.voicechange_unpacked.apk" target="_blank" rel="noopener">unpacked&lt;/a>.&lt;/p>
+&lt;h2 id="acknowledgments">Acknowledgments&lt;/h2>
+&lt;p>Thanks to my colleagues who proofread this article.&lt;/p>
+&lt;h3 id="references">References&lt;/h3>
+&lt;section class="footnotes" role="doc-endnotes">
+&lt;hr>
+&lt;ol>
+&lt;li id="fn:1" role="doc-endnote">
+&lt;p>&lt;a href="http://www.oberhumer.com/opensource/ucl/">http://www.oberhumer.com/opensource/ucl/&lt;/a>&amp;#160;&lt;a href="#fnref:1" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li id="fn:2" role="doc-endnote">
+&lt;p>&lt;a href="https://en.wikipedia.org/wiki/XTEA">https://en.wikipedia.org/wiki/XTEA&lt;/a>&amp;#160;&lt;a href="#fnref:2" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li id="fn:3" role="doc-endnote">
+&lt;p>&lt;a href="http://androidxref.com/4.4.4_r1/xref/dalvik/vm/UtfString.cpp#88">http://androidxref.com/4.4.4_r1/xref/dalvik/vm/UtfString.cpp#88&lt;/a>&amp;#160;&lt;a href="#fnref:3" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li id="fn:4" role="doc-endnote">
+&lt;p>&lt;a href="https://www.virustotal.com/gui/file/708e6967920dcf2789b7183d714e73ab79a2f8b3ca71929b12aadeb2c58c2867/detection">https://www.virustotal.com/gui/file/708e6967920dcf2789b7183d714e73ab79a2f8b3ca71929b12aadeb2c58c2867/detection&lt;/a>&amp;#160;&lt;a href="#fnref:4" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;/section></description></item></channel></rss>

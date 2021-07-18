@@ -1,0 +1,1735 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>reverse engineering | Romain Thomas</title><link>/tags/reverse-engineering/</link><atom:link href="/tags/reverse-engineering/index.xml" rel="self" type="application/rss+xml"/><description>reverse engineering</description><generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>Published with Academic Website Builder - Icons made by Freepik</copyright><lastBuildDate>Sun, 18 Jul 2021 00:00:00 +0000</lastBuildDate><image><url>/images/icon_hu2654a0fcc87c65a864822ac27b001d3b_698_512x512_fill_lanczos_center_2.png</url><title>reverse engineering</title><link>/tags/reverse-engineering/</link></image><item><title>Gotta Catch 'Em All: Frida &amp; jailbreak detection</title><link>/post/21-07-pokemongo-anti-frida-jailbreak-bypass/</link><pubDate>Sun, 18 Jul 2021 00:00:00 +0000</pubDate><guid>/post/21-07-pokemongo-anti-frida-jailbreak-bypass/</guid><description>&lt;style>
+.green {
+color:green;
+font-family: 'Fira Code', monospace;
+font-size: 87.5%;
+}
+.blue {
+color: blue;
+font-family: 'Fira Code', monospace;
+font-size: 87.5%;
+}
+.orange {
+color: #FF6347;
+font-family: 'Fira Code', monospace;
+font-size: 87.5%;
+}
+.red {
+color: #df2b04;
+font-family: 'Fira Code', monospace;
+font-size: 87.5%;
+}
+.hl-comment {
+color: #df2b04;
+font-family: 'Fira Code', monospace;
+font-size: 87.5%;
+}
+.hl-keyword {
+color: #A90D91;
+font-family: 'Fira Code', monospace;
+font-size: 87.5%;
+}
+.hl-literal {
+color: #1C01CE;
+font-family: 'Fira Code', monospace;
+font-size: 87.5%;
+}
+.hl-preproc {
+color: #633820;
+font-family: 'Fira Code', monospace;
+font-size: 87.5%;
+}
+.hl-strings {
+color: #C41A16;
+font-family: 'Fira Code', monospace;
+font-size: 87.5%;
+}
+.yellow {
+color: #CC7000;
+font-family: 'Fira Code', monospace;
+font-size: 87.5%;
+}
+&lt;/style>
+&lt;div class="alert alert-note">
+&lt;div>
+Do not expect a &lt;em>click &amp;amp; play&lt;/em> solution for PokemonGO in this blog post. This blog post is more about
+the technical aspects of jailbreak detection than a bypass for this game.
+&lt;/div>
+&lt;/div>
+&lt;h2 id="introduction">Introduction&lt;/h2>
+&lt;p>While working on LIEF during my vacations to support in-memory parsing for Mach-O files, I found that
+PokemonGO was an interesting use case to introduce this feature. It led me to look at the jailbreak
+and Frida detection implemented in this game.
+Being more familiar with Android than iOS, the analysis workflow on this platform is quite different, which
+is also a good opportunity to improve tooling.&lt;/p>
+&lt;p>The first challenge stems from jailbreaking the device. Fortunately, checkra1n eases this step.
+The second difficulty lies in extracting the encrypted iOS app from the device. In contrast to Android,
+iOS apps are encrypted on the disk and decrypted by the kernel when loaded. It means that one way to get
+the unencrypted code is to dump the file from memory. One could also leverage the function &lt;code>mremap_encrypted()&lt;/code>
+as described in
+&lt;a href="https://www.linkedin.com/pulse/decrypting-apps-ios-john-coates/" target="_blank" rel="noopener">Decrypting Apps on iOS&lt;/a>.&lt;/p>
+&lt;h2 id="pokemongo-overview">PokemonGO Overview&lt;/h2>
+&lt;p>When running PokemonGO on a jailbroken device&lt;sup id="fnref:1">&lt;a href="#fn:1" class="footnote-ref" role="doc-noteref">1&lt;/a>&lt;/sup>, the application immediately crashes with the following backtrace:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text">0 ??? 0x000000020ac46ab8 0 + 8770579128
+1 libdyld.dylib 0x0000000184df8304 invocation function for block in dyld3::AllImages::runAllInitializersInImage(dyld3::closure::Image const*, dyld3::MachOLoaded const*) + 136
+2 libdyld.dylib 0x0000000184dea5b0 dyld3::closure::Image::forEachInitializer(void const*, void (void const*) block_pointer) const + 96
+3 libdyld.dylib 0x0000000184df8160 invocation function for block in dyld3::AllImages::runInitialzersBottomUp(dyld3::closure::Image const*) + 296
+4 libdyld.dylib 0x0000000184deae6c dyld3::closure::Image::forEachImageToInitBefore(void (unsigned int, bool&amp;amp;) block_pointer) const + 92
+5 libdyld.dylib 0x0000000184df8b48 dyld3::AllImages::loadImage(Diagnostics&amp;amp;, char const*, unsigned int, dyld3::closure::DlopenClosure const*, bool, bool, bool, bool, void const*) + 776
+6 libdyld.dylib 0x0000000184df8698 dyld3::AllImages::dlopen(Diagnostics&amp;amp;, char const*, bool, bool, bool, bool, bool, void const*, bool) + 872
+7 libdyld.dylib 0x0000000184dfa2b4 dyld3::dlopen_internal(char const*, int, void*) + 368
+8 libdyld.dylib 0x0000000184ded5b0 dlopen_internal(char const*, int, void*) + 108
+9 CoreFoundation 0x00000001850ed038 _CFBundleDlfcnLoadFramework + 136
+10 CoreFoundation 0x00000001850be974 _CFBundleLoadExecutableAndReturnError + 376
+11 Foundation 0x0000000186359ba8 -[NSBundle loadAndReturnError:] + 332
+12 pokemongo 0x00000001041a7c5c 0x1041a0000 + 31836
+13 pokemongo 0x00000001041a7d50 0x1041a0000 + 32080
+14 libdyld.dylib 0x0000000184de9588 start + 4
+&lt;/code>&lt;/pre>&lt;/div>&lt;div class="alert alert-note">
+&lt;div>
+The full crash log is available &lt;a href="backtrace.log">here&lt;/a>.
+&lt;/div>
+&lt;/div>
+&lt;p>In this backtrace, the main &lt;code>pokemongo&lt;/code> binary is a kind of &lt;em>stub&lt;/em> that loads the Unity binary: &lt;code>UnityFramework&lt;/code> which
+contains the main logic of the game.&lt;/p>
+&lt;p>This library is loaded by the &lt;code>dlopen_internal&lt;/code> function at index &lt;strong>8&lt;/strong> in the backtrace as a
+result of &lt;code>-[NSBundle loadAndReturnError:]&lt;/code>.
+Since &lt;code>UnityFramework&lt;/code> depends on other libraries, they are (pre)loaded with &lt;code>Image::forEachImageToInitBefore&lt;/code>
+which processes the following files:&lt;/p>
+&lt;ol>
+&lt;li>&lt;span class="yellow">@/usr/lib/libc++.1.dylib&lt;/span>&lt;/li>
+&lt;li>&amp;hellip;&lt;/li>
+&lt;li>&lt;span class="blue">@rpath/NianticLabsPlugin.framework/NianticLabsPlugin&lt;/span>&lt;/li>
+&lt;li>&amp;hellip;&lt;/li>
+&lt;li>&lt;span class="yellow">@rpath/libswiftos.dylib&lt;/span>&lt;/li>
+&lt;/ol>
+&lt;p>Among those dependencies, we can notice the &lt;span class="blue">NianticLabsPlugin&lt;/span> library which is a cross-platform
+Unity plugin &amp;ndash; also present in the Android version &amp;ndash; that contains the main protections of the game.
+These protections are used to prevent cheat, bots, GPS spoofing, in PokemonGO. The whole
+being obfuscated by Digital.ai (formerly known as Arxan). &lt;span class="blue">NianticLabsPlugin&lt;/span> communicates with the &lt;code>UnityFramework&lt;/code> through
+an exported function &lt;code>GetN2Api&lt;/code> that returns an array of functions (pointers).&lt;/p>
+&lt;p>The following figure outlines these different components:&lt;/p>
+&lt;p>&lt;img src="overview.png" alt="PokemonGO overview">&lt;/p>
+&lt;p>Getting back to the backtrace, if we assume that the application crashes when loading &lt;span class="blue">NianticLabsPlugin&lt;/span>,
+it precisely crashes when calling the Mach-O constructors in &lt;code>AllImages::runAllInitializersInImage&lt;/code>.
+Since the application is heavily obfuscated, a static analysis reaches quickly its limits, which forces us
+to emulate or dynamically analyze the functions of interest.&lt;/p>
+&lt;div class="alert alert-note">
+&lt;div>
+&lt;p>The addresses of the functions/instructions mentioned in this blog post are based on the following version of NianticLabsPlugin:&lt;/p>
+&lt;p>&lt;i class="fas fa-shield-alt">&lt;/i> &lt;a href="NianticLabsPlugin.bin">NianticLabsPlugin - 2140426ccdfdfb2529f454697cb5cc83&lt;/a>&lt;/p>
+&lt;p>&lt;i class="fas fa-code-branch">&lt;/i> PokemonGO v0.211.2 - June 2021&lt;/p>
+&lt;/div>
+&lt;/div>
+&lt;h2 id="analyzing-mach-o-constructors-with-frida">Analyzing Mach-O constructors with Frida&lt;/h2>
+&lt;p>From the previous section, we surmised that the application crashed because of the &lt;span class="blue">NianticLabsPlugin&lt;/span>&amp;rsquo;s constructors.
+Since these functions are called before &lt;strong>any other functions&lt;/strong> of the library, it raises the question of finding
+a way to perform actions (or hook) before they are executed.&lt;/p>
+&lt;p>On Android, when we need to analyse a library&amp;rsquo;s constructors, we can hook the &lt;code>call_array&lt;/code> function from
+&lt;a href="https://github.com/aosp-mirror/platform_bionic/blob/c44b1d0676ded732df4b3b21c5f798eacae93228/linker/linker_soinfo.cpp#L488" target="_blank" rel="noopener">Bionic&amp;rsquo;s linker (ELF loader)&lt;/a>:&lt;/p>
+&lt;script src="https://gist.github.com/romainthomas/c10298387a921df730c1556c2ee9cecb.js">&lt;/script>
+&lt;p>If we try to apply the same approach on iOS, the mirror of the ELF loader on iOS is &lt;code>dyld&lt;/code> which contains
+most of the logic to load Mach-O files.
+It turns out that at some points, the Mach-O&amp;rsquo;s constructors are processed in the &lt;code>doModInitFunctions&lt;/code> function
+(from
+&lt;a href="https://github.com/apple-opensource/dyld/blob/1128192c016372ae94793d88530bc5978c1fce93/src/ImageLoaderMachO.cpp#L2290" target="_blank" rel="noopener">ImageLoaderMachO.cpp&lt;/a>).&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="color:#66d9ef">void&lt;/span> ImageLoaderMachO&lt;span style="color:#f92672">::&lt;/span>doModInitFunctions(&lt;span style="color:#66d9ef">const&lt;/span> LinkContext&lt;span style="color:#f92672">&amp;amp;&lt;/span> context) {
+...
+&lt;span style="color:#66d9ef">for&lt;/span> (&lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#66d9ef">struct&lt;/span> &lt;span style="color:#a6e22e">macho_section&lt;/span>&lt;span style="color:#f92672">*&lt;/span> sect&lt;span style="color:#f92672">=&lt;/span>sectionsStart; sect &lt;span style="color:#f92672">&amp;lt;&lt;/span> sectionsEnd; &lt;span style="color:#f92672">++&lt;/span>sect) {
+&lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#66d9ef">uint8_t&lt;/span> type &lt;span style="color:#f92672">=&lt;/span> sect&lt;span style="color:#f92672">-&amp;gt;&lt;/span>flags &lt;span style="color:#f92672">&amp;amp;&lt;/span> SECTION_TYPE;
+&lt;span style="color:#66d9ef">if&lt;/span> ( type &lt;span style="color:#f92672">==&lt;/span> S_MOD_INIT_FUNC_POINTERS ) {
+Initializer&lt;span style="color:#f92672">*&lt;/span> inits &lt;span style="color:#f92672">=&lt;/span> (Initializer&lt;span style="color:#f92672">*&lt;/span>)(sect&lt;span style="color:#f92672">-&amp;gt;&lt;/span>addr &lt;span style="color:#f92672">+&lt;/span> fSlide);
+...
+&lt;span style="color:#66d9ef">if&lt;/span> (&lt;span style="color:#f92672">!&lt;/span>&lt;span style="color:#66d9ef">this&lt;/span>&lt;span style="color:#f92672">-&amp;gt;&lt;/span>containsAddress(stripPointer((&lt;span style="color:#66d9ef">void&lt;/span>&lt;span style="color:#f92672">*&lt;/span>)func)) ) {
+dyld&lt;span style="color:#f92672">::&lt;/span>throwf(&lt;span style="color:#e6db74">&amp;#34;initializer function %p not in mapped image for %s&lt;/span>&lt;span style="color:#ae81ff">\n&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>, func, &lt;span style="color:#66d9ef">this&lt;/span>&lt;span style="color:#f92672">-&amp;gt;&lt;/span>getPath());
+}
+...
+func(context.argc, context.argv, context.envp, context.apple, &lt;span style="color:#f92672">&amp;amp;&lt;/span>context.programVars);
+}
+}
+...
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>From this code, we can notice that &lt;strong>all&lt;/strong> constructor addresses are checked &lt;strong>beforehand&lt;/strong> by the
+&lt;code>containsAddress&lt;/code> function. Therefore, it makes this function a good hooking spot as it is executed before
+calling the constructor itself. One can use the native SDK of
+&lt;a href="https://github.com/frida/frida-gum" target="_blank" rel="noopener">frida-gum&lt;/a>
+to perform this action:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="color:#75715e">// Address of ImageLoader::containsAddress in /usr/lib/dyld
+&lt;/span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#66d9ef">const&lt;/span> uintptr_t containsAddress_ptr &lt;span style="color:#f92672">=&lt;/span> ...;
+&lt;span style="color:#75715e">// Setup hooks with gum_interceptor_attach
+&lt;/span>&lt;span style="color:#75715e">&lt;/span>GumAttachReturn attach_ret &lt;span style="color:#f92672">=&lt;/span> gum_interceptor_attach(
+listener_&lt;span style="color:#f92672">-&amp;gt;&lt;/span>interceptor,
+&lt;span style="color:#75715e">/* target */&lt;/span> &lt;span style="color:#66d9ef">reinterpret_cast&lt;/span>&lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#66d9ef">void&lt;/span>&lt;span style="color:#f92672">*&amp;gt;&lt;/span>(containsAddress_ptr),
+&lt;span style="color:#66d9ef">reinterpret_cast&lt;/span>&lt;span style="color:#f92672">&amp;lt;&lt;/span>GumInvocationListener&lt;span style="color:#f92672">*&amp;gt;&lt;/span>(listener_),
+&lt;span style="color:#75715e">/* ID */&lt;/span> &lt;span style="color:#66d9ef">reinterpret_cast&lt;/span>&lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#66d9ef">void&lt;/span>&lt;span style="color:#f92672">*&amp;gt;&lt;/span>(containsAddress_ptr)
+);
+....
+&lt;span style="color:#75715e">// Equivalent of onEnter in Javascript
+&lt;/span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#66d9ef">void&lt;/span> native_listener_on_enter(GumInvocationListener&lt;span style="color:#f92672">*&lt;/span> listener, GumInvocationContext&lt;span style="color:#f92672">*&lt;/span> ic) {
+&lt;span style="color:#66d9ef">const&lt;/span> uintptr_t ctor_function_addr &lt;span style="color:#f92672">=&lt;/span> ic&lt;span style="color:#f92672">-&amp;gt;&lt;/span>cpu_context&lt;span style="color:#f92672">-&amp;gt;&lt;/span>x[&lt;span style="color:#ae81ff">1&lt;/span>];
+&lt;span style="color:#75715e">// Do stuff with ctor_function_addr
+&lt;/span>&lt;span style="color:#75715e">&lt;/span>}
+&lt;/code>&lt;/pre>&lt;/div>&lt;div class="alert alert-note">
+&lt;div>
+&lt;code>containsAddress&lt;/code> is a member function, therefore &lt;code>x0&lt;/code> contains a pointer on &lt;code>this&lt;/code> and the address
+to check is located in &lt;code>x1&lt;/code>.
+&lt;/div>
+&lt;/div>
+&lt;p>By hooking &lt;code>containsAddress()&lt;/code>, we get the &lt;strong>control before&lt;/strong> the execution of the constructors.
+It gives us the ability to perform the following actions that can help to identify the constructor involved in the crash:&lt;/p>
+&lt;ol>
+&lt;li>Trace the constructors (see:
+&lt;a href="constructors_trace.log">constructors_trace.log&lt;/a>)&lt;/li>
+&lt;li>Replace/disable a constructor (&lt;code>gum_interceptor_replace&lt;/code>)&lt;/li>
+&lt;li>Detect the &lt;strong>first&lt;/strong> constructor and hook the next ones (&lt;code>gum_interceptor_attach&lt;/code>)&lt;/li>
+&lt;/ol>
+&lt;p>&lt;span class="blue">NianticLabsPlugin&lt;/span> embeds no less than 120 constructors
+among those, 6&lt;sup id="fnref:2">&lt;a href="#fn:2" class="footnote-ref" role="doc-noteref">2&lt;/a>&lt;/sup> are involved in detecting Frida, jailbroken devices, anti-debug, etc:&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>Index&lt;/th>
+&lt;th>Offset&lt;/th>
+&lt;th>Description&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>15&lt;/td>
+&lt;td>0x4369e0&lt;/td>
+&lt;td>Anti-debug &amp;amp; anti-emulation&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>16&lt;/td>
+&lt;td>0x00e0d8&lt;/td>
+&lt;td>Frida detection&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>17&lt;/td>
+&lt;td>0x26bd5c&lt;/td>
+&lt;td>Anti-bypass?&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>18&lt;/td>
+&lt;td>0x449b84&lt;/td>
+&lt;td>Anti-jailbreak, anti-Frida&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>19&lt;/td>
+&lt;td>0x731b90&lt;/td>
+&lt;td>Anti-jailbreak, anti-debug, anti-frida&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>20&lt;/td>
+&lt;td>0x359194&lt;/td>
+&lt;td>Anti-jailbreak&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;p>Once we reduced the set of functions involved in the crash, we can combine dynamic analysis with Frida
+and emulation with Unicorn.&lt;/p>
+&lt;h2 id="anti-debug">Anti-debug&lt;/h2>
+&lt;p>One of the redundant checks we can find in many functions (not only the constructors) are the
+anti-debugs. They always come in two parts:&lt;/p>
+&lt;ol>
+&lt;li>Try to &lt;em>&amp;ldquo;kill&amp;rdquo;&lt;/em> its own pid with the 0-signal&lt;/li>
+&lt;li>Check if PTRACE is flagged&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="color:#66d9ef">void&lt;/span> &lt;span style="color:#a6e22e">try_kill&lt;/span>() {
+&lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#66d9ef">int&lt;/span> pid &lt;span style="color:#f92672">=&lt;/span> getpid(); &lt;span style="color:#75715e">// syscall@0x436cdc
+&lt;/span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">int&lt;/span> ret &lt;span style="color:#f92672">=&lt;/span> kill(pid, &lt;span style="color:#ae81ff">0&lt;/span>); &lt;span style="color:#75715e">// syscall@0x436d28
+&lt;/span>&lt;span style="color:#75715e">&lt;/span>}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>According to the man page of kill (&lt;code>man 2 kill&lt;/code>), the signal &lt;code>0&lt;/code> is used to check
+that the &lt;code>pid&lt;/code> given in the first parameter really exists.&lt;/p>
+&lt;blockquote>
+&lt;p>[&amp;hellip;] A value of 0, however, will cause error checking to be performed (with no signal being sent). This can be used
+to check the validity of pid.&lt;/p>
+&lt;/blockquote>
+&lt;p>This &lt;em>kill&lt;/em> operation is followed by three &lt;code>PTRACE&lt;/code> checks:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="color:#75715e">// Done three times
+&lt;/span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#66d9ef">inline&lt;/span> &lt;span style="color:#66d9ef">bool&lt;/span> &lt;span style="color:#a6e22e">ptrace_detect&lt;/span>() {
+&lt;span style="color:#66d9ef">int32_t&lt;/span> opt[&lt;span style="color:#ae81ff">4&lt;/span>] &lt;span style="color:#f92672">=&lt;/span> {
+CTL_KERN,
+KERN_PROC,
+KERN_PROC_PID,
+getpid(),
+};
+kinfo_proc info;
+sysctl(opt, &lt;span style="color:#ae81ff">4&lt;/span>, &lt;span style="color:#f92672">&amp;amp;&lt;/span>info, &lt;span style="color:#66d9ef">sizeof&lt;/span>(kinfo_proc), &lt;span style="color:#66d9ef">nullptr&lt;/span>, &lt;span style="color:#ae81ff">0&lt;/span>);
+&lt;span style="color:#66d9ef">return&lt;/span> info.kp_proc.p_flag &lt;span style="color:#f92672">&amp;amp;&lt;/span> P_TRACED;
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>These three &lt;code>P_TRACED&lt;/code> checks &lt;strong>always&lt;/strong> come together:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text">0x436cdc: getpid(): 6015
+0x436d28: kill(6015, 0): 0
+0x4374b0: sysctl(CTL_KERN, KERN_PROC, KERN_PROC_PID, 6015)
+0x4371e8: sysctl(CTL_KERN, KERN_PROC, KERN_PROC_PID, 6015)
+0x437398: sysctl(CTL_KERN, KERN_PROC, KERN_PROC_PID, 6015)
+&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="frida-detection">Frida Detection&lt;/h2>
+&lt;p>Frida is detected by the application through its client-server mode, which binds the localhost on the port &lt;code>27042&lt;/code>.
+When PokemonGO is starting, it tries to open a socket on this port and if it manages to connect, it tests the Frida handshake.&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text">0x00e3b8: getifaddrs(0x16b7fb518): 0x0
+0x016990: socket(&amp;#39;IPV4&amp;#39;, &amp;#39;TCP&amp;#39;, &amp;#39;0&amp;#39;): 0x8
+0x019d60: bind(&amp;#39;PF_INET&amp;#39;, 0x8, &amp;#39;127.0.0.1:27042&amp;#39;)
+0x01805c: close(0x8)
+0x016990: socket(&amp;#39;IPV4&amp;#39;, &amp;#39;TCP&amp;#39;, &amp;#39;0&amp;#39;): 0x8
+0x019d60: bind(&amp;#39;PF_INET&amp;#39;, 0x8, &amp;#39;192.168.0.26:27042&amp;#39;)
+0x01805c: close(0x8)
+0x00e3ec: freeifaddrs(0x10601ac00): 0x105360a00
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>The application also iterates over the list of the libraries loaded in memory with the
+&lt;code>_dyld_image_count&lt;/code>/&lt;code>_dyld_get_image_name&lt;/code> functions. Nevertheless, it seems that they are not used to detect
+Frida libraries artifacts (like &lt;code>FridaGadget.dylib&lt;/code>).&lt;/p>
+&lt;h2 id="jailbreak-detection">Jailbreak Detection&lt;/h2>
+&lt;p>The application implements jailbreak detection by checking if some files are accessible or not on the device.
+Most of the checks are done by using the &lt;code>access()&lt;/code> syscalls that are inlined in different places:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text">0x44c390: access(&amp;#39;/bin/grep&amp;#39;, 0x0)
+...
+0x7326b0: access(&amp;#39;/private/var/checkra1n.dmg&amp;#39;, 0x0)
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>The list of the checked files is given in the
+&lt;a href="#annexes">annexes of the blog post&lt;/a>.&lt;/p>
+&lt;div class="alert alert-success">
+&lt;div>
+This list is very close to &lt;a href="https://github.com/XsF1re/vnodebypass/blob/870b21fd3566736cca285355b4faf7f289baa4d5/layout/usr/share/vnodebypass/hidePathList.plist">vnodebypass/hidePathList.plist&lt;/a>
+&lt;/div>
+&lt;/div>
+&lt;p>In addition to &lt;em>raw&lt;/em> &lt;code>access&lt;/code> syscall, the application enhances its detection by creating a symbolic link of the
+root directory in a temporary app data directory:&lt;/p>
+&lt;pre>&lt;code>0x734e08: symlink('/Applications/..', '/private/var/mobile/Containers/Data/Application/D933FBC9-90E7-4584-851E-CE2D5E900446/tmp/WCH38bnM0x101a9e7d0')
+&lt;/code>&lt;/pre>&lt;p>Then, it performs the same checks with the app data directory as prefix: &lt;code>[...]/tmp/WCH38bnM0x101a9e7d0&lt;/code>:&lt;/p>
+&lt;pre>&lt;code>0x7376d8: access('/private/var/mobile/Containers/Data/Application/D933FBC9-90E7-4584-851E-CE2D5E900446/tmp/3Odis0x101a9dfd0/usr/bin/passwd', 0x0)
+&lt;/code>&lt;/pre>&lt;h2 id="signature-check">Signature Check&lt;/h2>
+&lt;p>At some point, one function checks the integrity of the signature of the &lt;code>pokemongo&lt;/code> binary.
+This check starts by opening the main &lt;code>pokemongo&lt;/code> binary from &lt;strong>the disk&lt;/strong>:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text">0x7392ec: add x0, x19, #6,lsl#12
+0x7392f0: add x0, x0, #0x540
+0x7392f4: mov w1, #0x1000000
+0x7392f8: mov x2, #0
+0x7392fc: svc 0x80 ; x16 -&amp;gt; SYS_open = 5
+// open(&amp;#39;/private/var/containers/Bundle/Application/[...]/pokemongo.app/pokemongo&amp;#39;): fd_pgo
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Then, it reads the beginning of the file in a stack buffer:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text">0x74b494: ldr x0, [x19, #0xc0] ; fd
+0x74b498: ldr x1, [x19, #0x130] ; buff
+0x74b49c: ldr x2, [x19, #0xb8] ; buff_size
+0x74b4a0: svc 0x80 ; x16 -&amp;gt; SYS_read = 3
+// uint8_t macho_head[0x4167];
+// 0x74b4a0: read(fd_pgo, macho_header, 0x4167);
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>to iterate over the Mach-O load commands:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text">; x8 points to the read&amp;#39;s buffer
+0x73942c: ldr w8, [x8, #0x10] ; Number of LC_COMMANDS
+for (size_t i = 0; i &amp;lt; nb_cmds; ++i) {
+0x74bc40: ldr w10, [x9, #4] ; Command&amp;#39;s size
+0x74ade4: ldr w9, [x9] ; command&amp;#39;s type
+if (cmd.type == LC_CODE_SIGNATURE) {
+0x74b1b8: ldr w10, [x10, #8] ; read signature offset -&amp;gt; 0xc3d0
+}
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>With the offset of the Mach-O &lt;code>LC_CODE_SIGNATURE&lt;/code> command, it reads the raw signature using the
+&lt;code>lseek/read&lt;/code> syscalls:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text">uint8_t sig_header[0x205];
+0x73a978: lseek(fd_pgo, LC_CODE_SIGNATURE offset, 0x0)
+0x73aecc: read(fd_pgo, &amp;amp;sig_header, 0x205);
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>The raw signature buffer is processed by chunks of 10 bytes in
+a function that looks like a checksum:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text">[...]
+0x73ad58: ldrsb w13, [x12]
+0x73ad5c: mov w14, #83
+0x73ad60: sub w13, w14, w13
+0x73ad64: ldrsb w14, [x12, #1]
+0x73ad68: mov w15, #87
+0x73ad6c: sub w14, w15, w14
+0x73ad70: ldrsb w16, [x12, #2]
+0x73ad74: mov w17, #53
+0x73ad78: sub w16, w17, w16
+0x73ad7c: ldrsb w17, [x12, #3]
+0x73ad80: mov w0, #52
+0x73ad84: sub w17, w0, w17
+0x73ad88: ldrsb w0, [x12, #4]
+0x73ad8c: sub w0, w15, w0
+0x73ad90: ldrsb w1, [x12, #5]
+0x73ad94: mov w2, #51
+0x73ad98: sub w1, w2, w1
+0x73ad9c: ldrsb w2, [x12, #6]
+0x73ada0: mov w3, #54
+0x73ada4: sub w2, w3, w2
+0x73ada8: ldrsb w3, [x12, #7]
+0x73adac: sub w15, w15, w3
+0x73adb0: ldrsb w3, [x12, #8]
+0x73adb4: mov w4, #78
+0x73adb8: sub w3, w4, w3
+0x73adbc: ldrsb w12, [x12, #9]
+0x73adc0: mov w4, #70
+0x73adc4: sub w4, w4, w12
+[...]
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>I did not manage to identify the underlying checksum algorithm, but it involves square multiplications and
+the key(?): &lt;code>SW5436NF&lt;/code>&lt;/p>
+&lt;h2 id="control-fault-injection">Control-Fault Injection&lt;/h2>
+&lt;p>Once we determined the functions involved in the detections, we might want to disable them in order to
+run the game smoothly.
+Actually, PokemonGO is protected against such bypass with global variables that assert if a function
+ran successfully or not.&lt;/p>
+&lt;p>This protection is equivalent to the following piece of code:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="color:#66d9ef">static&lt;/span> &lt;span style="color:#66d9ef">constexpr&lt;/span> uintptr_t GOOD &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">0x00627178&lt;/span>; &lt;span style="color:#75715e">// bqx ?
+&lt;/span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#66d9ef">static&lt;/span> uintptr_t MAGIC_CFI &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">0xdeadc0de&lt;/span>;
+__attribute__((constructor))
+&lt;span style="color:#66d9ef">void&lt;/span> frida_detect() {
+&lt;span style="color:#66d9ef">if&lt;/span> (is_frida_running()) {
+crash();
+}
+MAGIC_CFI &lt;span style="color:#f92672">=&lt;/span> GOOD;
+}
+__attribute__((constructor))
+&lt;span style="color:#66d9ef">void&lt;/span> control_fault_check() {
+&lt;span style="color:#66d9ef">if&lt;/span> (MAGIC_CFI &lt;span style="color:#f92672">!=&lt;/span> GOOD) {
+crash();
+}
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>If we only disable &lt;code>frida_detect()&lt;/code>, the application will crash because of &lt;code>control_fault_check()&lt;/code>.&lt;/p>
+&lt;p>We could bypass this protection by identifying the address of the
+&lt;code>MAGIC_CFI&lt;/code> in the &lt;code>__data&lt;/code> section, or by disabling the &lt;code>control_fault_check()&lt;/code>.&lt;/p>
+&lt;h2 id="what-about-lief">What about LIEF?&lt;/h2>
+&lt;p>As mentioned in the introduction, it started with an ongoing feature to parse Mach-O files from memory.
+Basically, LIEF will&lt;sup id="fnref:3">&lt;a href="#fn:3" class="footnote-ref" role="doc-noteref">3&lt;/a>&lt;/sup> enable to parse Mach-O files&lt;sup id="fnref:4">&lt;a href="#fn:4" class="footnote-ref" role="doc-noteref">4&lt;/a>&lt;/sup> from an absolute address with this kind of API:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="color:#75715e">// 0x10234400 -&amp;gt; start of the Mach-O file
+&lt;/span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#66d9ef">auto&lt;/span> bin &lt;span style="color:#f92672">=&lt;/span> LIEF&lt;span style="color:#f92672">::&lt;/span>MachO&lt;span style="color:#f92672">::&lt;/span>Parser&lt;span style="color:#f92672">::&lt;/span>parse_from_memory(&lt;span style="color:#ae81ff">0x10234400&lt;/span>);
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Depending on the user&amp;rsquo;s needs, the &lt;code>write()&lt;/code> operation will optionally undo all the relocations and the symbol bindings.
+This could be useful if we aim at (re)running the file dumped (on a Apple M1?).&lt;/p>
+&lt;p>As expected, the strings used within the &lt;span class="blue">NianticLabsPlugin&lt;/span> library are encoded
+by the obfuscator. We could statically analyze the decoding routine (cf. Tim Blazytko&amp;rsquo;s
+&lt;a href="https://synthesis.to/2021/06/30/automating_string_decryption.html" target="_blank" rel="noopener">blog post&lt;/a>)
+,but another technique consists in using a property of the obfuscator&amp;rsquo;s string encoding mechanism.&lt;/p>
+&lt;p>It seems that the obfuscator put &lt;strong>all&lt;/strong> the strings&lt;sup id="fnref:5">&lt;a href="#fn:5" class="footnote-ref" role="doc-noteref">5&lt;/a>&lt;/sup> in the data section and decrypts &lt;strong>all of them&lt;/strong>
+in a &lt;strong>single&lt;/strong> constructor function.&lt;/p>
+&lt;p>For instance, if we have the string &amp;ldquo;TOKEN&amp;rdquo; to protect in the following functions:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="color:#66d9ef">void&lt;/span> &lt;span style="color:#a6e22e">protect_me&lt;/span>() {
+sensitive(&lt;span style="color:#e6db74">&amp;#34;TOKEN&amp;#34;&lt;/span>);
+}
+&lt;span style="color:#66d9ef">void&lt;/span> &lt;span style="color:#a6e22e">protect_me_2&lt;/span>() {
+sensitive(&lt;span style="color:#e6db74">&amp;#34;TOKEN2&amp;#34;&lt;/span>);
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>The obfuscator transforms and decodes the strings into something like:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="color:#75715e">// __data section
+&lt;/span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#66d9ef">static&lt;/span> &lt;span style="color:#66d9ef">char&lt;/span> var_TOKEN[] &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;&lt;/span>&lt;span style="color:#ae81ff">\x00\x1D\xDD\xEE\xAB&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>;
+&lt;span style="color:#66d9ef">static&lt;/span> &lt;span style="color:#66d9ef">char&lt;/span> var_TOKEN_2[] &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;&lt;/span>&lt;span style="color:#ae81ff">\x00\x1D\xDD\xEE\xAF&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>;
+__attribute__((constructor))
+&lt;span style="color:#66d9ef">void&lt;/span> decode_strings() {
+decode(var_TOKEN);
+decode(var_TOKEN_2);
+}
+&lt;span style="color:#66d9ef">void&lt;/span> &lt;span style="color:#a6e22e">protect_me&lt;/span>() {
+sensitive(var_TOKEN);
+}
+&lt;span style="color:#66d9ef">void&lt;/span> &lt;span style="color:#a6e22e">protect_me_2&lt;/span>() {
+sensitive(var_TOKEN_2);
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Since &lt;strong>all&lt;/strong> the strings are decoded at once in one of the first constructors, if we manage to dump the binary
+right after this constructor,
+we can recover the original strings for free.&lt;/p>
+&lt;p>Programmatically, it can be done using (again) frida-gum SDK with the following pseudocode:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="color:#75715e">// Hook associated with ImageLoader::containsAddress
+&lt;/span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#66d9ef">void&lt;/span> &lt;span style="color:#a6e22e">native_listener_on_enter&lt;/span>(GumInvocationListener&lt;span style="color:#f92672">*&lt;/span> listener,
+GumInvocationContext&lt;span style="color:#f92672">*&lt;/span> ic) {
+&lt;span style="color:#66d9ef">static&lt;/span> size_t CTOR_ID &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>;
+&lt;span style="color:#66d9ef">const&lt;/span> uintptr_t ctor_function_addr &lt;span style="color:#f92672">=&lt;/span> ic&lt;span style="color:#f92672">-&amp;gt;&lt;/span>cpu_context&lt;span style="color:#f92672">-&amp;gt;&lt;/span>x[&lt;span style="color:#ae81ff">1&lt;/span>];
+std&lt;span style="color:#f92672">::&lt;/span>string libname &lt;span style="color:#f92672">=&lt;/span> module_from_addr(ctor_function_addr);
+&lt;span style="color:#66d9ef">if&lt;/span> (libname &lt;span style="color:#f92672">==&lt;/span> &lt;span style="color:#e6db74">&amp;#34;NianticLabsPlugin&amp;#34;&lt;/span> &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> CTOR_ID&lt;span style="color:#f92672">++&lt;/span> &lt;span style="color:#f92672">==&lt;/span> &lt;span style="color:#ae81ff">3&lt;/span>) {
+&lt;span style="color:#66d9ef">const&lt;/span> uintptr_t base_address &lt;span style="color:#f92672">=&lt;/span> base_addr_from_ptr(ctor_function_addr);
+&lt;span style="color:#66d9ef">auto&lt;/span> bin &lt;span style="color:#f92672">=&lt;/span> LIEF&lt;span style="color:#f92672">::&lt;/span>MachO&lt;span style="color:#f92672">::&lt;/span>Parser&lt;span style="color:#f92672">::&lt;/span>parse_from_memory(base_address);
+bin&lt;span style="color:#f92672">-&amp;gt;&lt;/span>write(&lt;span style="color:#e6db74">&amp;#34;/tmp/pokemongo_after_ctor.bin&amp;#34;&lt;/span>); &lt;span style="color:#75715e">// /tmp on the iPhone
+&lt;/span>&lt;span style="color:#75715e">&lt;/span> }
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>At end, the dumped file contains the decoded strings:&lt;/p>
+&lt;p>&lt;img src="strings.png" alt="Data area after LIEF dump">&lt;/p>
+&lt;p>If we skim the &lt;code>__data&lt;/code> section, we can also observe the following changes:&lt;/p>
+&lt;p>&lt;img src="data_dump.png" alt="Data area after LIEF dump">&lt;/p>
+&lt;p>A practiced eye might notice&lt;sup id="fnref:6">&lt;a href="#fn:6" class="footnote-ref" role="doc-noteref">6&lt;/a>&lt;/sup> that some strings of the section are actually
+embedded in protobuf structures. We can confirm this observation by trying to infer the data as protobuf
+types:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">&lt;span style="color:#f92672">from&lt;/span> . &lt;span style="color:#f92672">import&lt;/span> proto_dump
+&lt;span style="color:#f92672">import&lt;/span> lief
+pgo &lt;span style="color:#f92672">=&lt;/span> lief&lt;span style="color:#f92672">.&lt;/span>parse(&lt;span style="color:#e6db74">&amp;#34;pokemongo_after_ctor.bin&amp;#34;&lt;/span>)
+start &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">0x12A51A7&lt;/span>
+end &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">0x12A51E2&lt;/span>
+raw_proto &lt;span style="color:#f92672">=&lt;/span> pgo&lt;span style="color:#f92672">.&lt;/span>get_content_from_virtual_address(start, end &lt;span style="color:#f92672">-&lt;/span> start)
+&lt;span style="color:#66d9ef">print&lt;/span>(proto_dump(raw_proto))
+&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text">{
+#3 = 4
+#4 (repeated) = 1 {
+#1 = &amp;#34;CheatReputation&amp;#34;
+#2 (repeated) = {
+#1 = &amp;#34;UNSET&amp;#34;
+#2 = 0
+} {
+#1 = &amp;#34;BOT&amp;#34;
+#2 = 1
+} {
+#1 = &amp;#34;SPOOFER&amp;#34;
+#2 = 2
+}
+}
+#5 = 8
+#8 = []
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="final-words">Final Words&lt;/h2>
+&lt;p>The application embeds other checks in the constructors and in the functions returned by &lt;code>GetN2Api&lt;/code>. It can
+make a good exercise for those that are interested in.&lt;/p>
+&lt;p>Generally speaking, the application and the protections are well designed since they slow down reverse engineers.
+Nevertheless, &lt;code>anti-{jb, frida, debug}&lt;/code> are quite difficult to protect as they need to interact with the OS
+through functions or syscalls with unprotected parameters. As a result, and once identified, we can bypass them.&lt;/p>
+&lt;p>One technique consists in injecting a library with Frida&amp;rsquo;s injector that aims at hooking
+the &lt;code>containsAddress()&lt;/code> to disable/patch the functions involved in the detections:&lt;/p>
+&lt;p>&lt;img src="jbfree.png" alt="PokemonGo Jailbreak bypass">&lt;/p>
+&lt;video controls >
+&lt;source src="pokemongo_jb_bypass.mp4" type="video/mp4">
+&lt;/video>
+&lt;p>Nevertheless, this technique is &lt;strong>not persistent&lt;/strong> and version-dependant.&lt;/p>
+&lt;p>After writing this post, it turned out that its structure is very close to
+&lt;a href="https://hot3eed.github.io/2020/08/02/starling_p2_detections_mitigations.html" target="_blank" rel="noopener">Reverse Engineering Starling Bank&lt;/a>.
+In particular, we can find the same anti-debug and the same Frida detection routine. These similarities suggest
+that these two application uses the same obfuscator that also provides &lt;code>anti-{jb, frida, debug}&lt;/code> as built-in.&lt;/p>
+&lt;p>You might also be interested in the recent talk of
+&lt;a href="https://twitter.com/elvanderb" target="_blank" rel="noopener">Eloi Benoist-Vanderbeken&lt;/a>
+&lt;a href="https://2021.pass-the-salt.org/" target="_blank" rel="noopener">@Pass the Salt&lt;/a>
+&lt;a href="https://archives.pass-the-salt.org/Pass%20the%20SALT/2021/videos/PTS2021-Talk-01-JailBreak_detection.mp4">
+&lt;i class="fas fa-laptop-code pr-1 fa-fw">&lt;/i>&lt;/a>
+&lt;a href="https://archives.pass-the-salt.org/Pass%20the%20SALT/2021/slides/PTS2021-Talk-01-JailBreak_detection.pdf">
+&lt;i class="fas fa-file-pdf pr-1 fa-fw">&lt;/i>&lt;/a>
+who detailed another approach to identify and bypass
+jailbreak detections.&lt;/p>
+&lt;div class="alert alert-">
+&lt;div>
+&lt;a href="https://lief.quarkslab.com/">LIEF&lt;/a> is a tool developed at &lt;a href="https://www.quarkslab.com/">Quarkslab&lt;/a> along with
+&lt;a href="https://qbdi.quarkslab.com">QBDI&lt;/a> &amp;amp; &lt;a href="https://triton.quarkslab.com">Triton&lt;/a>.
+&lt;/div>
+&lt;/div>
+&lt;hr>
+&lt;h3 id="annexes">Annexes&lt;/h3>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>Files that trigger the JB detection&lt;/th>
+&lt;th>Files that should be present&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>&lt;code>/.bootstrapped_electra&lt;/code>&lt;/td>
+&lt;td>&lt;code>/cores&lt;/code>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/Applications/Anemone.app&lt;/code>&lt;/td>
+&lt;td>&lt;code>/dev/null&lt;/code>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/Applications/Cydia.app&lt;/code>&lt;/td>
+&lt;td>&lt;code>/etc/hosts&lt;/code>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/Applications/SafeMode.app&lt;/code>&lt;/td>
+&lt;td>&lt;code>/etc/passwd&lt;/code>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/Library/Frameworks/CydiaSubstrate.framework&lt;/code>&lt;/td>
+&lt;td>&lt;code>/sbin&lt;/code>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/Library/MobileSubstrate/DynamicLibraries/FlyJB.dylb&lt;/code>&lt;/td>
+&lt;td>&lt;code>/sbin/launchd&lt;/code>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/Library/MobileSubstrate/MobileSubstrate.dylib&lt;/code>&lt;/td>
+&lt;td>&lt;code>/sbin/mount&lt;/code>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/Library/PreferenceBundles/LaunchInSafeMode.bundle&lt;/code>&lt;/td>
+&lt;td>&lt;code>/usr&lt;/code>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/Library/PreferenceLoader/Preferences/LaunchInSafeMode.plist&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/Library/Themes&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/Library/dpkg/info/com.inoahdev.launchinsafemode.list&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/Library/dpkg/info/com.inoahdev.launchinsafemode.md5sums&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/bin/bash&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/bin/bunzip2&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/bin/bzip2&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/bin/cat&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/bin/chgrp&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/bin/chmod&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/bin/chown&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/bin/cp&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/bin/grep&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/bin/gzip&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/bin/kill&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/bin/ln&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/bin/ls&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/bin/mkdir&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/bin/mv&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/bin/sed&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/bin/sh&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/bin/su&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/bin/tar&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/binpack&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/bootstrap&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/chimera&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/electra&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/etc/apt&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/etc/profile&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/jb&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/private/var/binpack&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/private/var/checkra1n.dmg&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/private/var/lib/apt&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/usr/bin/diff&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/usr/bin/hostinfo&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/usr/bin/killall&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/usr/bin/passwd&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/usr/bin/recache&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/usr/bin/tar&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/usr/bin/which&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/usr/bin/xargs&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/usr/lib/SBInject&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/usr/lib/SBInject.dylib&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/usr/lib/TweakInject&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/usr/lib/TweakInject.dylib&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/usr/lib/TweakInjectMapsCheck.dylib&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/usr/lib/libjailbreak.dylib&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/usr/lib/libsubstitute.0.dylib&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/usr/lib/libsubstitute.dylib&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/usr/lib/libsubstrate.dylib&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/usr/libexec/sftp-server&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/usr/sbin/sshd&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/usr/share/terminfo&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/var/mobile/Library/.sbinjectSafeMode&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/var/mobile/Library/Preferences/jp.akusio.kernbypass.plist&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;section class="footnotes" role="doc-endnotes">
+&lt;hr>
+&lt;ol>
+&lt;li id="fn:1" role="doc-endnote">
+&lt;p>iPhone 6 running on iOS 14.2 with checkra1n.&amp;#160;&lt;a href="#fnref:1" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li id="fn:2" role="doc-endnote">
+&lt;p>We can identify them by trial and error.&amp;#160;&lt;a href="#fnref:2" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li id="fn:3" role="doc-endnote">
+&lt;p>ETA: likely by the end of the year&amp;#160;&lt;a href="#fnref:3" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li id="fn:4" role="doc-endnote">
+&lt;p>The Mach-O format is very suitable for this feature as
+the header in mapped in memory. Therefore, it eases the parsing.&amp;#160;&lt;a href="#fnref:4" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li id="fn:5" role="doc-endnote">
+&lt;p>More generally, it can encode local data (strings, bytes arrays, &amp;hellip;)&amp;#160;&lt;a href="#fnref:5" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li id="fn:6" role="doc-endnote">
+&lt;p>Protobuf strings can be identified as they usually start with &lt;code>0xA&lt;/code>, &lt;code>0xB&lt;/code>, followed by their lengths
+and the string itself (see:
+&lt;a href="https://developers.google.com/protocol-buffers/docs/encoding#strings" target="_blank" rel="noopener">protocol-buffers/docs/encoding&lt;/a>)&amp;#160;&lt;a href="#fnref:6" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;/section></description></item><item><title>r2-pay: whitebox (part 2)</title><link>/post/20-09-r2con-obfuscated-whitebox-part2/</link><pubDate>Sun, 27 Sep 2020 00:00:00 +0000</pubDate><guid>/post/20-09-r2con-obfuscated-whitebox-part2/</guid><description>&lt;style>
+.green {
+color:green;
+font-family: 'Fira Code', monospace;
+font-size: 87.5%;
+}
+.blue {
+color: blue;
+font-family: 'Fira Code', monospace;
+font-size: 87.5%;
+}
+.orange {
+color: #FF6347;
+font-family: 'Fira Code', monospace;
+font-size: 87.5%;
+}
+.red {
+color: #df2b04;
+font-family: 'Fira Code', monospace;
+font-size: 87.5%;
+}
+.hl-comment {
+color: #df2b04;
+font-family: 'Fira Code', monospace;
+font-size: 87.5%;
+}
+.hl-keyword {
+color: #A90D91;
+font-family: 'Fira Code', monospace;
+font-size: 87.5%;
+}
+.hl-literal {
+color: #1C01CE;
+font-family: 'Fira Code', monospace;
+font-size: 87.5%;
+}
+.hl-preproc {
+color: #633820;
+font-family: 'Fira Code', monospace;
+font-size: 87.5%;
+}
+.hl-strings {
+color: #C41A16;
+font-family: 'Fira Code', monospace;
+font-size: 87.5%;
+}
+.yellow {
+color: #CC7000;
+font-family: 'Fira Code', monospace;
+font-size: 87.5%;
+}
+#
+&lt;/style>
+&lt;h2 id="introduction">Introduction&lt;/h2>
+&lt;p>In the
+&lt;a href="/post/20-09-r2con-obfuscated-whitebox-part1/">first part&lt;/a> of this write-up, we described the
+anti-frida, anti-debug and anti-root techniques used in the application and how to remove most of them.&lt;/p>
+&lt;p>This second part digs into the JNI function &lt;code>gXftm3iswpkVgBNDUp&lt;/code> and the underlying whitebox implementation.&lt;/p>
+&lt;h2 id="library-shimming">Library Shimming&lt;/h2>
+&lt;p>The inputs of the function &lt;code>gXftm3iswpkVgBNDUp&lt;/code> are provided by the GUI widgets and the function
+is triggered when we press the &lt;em>Generate R2Coin&lt;/em> button.
+Nevertheless, the behavior of &lt;code>gXftm3iswpkVgBNDUp&lt;/code> does not rely on UI features nor
+the application&amp;rsquo;s context&lt;sup id="fnref:1">&lt;a href="#fn:1" class="footnote-ref" role="doc-noteref">1&lt;/a>&lt;/sup>.&lt;/p>
+&lt;p>To take a closer look at the logic of &lt;code>gXftm3iswpkVgBNDUp&lt;/code>, it would be pretty useful to be able to feed
+the function&amp;rsquo;s inputs with our &lt;strong>own standalone binary&lt;/strong>. Basically, we would like to achieve this kind
+of interface:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="color:#66d9ef">int&lt;/span> &lt;span style="color:#a6e22e">main&lt;/span>(&lt;span style="color:#66d9ef">int&lt;/span> argc, &lt;span style="color:#66d9ef">char&lt;/span>&lt;span style="color:#f92672">**&lt;/span> argv) {
+&lt;span style="color:#66d9ef">void&lt;/span>&lt;span style="color:#f92672">*&lt;/span> dlopen(&lt;span style="color:#e6db74">&amp;#34;libnative-lib.so&amp;#34;&lt;/span>, RTLD_NOW);
+...
+jbyteArray out &lt;span style="color:#f92672">=&lt;/span> gXftm3iswpkVgBNDUp(env, ...);
+&lt;span style="color:#66d9ef">return&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>;
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>This technique is not new and has been already described in a blog post by
+&lt;a href="https://twitter.com/caleb_fenton" target="_blank" rel="noopener">Caleb Fenton&lt;/a>&lt;sup id="fnref:2">&lt;a href="#fn:2" class="footnote-ref" role="doc-noteref">2&lt;/a>&lt;/sup>. The idea is to get
+the &lt;code>JNIEnv* env&lt;/code> variable with &lt;code>JNI_CreateJavaVM&lt;/code> which is exported by the Android runtime: &lt;code>libart.so&lt;/code>.&lt;/p>
+&lt;p>Once we have this variable, we can call the &lt;code>gXftm3iswpkVgBNDUp&lt;/code> function as well as manipulating the JNI buffers:&lt;/p>
+&lt;ul>
+&lt;li>&lt;code>env-&amp;gt;NewByteArray()&lt;/code>&lt;/li>
+&lt;li>&lt;code>env-&amp;gt;GetArrayLength()&lt;/code>&lt;/li>
+&lt;li>&amp;hellip;&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="shim_mechanism.png" alt="Shimming of whitebox library">&lt;/p>
+&lt;p>Long story short, we can instantiate the Android runtime with the following piece of code:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="color:#66d9ef">int&lt;/span> &lt;span style="color:#a6e22e">main&lt;/span>(&lt;span style="color:#66d9ef">int&lt;/span> argc, &lt;span style="color:#66d9ef">char&lt;/span>&lt;span style="color:#f92672">**&lt;/span> argv) {
+JavaVMOption opt[&lt;span style="color:#ae81ff">2&lt;/span>];
+opt[&lt;span style="color:#ae81ff">0&lt;/span>].optionString &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;-Djava.class.path=/data/local/tmp/re.pwnme.1.0.apk&amp;#34;&lt;/span>;
+opt[&lt;span style="color:#ae81ff">1&lt;/span>].optionString &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;-Djava.library.path=/data/local/tmp&amp;#34;&lt;/span>;
+JavaVMInitArgs args;
+args.version &lt;span style="color:#f92672">=&lt;/span> JNI_VERSION_1_6;
+args.options &lt;span style="color:#f92672">=&lt;/span> opt;
+args.nOptions &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">2&lt;/span>;
+args.ignoreUnrecognized &lt;span style="color:#f92672">=&lt;/span> JNI_FALSE;
+&lt;span style="color:#66d9ef">void&lt;/span>&lt;span style="color:#f92672">*&lt;/span> handler &lt;span style="color:#f92672">=&lt;/span> dlopen(&lt;span style="color:#e6db74">&amp;#34;/system/lib64/libart.so&amp;#34;&lt;/span>, RTLD_NOW);
+&lt;span style="color:#66d9ef">auto&lt;/span> JNI_CreateJavaVM_f &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#66d9ef">reinterpret_cast&lt;/span>&lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#66d9ef">decltype&lt;/span>(JNI_CreateJavaVM)&lt;span style="color:#f92672">*&amp;gt;&lt;/span>(dlsym(handler, &lt;span style="color:#e6db74">&amp;#34;JNI_CreateJavaVM&amp;#34;&lt;/span>));
+JNI_CreateJavaVM_f(&lt;span style="color:#f92672">&amp;amp;&lt;/span>jvm, &lt;span style="color:#f92672">&amp;amp;&lt;/span>env, &lt;span style="color:#f92672">&amp;amp;&lt;/span>args);
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Then, we can resolve the &lt;code>gXftm3iswpkVgBNDUp&lt;/code> function with the base address of &lt;code>libnative-lib.so&lt;/code>
+and its offset &lt;code>0x9B41C&lt;/code>:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="color:#66d9ef">void&lt;/span>&lt;span style="color:#f92672">*&lt;/span> hdl &lt;span style="color:#f92672">=&lt;/span> dlopen(&lt;span style="color:#e6db74">&amp;#34;libnative-lib.so&amp;#34;&lt;/span>, RTLD_NOW);
+uintptr_t base_address &lt;span style="color:#f92672">=&lt;/span> get_base_address(&lt;span style="color:#e6db74">&amp;#34;libnative-lib.so&amp;#34;&lt;/span>);
+&lt;span style="color:#66d9ef">using&lt;/span> gXftm3iswpkVgBNDUp_t &lt;span style="color:#f92672">=&lt;/span> jbyteArray(&lt;span style="color:#f92672">*&lt;/span>)(JNIEnv&lt;span style="color:#f92672">*&lt;/span>, jobject, jbyteArray, jbyte);
+gXftm3iswpkVgBNDUp &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#66d9ef">reinterpret_cast&lt;/span>&lt;span style="color:#f92672">&amp;lt;&lt;/span>gXftm3iswpkVgBNDUp_t&lt;span style="color:#f92672">&amp;gt;&lt;/span>(base_address &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#ae81ff">0x9B41C&lt;/span>);
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Finally, we can run the function with our own inputs:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">std&lt;span style="color:#f92672">::&lt;/span>string pin_amount &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;0000123400004567&amp;#34;&lt;/span>;
+jbyteArray array &lt;span style="color:#f92672">=&lt;/span> convert_to_jbyteArray(pin_amount, ptr);
+jbyteArray jencrypted_buffer &lt;span style="color:#f92672">=&lt;/span> gXftm3iswpkVgBNDUp(env, &lt;span style="color:#66d9ef">nullptr&lt;/span>, array, &lt;span style="color:#ae81ff">0xF0&lt;/span>);
+&lt;span style="color:#66d9ef">const&lt;/span> std&lt;span style="color:#f92672">::&lt;/span>vector&lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#66d9ef">uint8_t&lt;/span>&lt;span style="color:#f92672">&amp;gt;&lt;/span> encrypted_buffer &lt;span style="color:#f92672">=&lt;/span> from_jbytes(jencrypted_buffer);
+std&lt;span style="color:#f92672">::&lt;/span>string hex_str &lt;span style="color:#f92672">=&lt;/span> to_hex(encrypted_buffer);
+LOG_INFO(&lt;span style="color:#e6db74">&amp;#34;{} --&amp;gt; {}&amp;#34;&lt;/span>, pin_amount, ref_str);
+&lt;/code>&lt;/pre>&lt;/div>&lt;div class="alert alert-note">
+&lt;div>
+The whole implementation is available &lt;a href="https://github.com/romainthomas/r2pay/blob/master/shim-whitebox">here &lt;i class="fab fa-github">&lt;/i>&lt;/a>.
+&lt;/div>
+&lt;/div>
+&lt;h2 id="function-tracing">Function Tracing&lt;/h2>
+&lt;p>Now that we are able to run the &lt;code>gXftm3iswpkVgBNDUp&lt;/code> function without the GUI layer, we can easily
+create an interface with
+&lt;a href="https://qbdi.quarkslab.com" target="_blank" rel="noopener">QBDI&lt;/a>:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">VM vm;
+vm.addInstrumentedModule(&lt;span style="color:#e6db74">&amp;#34;libnative-lib.so&amp;#34;&lt;/span>);
+...
+jbyteArray array &lt;span style="color:#f92672">=&lt;/span> to_jarray(pin_amount, ptr);
+jbyteArray qbdi_encrypted_buffer;
+vm.call(
+&lt;span style="color:#75715e">/* ret */&lt;/span> &lt;span style="color:#66d9ef">reinterpret_cast&lt;/span>&lt;span style="color:#f92672">&amp;lt;&lt;/span>uintptr_t&lt;span style="color:#f92672">*&amp;gt;&lt;/span>(&lt;span style="color:#f92672">&amp;amp;&lt;/span>qbdi_encrypted_buffer),
+&lt;span style="color:#75715e">/* target */&lt;/span> &lt;span style="color:#66d9ef">reinterpret_cast&lt;/span>&lt;span style="color:#f92672">&amp;lt;&lt;/span>uintptr_t&lt;span style="color:#f92672">&amp;gt;&lt;/span>(gXftm3iswpkVgBNDUp),
+&lt;span style="color:#75715e">/* params */&lt;/span> {
+&lt;span style="color:#75715e">/* p_0: JNIEnv* */&lt;/span> &lt;span style="color:#66d9ef">reinterpret_cast&lt;/span>&lt;span style="color:#f92672">&amp;lt;&lt;/span>rword&lt;span style="color:#f92672">&amp;gt;&lt;/span>(env),
+&lt;span style="color:#75715e">/* p_1: jobject thiz */&lt;/span> &lt;span style="color:#66d9ef">reinterpret_cast&lt;/span>&lt;span style="color:#f92672">&amp;lt;&lt;/span>rword&lt;span style="color:#f92672">&amp;gt;&lt;/span>(&lt;span style="color:#66d9ef">nullptr&lt;/span>),
+&lt;span style="color:#75715e">/* p_2: inbuffer */&lt;/span> &lt;span style="color:#66d9ef">reinterpret_cast&lt;/span>&lt;span style="color:#f92672">&amp;lt;&lt;/span>rword&lt;span style="color:#f92672">&amp;gt;&lt;/span>(array),
+&lt;span style="color:#ae81ff">0xF0&lt;/span>
+}
+);
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>The execution in QBDI &lt;strong>without user&amp;rsquo;s callbacks&lt;/strong> takes about &lt;strong>3min 30s&lt;/strong> which is quite huge compared to
+the &lt;strong>real execution&lt;/strong> that takes about &lt;strong>853ms&lt;/strong>:&lt;/p>
+&lt;p>&lt;img src="benchmark.svg" alt="Performances with different configurations">&lt;/p>
+&lt;p>This overhead is mostly due to the function &lt;code>0x1038f0&lt;/code> that is executed ~20 000 times. After a quick
+analysis, it turns out that this function is not relevant to instrument to break the whitebox.
+We can force its &lt;em>real&lt;/em> execution
+(i.e. outside QBDI) &lt;strong>by removing the function&amp;rsquo;s address from the instrumented range&lt;/strong>&lt;sup id="fnref:3">&lt;a href="#fn:3" class="footnote-ref" role="doc-noteref">3&lt;/a>&lt;/sup>.&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="color:#66d9ef">static&lt;/span> &lt;span style="color:#66d9ef">constexpr&lt;/span> uintptr_t HEAVY_FUNCTION &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">0x1038f0&lt;/span>;
+vm.removeInstrumentedRange(
+base_address &lt;span style="color:#f92672">+&lt;/span> HEAVY_FUNCTION,
+base_address &lt;span style="color:#f92672">+&lt;/span> HEAVY_FUNCTION &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#ae81ff">1&lt;/span>
+);
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>This small adjustment &lt;strong>drops the execution to 3'30sec&lt;/strong>.&lt;/p>
+&lt;hr>
+&lt;p>Some cryptographic algorithms can be fingerprinted either with predefined constants or with their memory accesses.
+According to the Quarkslab&amp;rsquo;s blog post:
+&lt;a href="https://blog.quarkslab.com/differential-fault-analysis-on-white-box-aes-implementations.html" target="_blank" rel="noopener">Differential Fault Analysis on White-box AES Implementations&lt;/a>,
+the whitebox lookup tables are likely to be stored in the &lt;code>.data, .rodata, ...&lt;/code> sections.&lt;/p>
+&lt;p>By looking at the sizes of these sections, only the &lt;code>.data&lt;/code> section seems to have an appropriate size.
+We can generate a memory trace on this section to see if we can outline some patterns.
+It can be made with the following piece of code:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">vm.recordMemoryAccess(MEMORY_READ_WRITE);
+vm.addMemRangeCB(
+&lt;span style="color:#75715e">/* .data start address */&lt;/span> base_address &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#ae81ff">0x127000&lt;/span>,
+&lt;span style="color:#75715e">/* .data end address */&lt;/span> base_address &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#ae81ff">0x127000&lt;/span> &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#ae81ff">0x8e000&lt;/span>,
+&lt;span style="color:#75715e">/* Record both: reads and writes */&lt;/span> MEMORY_READ_WRITE,
+&lt;span style="color:#75715e">/* Memory callback */&lt;/span>
+[] (VM&lt;span style="color:#f92672">*&lt;/span> vm, GPRState&lt;span style="color:#f92672">*&lt;/span>, FPRState&lt;span style="color:#f92672">*&lt;/span>, &lt;span style="color:#66d9ef">void&lt;/span>&lt;span style="color:#f92672">*&lt;/span> data) {
+&lt;span style="color:#66d9ef">auto&lt;/span> ctx &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#66d9ef">reinterpret_cast&lt;/span>&lt;span style="color:#f92672">&amp;lt;&lt;/span>qbdi_ctx&lt;span style="color:#f92672">*&amp;gt;&lt;/span>(data);
+&lt;span style="color:#75715e">/*
+&lt;/span>&lt;span style="color:#75715e"> * &amp;#39;for&amp;#39; loop since on AArch64 we can have multiple reads / writes
+&lt;/span>&lt;span style="color:#75715e"> * at once. (e.g. stp x0, x1, [sp, #128])
+&lt;/span>&lt;span style="color:#75715e"> */&lt;/span>
+&lt;span style="color:#66d9ef">for&lt;/span> (&lt;span style="color:#66d9ef">const&lt;/span> MemoryAccess&lt;span style="color:#f92672">&amp;amp;&lt;/span> mem_access : vm&lt;span style="color:#f92672">-&amp;gt;&lt;/span>getInstMemoryAccess()) {
+ctx&lt;span style="color:#f92672">-&amp;gt;&lt;/span>trace&lt;span style="color:#f92672">-&amp;gt;&lt;/span>push_back({
+mem_access.instAddress &lt;span style="color:#f92672">-&lt;/span> base_address,
+mem_access.accessAddress &lt;span style="color:#f92672">-&lt;/span> base_address,
+mem_access.size,
+});
+}
+&lt;span style="color:#66d9ef">return&lt;/span> VMAction&lt;span style="color:#f92672">::&lt;/span>CONTINUE;
+}, &lt;span style="color:#f92672">&amp;amp;&lt;/span>ctx);
+&lt;/code>&lt;/pre>&lt;/div>&lt;div class="alert alert-note">
+&lt;div>
+Generating the memory trace takes about 11sec which is acceptable.
+&lt;/div>
+&lt;/div>
+&lt;p>It leads to the following graph in which we can notice a characteristic pattern at the end of the trace:&lt;/p>
+&lt;p>&lt;img src="memory_trace.png" alt="Memory trace generated with QBDI">&lt;/p>
+&lt;h2 id="fault-injection">Fault Injection&lt;/h2>
+&lt;p>The pattern at the end of the trace is quite characteristic of AES-128 where we can identify 10 rounds.
+&lt;img src="rounds.png" alt="AES rounds">&lt;/p>
+&lt;p>We now have all the necessary information to make a &lt;em>fault injection attack&lt;/em>:&lt;/p>
+&lt;ol>
+&lt;li>We can identify the 9th round&lt;/li>
+&lt;li>We can &lt;strong>accurately&lt;/strong> fault the &lt;code>.data&lt;/code> section thanks to the memory trace&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="injection.png" alt="Fault injection in the 9th round">&lt;/p>
+&lt;div class="alert alert-note">
+&lt;div>
+The memory trace is available in the &lt;a href="https://github.com/romainthomas/r2pay/blob/master/assets/mem_trace.json">&lt;i class="fab fa-github">&lt;/i> mem_trace.json&lt;/a> file of the repository.
+&lt;/div>
+&lt;/div>
+&lt;p>To efficiently make
+the injection, we can first reduce the memory addresses to only keep those that are used in the last 2 rounds:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">trace_file &lt;span style="color:#f92672">=&lt;/span> CWD &lt;span style="color:#f92672">/&lt;/span> &lt;span style="color:#e6db74">&amp;#34;..&amp;#34;&lt;/span> &lt;span style="color:#f92672">/&lt;/span> &lt;span style="color:#e6db74">&amp;#34;assets&amp;#34;&lt;/span> &lt;span style="color:#f92672">/&lt;/span> &lt;span style="color:#e6db74">&amp;#34;mem_trace.json&amp;#34;&lt;/span>
+trace &lt;span style="color:#f92672">=&lt;/span> json&lt;span style="color:#f92672">.&lt;/span>loads(trace_file&lt;span style="color:#f92672">.&lt;/span>read_bytes())[&lt;span style="color:#ae81ff">0&lt;/span>]
+&lt;span style="color:#75715e"># Keep the entries that are involved in the last 2-rounds (empirical number)&lt;/span>
+nice_trace &lt;span style="color:#f92672">=&lt;/span> trace[&lt;span style="color:#f92672">-&lt;/span>&lt;span style="color:#ae81ff">1000&lt;/span>:]
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Then, we can use our shim mechanism to inject the faults in the &lt;code>.data&lt;/code> section with the addresses previously selected.
+Moreover, we can reduce the set of &lt;code>.data&lt;/code> addresses with the faults that introduce exactly &lt;strong>4 differences&lt;/strong> in the ciphertext:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="color:#75715e">// Make sure the .data section is writable
+&lt;/span>&lt;span style="color:#75715e">&lt;/span>mprotect(
+&lt;span style="color:#66d9ef">reinterpret_cast&lt;/span>&lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#66d9ef">void&lt;/span>&lt;span style="color:#f92672">*&amp;gt;&lt;/span>(base_address &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#75715e">/* .data */&lt;/span> &lt;span style="color:#ae81ff">0x127000&lt;/span>),
+&lt;span style="color:#ae81ff">0x8e000&lt;/span>,
+PROT_READ &lt;span style="color:#f92672">|&lt;/span> PROT_WRITE
+);
+&lt;span style="color:#66d9ef">for&lt;/span> (uintptr_t fault_addr : selected_addresses) {
+&lt;span style="color:#66d9ef">uint8_t&lt;/span>&lt;span style="color:#f92672">&amp;amp;&lt;/span> target_byte &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#f92672">*&lt;/span>&lt;span style="color:#66d9ef">reinterpret_cast&lt;/span>&lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#66d9ef">uint8_t&lt;/span>&lt;span style="color:#f92672">*&amp;gt;&lt;/span>(base_address &lt;span style="color:#f92672">+&lt;/span> fault_addr);
+&lt;span style="color:#66d9ef">uint8_t&lt;/span> backup &lt;span style="color:#f92672">=&lt;/span> target_byte;
+&lt;span style="color:#75715e">// Fault 1 byte:
+&lt;/span>&lt;span style="color:#75715e">&lt;/span> target_byte &lt;span style="color:#f92672">^=&lt;/span> &lt;span style="color:#ae81ff">0x33&lt;/span>;
+&lt;span style="color:#75715e">// Run the whitebox with the faulty byte
+&lt;/span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">const&lt;/span> std&lt;span style="color:#f92672">::&lt;/span>vector&lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#66d9ef">uint8_t&lt;/span>&lt;span style="color:#f92672">&amp;gt;&lt;/span> encrypted &lt;span style="color:#f92672">=&lt;/span> encrypt(msg);
+&lt;span style="color:#75715e">// Restore the original byte
+&lt;/span>&lt;span style="color:#75715e">&lt;/span> target_byte &lt;span style="color:#f92672">=&lt;/span> backup;
+&lt;span style="color:#75715e">// Compute the number of errors
+&lt;/span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#75715e">// ...
+&lt;/span>&lt;span style="color:#75715e">&lt;/span>}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Finally, with the subset of the addresses that affect exactly 4 bytes, we can generate several faults for a given
+address:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="color:#66d9ef">for&lt;/span> (uintptr_t nice_fault_addr : four_bytes_fault_addresses) {
+&lt;span style="color:#66d9ef">for&lt;/span> (size_t i &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>; i &lt;span style="color:#f92672">&amp;lt;&lt;/span> &lt;span style="color:#ae81ff">255&lt;/span>; &lt;span style="color:#f92672">++&lt;/span>i) {
+&lt;span style="color:#66d9ef">const&lt;/span> std&lt;span style="color:#f92672">::&lt;/span>vector&lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#66d9ef">uint8_t&lt;/span>&lt;span style="color:#f92672">&amp;gt;&amp;amp;&lt;/span> output &lt;span style="color:#f92672">=&lt;/span> inject_fault(addr, PIN_AMOUNT, i);
+&lt;span style="color:#66d9ef">const&lt;/span> size_t nb_errors &lt;span style="color:#f92672">=&lt;/span> get_error(genuine_value, output);
+&lt;span style="color:#66d9ef">if&lt;/span> (nb_errors &lt;span style="color:#f92672">==&lt;/span> &lt;span style="color:#ae81ff">4&lt;/span> and unique.insert(output).second) {
+&lt;span style="color:#75715e">// Record the entry ...
+&lt;/span>&lt;span style="color:#75715e">&lt;/span> }
+}
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>The aforementioned code gives an idea about how to generate the faults. One can find the whole implementation in
+this file:
+&lt;a href="https://github.com/romainthomas/r2pay/blob/master/shim-whitebox/src/main.cpp#L343-L365" target="_blank" rel="noopener">shim-whitebox/src/main.cpp&lt;/a> that produces
+this set of files
+&lt;a href="https://github.com/romainthomas/r2pay/blob/master/assets/wb-traces" target="_blank" rel="noopener">assets/wb-traces&lt;/a>.&lt;/p>
+&lt;h2 id="key-extraction">Key Extraction&lt;/h2>
+&lt;p>Thanks to the
+&lt;a href="https://github.com/SideChannelMarvels" target="_blank" rel="noopener">&lt;i class="fab fa-github">&lt;/i> Side-Channel Marvels&lt;/a> project,
+we can use
+&lt;a href="https://github.com/SideChannelMarvels/JeanGrey" target="_blank" rel="noopener">JeanGrey&lt;/a> &amp;mdash; developed by Philippe Teuwen &amp;mdash; to recover the whitebox&amp;rsquo;s key from the faulty traces:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">&lt;span style="color:#f92672">import&lt;/span> pathlib
+&lt;span style="color:#f92672">import&lt;/span> phoenixAES
+CWD &lt;span style="color:#f92672">=&lt;/span> pathlib&lt;span style="color:#f92672">.&lt;/span>Path(__file__)&lt;span style="color:#f92672">.&lt;/span>parent
+trace_dir &lt;span style="color:#f92672">=&lt;/span> CWD &lt;span style="color:#f92672">/&lt;/span> &lt;span style="color:#e6db74">&amp;#34;..&amp;#34;&lt;/span> &lt;span style="color:#f92672">/&lt;/span> &lt;span style="color:#e6db74">&amp;#34;assets&amp;#34;&lt;/span> &lt;span style="color:#f92672">/&lt;/span> &lt;span style="color:#e6db74">&amp;#34;wb-traces&amp;#34;&lt;/span>
+&lt;span style="color:#66d9ef">for&lt;/span> f &lt;span style="color:#f92672">in&lt;/span> trace_dir&lt;span style="color:#f92672">.&lt;/span>iterdir():
+x &lt;span style="color:#f92672">=&lt;/span> phoenixAES&lt;span style="color:#f92672">.&lt;/span>crack_file(f)
+&lt;span style="color:#66d9ef">if&lt;/span> x &lt;span style="color:#f92672">is&lt;/span> &lt;span style="color:#f92672">not&lt;/span> None:
+&lt;span style="color:#66d9ef">print&lt;/span>(x, f&lt;span style="color:#f92672">.&lt;/span>name)
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>It provides the following results which enable to retrieve the key:&lt;/p>
+&lt;pre>&lt;code class="language-console" data-lang="console">$ python wb_key_recovery.py
+..8D....7F............9A....79.. injection-1a930d.trace
+..8D....7F............9A....79.. injection-1a95bd.trace
+....19....62....B0............8F injection-1a91b2.trace
+....19....62....B0............8F injection-1a8fdf.trace
+76............1E....D3....E1.... injection-1a8549.trace
+......E1....A0....CD....28...... injection-1a8978.trace
+....19....62....B0............8F injection-1a90ce.trace
+....19....62....B0............8F injection-1a8efd.trace
+r 2 p 4 y 1 s N 0 w S e c u r 3
+&lt;/code>&lt;/pre>&lt;p>Finally, we can verify that &lt;strong>r2p4y1sN0wSecur3&lt;/strong> is the right key by trying to decrypt &lt;code>9497cdf1df2600e7f63778d0ae91dcbb&lt;/code>&lt;sup id="fnref:4">&lt;a href="#fn:4" class="footnote-ref" role="doc-noteref">4&lt;/a>&lt;/sup>:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">&lt;span style="color:#f92672">from&lt;/span> Crypto.Cipher &lt;span style="color:#f92672">import&lt;/span> AES
+WB_KEY &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">b&lt;/span>&lt;span style="color:#e6db74">&amp;#34;r2p4y1sN0wSecur3&amp;#34;&lt;/span>
+cipher &lt;span style="color:#f92672">=&lt;/span> AES&lt;span style="color:#f92672">.&lt;/span>new(WB_KEY, AES&lt;span style="color:#f92672">.&lt;/span>MODE_ECB)
+output &lt;span style="color:#f92672">=&lt;/span> cipher&lt;span style="color:#f92672">.&lt;/span>decrypt(bytes&lt;span style="color:#f92672">.&lt;/span>fromhex(&lt;span style="color:#e6db74">&amp;#34;9497cdf1df2600e7f63778d0ae91dcbb&amp;#34;&lt;/span>))
+&lt;span style="color:#66d9ef">print&lt;/span>(output&lt;span style="color:#f92672">.&lt;/span>decode())
+&lt;/code>&lt;/pre>&lt;/div>&lt;pre>&lt;code class="language-console" data-lang="console">$ python ./aes_test.py
+0000123400004567
+&lt;/code>&lt;/pre>&lt;h2 id="side-note-about-the-data-section">Side note about the &lt;code>.data&lt;/code> section&lt;/h2>
+&lt;p>Most of the obfuscators encode strings so that we don&amp;rsquo;t have any clue about functions' logic. The obfuscator
+used in the challenge follows this rule and running the &lt;code>strings&lt;/code> utility on the library does not reveal any interesting information.&lt;/p>
+&lt;p>Nevertheless, we can find a lot of &lt;code>.datadiv_decode&amp;lt;random hex&amp;gt;&lt;/code> in the ELF constructors of the library.
+As explained in the previous part, they are generated by the obfuscator and aimed to decode the strings.&lt;/p>
+&lt;p>Since these functions are in the &lt;strong>ELF constructors&lt;/strong>, this means that they are executed as soon as the library is loaded.
+In particular, when calling &lt;code>dlopen(...)&lt;/code> these constructors are executed. It can be confirmed by
+dumping the &lt;code>.data&lt;/code> section right after &lt;code>dlopen()&lt;/code>:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">dlopen(&lt;span style="color:#e6db74">&amp;#34;libnative-lib.so&amp;#34;&lt;/span>, RTLD_NOW);
+std&lt;span style="color:#f92672">::&lt;/span>ofstream ofs{fmt&lt;span style="color:#f92672">::&lt;/span>format(&lt;span style="color:#e6db74">&amp;#34;/data/local/tmp/{}&amp;#34;&lt;/span>, output)};
+&lt;span style="color:#66d9ef">auto&lt;/span> start &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#66d9ef">reinterpret_cast&lt;/span>&lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#66d9ef">char&lt;/span>&lt;span style="color:#f92672">*&amp;gt;&lt;/span>(base_address &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#ae81ff">0x127000&lt;/span>);
+ofs.write(start, &lt;span style="color:#75715e">/* sizeof(.data) */&lt;/span> &lt;span style="color:#ae81ff">0x8d49f&lt;/span>);
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Then, we can compare the bytes distribution with
+&lt;a href="https://binvis.io/" target="_blank" rel="noopener">binvis.io&lt;/a>:&lt;/p>
+&lt;p>&lt;img src="data_strings.png" alt="Bytes distribution in the .data section">&lt;/p>
+&lt;p>At the end of the in-memory &lt;code>.data&lt;/code> section, we can found interesting strings used to detect Frida and the
+device&amp;rsquo;s root state.&lt;/p>
+&lt;h2 id="conclusion">Conclusion&lt;/h2>
+&lt;p>Thanks again to &lt;u>Eduardo Novella&lt;/u> (
+&lt;a href="https://twitter.com/enovella_" target="_blank" rel="noopener">@enovella_&lt;/a>)
+and &lt;u>Gautam Arvind&lt;/u> (
+&lt;a href="https://twitter.com/darvincisec" target="_blank" rel="noopener">@darvincisec&lt;/a>) for this second part of the challenge :)&lt;/p>
+&lt;p>Also thanks to &lt;u>
+&lt;a href="https://www.quarkslab.com" target="_blank" rel="noopener">Quarkslab&lt;/a>&lt;/u> that allowed this publication.
+One can find related blog posts about whitebox attacks on the Quarkslab&amp;rsquo;s blog:&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>
+&lt;a href="https://blog.quarkslab.com/introduction-to-whiteboxes-and-collision-based-attacks-with-qbdi.html" target="_blank" rel="noopener">Introduction to Whiteboxes and Collision-Based Attacks With QBDI
+&lt;/a> by Paul Hernault (
+&lt;a href="https://twitter.com/0xAcid" target="_blank" rel="noopener">@0xAcid&lt;/a>)&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>
+&lt;a href="https://blog.quarkslab.com/when-sidechannelmarvels-meet-lief.html" target="_blank" rel="noopener">When SideChannelMarvels meet LIEF &lt;/a>&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>
+&lt;a href="https://blog.quarkslab.com/differential-fault-analysis-on-white-box-aes-implementations.html" target="_blank" rel="noopener">Differential Fault Analysis on White-box AES
+Implementations&lt;/a> by Philippe Teuwen (
+&lt;a href="https://twitter.com/doegox" target="_blank" rel="noopener">@doegox&lt;/a>).
+&lt;em>I used this blog post as a reference to resolve this part of the challenge.&lt;/em>&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h3 id="references">References&lt;/h3>
+&lt;section class="footnotes" role="doc-endnotes">
+&lt;hr>
+&lt;ol>
+&lt;li id="fn:1" role="doc-endnote">
+&lt;p>&lt;a href="https://developer.android.com/reference/android/content/Context">https://developer.android.com/reference/android/content/Context&lt;/a>&amp;#160;&lt;a href="#fnref:1" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li id="fn:2" role="doc-endnote">
+&lt;p>&lt;a href="https://calebfenton.github.io/2017/04/05/creating_java_vm_from_android_native_code/">https://calebfenton.github.io/2017/04/05/creating_java_vm_from_android_native_code/&lt;/a>&amp;#160;&lt;a href="#fnref:2" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li id="fn:3" role="doc-endnote">
+&lt;p>QBDI will execute the function using the
+&lt;a href="https://qbdi.readthedocs.io/en/stable/api_cpp.html#execution-filtering" target="_blank" rel="noopener">ExecBroker&lt;/a> mechanism.&amp;#160;&lt;a href="#fnref:3" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li id="fn:4" role="doc-endnote">
+&lt;p>It is the output of the function when entering &lt;code>1234&lt;/code> in the PIN field and &lt;code>4567&lt;/code> in the amount field.&amp;#160;&lt;a href="#fnref:4" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;/section></description></item><item><title>r2-pay: anti-debug, anti-root &amp; anti-frida (part 1)</title><link>/post/20-09-r2con-obfuscated-whitebox-part1/</link><pubDate>Sun, 20 Sep 2020 00:00:00 +0000</pubDate><guid>/post/20-09-r2con-obfuscated-whitebox-part1/</guid><description>&lt;style>
+.green {
+color:green;
+font-family: 'Fira Code', monospace;
+font-size: 87.5%;
+}
+.blue {
+color: blue;
+font-family: 'Fira Code', monospace;
+font-size: 87.5%;
+}
+.orange {
+color: #FF6347;
+font-family: 'Fira Code', monospace;
+font-size: 87.5%;
+}
+.red {
+color: #df2b04;
+font-family: 'Fira Code', monospace;
+font-size: 87.5%;
+}
+.hl-comment {
+color: #df2b04;
+font-family: 'Fira Code', monospace;
+font-size: 87.5%;
+}
+.hl-keyword {
+color: #A90D91;
+font-family: 'Fira Code', monospace;
+font-size: 87.5%;
+}
+.hl-literal {
+color: #1C01CE;
+font-family: 'Fira Code', monospace;
+font-size: 87.5%;
+}
+.hl-preproc {
+color: #633820;
+font-family: 'Fira Code', monospace;
+font-size: 87.5%;
+}
+.hl-strings {
+color: #C41A16;
+font-family: 'Fira Code', monospace;
+font-size: 87.5%;
+}
+.yellow {
+color: #CC7000;
+font-family: 'Fira Code', monospace;
+font-size: 87.5%;
+}
+#
+&lt;/style>
+&lt;h2 id="introduction">Introduction&lt;/h2>
+&lt;p>This series of blog posts explains one way to resolve the r2-pay challenge released during the
+&lt;a href="https://rada.re/con/2020/" target="_blank" rel="noopener">r2con2020&lt;/a> conference. This first part is about the
+anti-analysis tricks used to hinder reverse-engineering while the second part will be more focused on
+breaking the whitebox.&lt;/p>
+&lt;p>The resolution took me more than a week-end but it covers nice topics that worth it: &lt;strong>obfuscation &amp;amp; whitebox&lt;/strong>.
+It was also the opportunity to practice attacks against whiteboxes
+and to test
+&lt;a href="https://github.com/SideChannelMarvels/JeanGrey" target="_blank" rel="noopener">SideChannelMarvels/JeanGrey&lt;/a> developed by Philippe Teuwen (aka.
+&lt;a href="https://twitter.com/doegox" target="_blank" rel="noopener">@doegox&lt;/a>).&lt;/p>
+&lt;p>The challenge has been resolved with the AArch64 version on a device running on Android 9 and rooted with Magisk.&lt;/p>
+&lt;div class="alert alert-note">
+&lt;div>
+&lt;p>Here are the files used in this write-up:&lt;/p>
+&lt;p>&lt;i class="fas fa-mobile-alt">&lt;/i> &lt;a href="re.pwnme.1.0.apk">re.pwnme.1.0.apk - af019d3016720592aade7bde9890110c&lt;/a>&lt;/p>
+&lt;p>&lt;i class="fas fa-shield-alt">&lt;/i> &lt;a href="libnative-lib.so">libnative-lib.so (arm64-v8a version)&lt;/a>&lt;/p>
+&lt;/div>
+&lt;/div>
+&lt;h2 id="overview">Overview&lt;/h2>
+&lt;p>When opening the application on a non-tempered device (or with Magisk hide enabled), we are asked to enter
+a PIN and an amount that is used to generate a &lt;em>token&lt;/em>.&lt;/p>
+&lt;p>To resolve the challenge, we have to find the &lt;em>master key&lt;/em> that is used to generate the token.
+Few days before the CTF I was told that one of the challenges
+would involve an obfuscated whitebox&amp;hellip;&lt;/p>
+&lt;p>The main interface of the APK is located in the Java class &lt;code>re.pwnme.MainActivity&lt;/code> which forwards the user inputs (PIN &amp;amp; amount)
+to a JNI function named &lt;code>gXftm3iswpkVgBNDUp&lt;/code>. This function takes the concatenated input $PIN\ ||\ Amount$
+and returns the token as a byte array.&lt;/p>
+&lt;p>The &lt;strong>static constructor&lt;/strong> of the class loads the &amp;ldquo;native-lib&amp;rdquo; library which is available for the architectures:
+&lt;code>arm64-v8a&lt;/code>, &lt;code>armeabi-v7a&lt;/code>, and &lt;code>x86_64&lt;/code>. Unsurprisingly, this library is obfuscated and some symbols suggest that it has
+been compiled with a fork of O-LLVM &lt;sup id="fnref:1">&lt;a href="#fn:1" class="footnote-ref" role="doc-noteref">1&lt;/a>&lt;/sup>.&lt;/p>
+&lt;p>&lt;img src="mainactivity_tag.png" alt="re.pwnme.MainActivity in r2pay">&lt;/p>
+&lt;p>In addition, the library does not export the expected symbol &lt;code>Java_re_pwnme_MainActivity_gXftm3iswpkVgBNDUp&lt;/code> but prefers
+to use the &lt;code>JNI_OnLoad&lt;/code> technique &lt;sup id="fnref:2">&lt;a href="#fn:2" class="footnote-ref" role="doc-noteref">2&lt;/a>&lt;/sup>. &lt;code>JNI_OnLoad()&lt;/code> is also obfuscated along with control-flow-flattening.&lt;/p>
+&lt;p>The main task of the challenge is to understand the logic of the &lt;code>gXftm3iswpkVgBNDUp&lt;/code> function to figure out how the
+&lt;em>token&lt;/em> is generated.&lt;/p>
+&lt;h2 id="anti-root--anti-frida">Anti-Root &amp;amp; Anti-Frida&lt;/h2>
+&lt;p>Along with the &lt;code>libnative-lib.so&lt;/code> library, the applications embeds another library &lt;code>libtool-checker.so&lt;/code>
+whose name sounds quite familiar: it comes from the open-source project
+&lt;a href="https://github.com/scottyab/rootbeer" target="_blank" rel="noopener">rootbeer&lt;/a>
+which is used to detect if the device is rooted.&lt;/p>
+&lt;p>Some of the root-checks are done in the MainActivity class and if the device is rooted the application raises
+an exception by dividing a number with 0.&lt;/p>
+&lt;p>On this point, we can disable the check by using
+&lt;a href="https://frida.re/" target="_blank" rel="noopener">Frida&lt;/a> on the rootbeer&amp;rsquo;s functions involved in the detection:&lt;/p>
+&lt;pre>&lt;code>// frida -U -l ./bypass-root.js --no-pause -f re.pwnme
+Java.perform(function () {
+var RootCheck = Java.use('\u266b.\u1d64');
+RootCheck['₤'].implementation = function () {
+console.log(&amp;quot;Skip root&amp;quot;);
+return false;
+}
+RootCheck['θ'].overload().implementation = function () {
+console.log(&amp;quot;Skip root&amp;quot;);
+return false;
+}
+})
+&lt;/code>&lt;/pre>&lt;p>Nevertheless, the application still crashes as soon as it starts and generates the following backtrace:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text">F libc : Fatal signal 11 (SIGSEGV), code 1 (SEGV_MAPERR), fault addr 0xfa929095 in tid 8875 (re.pwnme), pid 8849 (re.pwnme)
+F DEBUG : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+F DEBUG : Build fingerprint: &amp;#39;google/taimen/taimen:9/PQ3A.190801.002/5670241:user/release-keys&amp;#39;
+F DEBUG : Revision: &amp;#39;rev_10&amp;#39;
+F DEBUG : ABI: &amp;#39;arm64&amp;#39;
+F DEBUG : pid: 8849, tid: 8875, name: re.pwnme &amp;gt;&amp;gt;&amp;gt; com.google.android.gms &amp;lt;&amp;lt;&amp;lt;
+F DEBUG : signal 11 (SIGSEGV), code 1 (SEGV_MAPERR), fault addr 0xfa929095
+F DEBUG : x0 0000007f041f6610 x1 0000007f2565c800 x2 0000007f25600000 x3 000000000000001d
+F DEBUG : x4 000000000000005c x5 0000000000000001 x6 0000000000000001 x7 0000000000000000
+F DEBUG : x8 0000007f041f6610 x9 0000007f041f6600 x10 00000000fa929095 x11 00000000000035b2
+F DEBUG : x12 00000000e34d79ac x13 00000000fffffff7 x14 00000000a139577d x15 0000000000000001
+F DEBUG : x16 0000007fa66af220 x17 0000007fa65e3608 x18 0000000000000000 x19 0000007f041f6680
+F DEBUG : x20 0000000000000000 x21 0000000000000000 x22 0000229100002291 x23 0000000000000000
+F DEBUG : x24 0000007f041ff570 x25 0000007f04102000 x26 0000007fab1ad5e0 x27 0000007f0421a690
+F DEBUG : x28 0000007f04209080 x29 0000007f041ff490
+F DEBUG : sp 0000007f041f65f0 lr 0000007f0423de04 pc 0000007f0423f980
+F DEBUG :
+F DEBUG : backtrace:
+F DEBUG : #00 pc 000000000003f980 /data/app/re.pwnme-7O3ynhSmMsg2_E5_uqbQxQ==/lib/arm64/libnative-lib.so
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>The backtrace suggests that other checks are performed in the native library. By looking at the ELF&amp;rsquo;s constructors,
+we can notice two functions that differ from those generated by the obfuscator:&lt;/p>
+&lt;p>&lt;img src="elf_ctor.png" alt="ELF constructors involved in the detection">&lt;/p>
+&lt;div class="alert alert-note">
+&lt;div>
+&lt;code>.datadiv_decode13003153710004289592&lt;/code> functions are in the ELF constructors since they decode global strings that need to be
+available as soon as the library is loaded.
+&lt;/div>
+&lt;/div>
+&lt;p>By tracing these functions with
+&lt;a href="https://qbdi.quarkslab.com/" target="_blank" rel="noopener">QBDI&lt;/a>, we quickly understand that &lt;span class="green">sub_9080&lt;/span> iterates over
+&lt;code>/proc/self/maps&lt;/code> with the syscalls &lt;span class="blue">openat&lt;/span>/&lt;span class="hl-keyword">read&lt;/span>
+that are located at the addresses &lt;span class="blue">0x009870&lt;/span> and &lt;span class="hl-keyword">0x00b448&lt;/span>.&lt;/p>
+&lt;p>Then, we observe the following sequence:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text">0x011fb0: syscall: openat(0xffffffffffffff9c, &amp;#39;/system/lib64/libc.so&amp;#39;)
+0x012884: syscall: read(51, 0x7ffc006c58, 64): &amp;#39;ELF@)@8@&amp;#39;
+0x013170: syscall: lseek(51, 0x112918, 0)
+0x0145f8: syscall: read(51, 0x7ffc006c18, 64)
+0x0145f8: syscall: read(51, 0x7ffc006c18, 64)
+0x0145f8: syscall: read(51, 0x7ffc006c18, 64): &amp;#39;/ &amp;#39;
+0x0145f8: syscall: read(51, 0x7ffc006c18, 64): &amp;#39;B88&amp;#39;
+0x0145f8: syscall: read(51, 0x7ffc006c18, 64): &amp;#39;J&amp;gt;&amp;#39;
+0x0145f8: syscall: read(51, 0x7ffc006c18, 64): &amp;#39;RoP)&amp;#39;
+0x0145f8: syscall: read(51, 0x7ffc006c18, 64): &amp;#39;\o((&amp;#39;
+0x0145f8: syscall: read(51, 0x7ffc006c18, 64): &amp;#39;io&amp;#39;
+0x0145f8: syscall: read(51, 0x7ffc006c18, 64): &amp;#39;xo0&amp;#39;
+0x0145f8: syscall: read(51, 0x7ffc006c18, 64)
+0x0145f8: syscall: read(51, 0x7ffc006c18, 64): &amp;#39;Bxx`-&amp;#39;
+0x0145f8: syscall: read(51, 0x7ffc006c18, 64): &amp;#39;PP`&amp;#39;
+0x0151f4: malloc(0x18): 0x7f0c21f4c0
+0x0156e4: syscall: lseek(51, 0x1a650, 0)
+0x015a68: malloc(0x1e60): 0x7f0acb2000
+0x015fa0: syscall: read(51, 0x7f0acb2000, 0x1e60): &amp;#39;{n@b r@ v@ z@ ~@ @ @&amp;#34; @B @b @ @ @ @ @ @&amp;#34; @B @b @ @ @ @ @ @&amp;#34; @B @b @ @ @ @ @ @&amp;#34; @B @b @ @ @ @ A A&amp;#34; AB Ab A A A A &amp;#34;A &amp;amp;A&amp;#34; *AB .Ab 2A 6A :A &amp;gt;A BA FA&amp;#34; JAB NAb RA VA ZA ^A bA fA&amp;#34; jAB nAb rA vA zA ~A A A&amp;#34; AB Ab A A A A A A&amp;#34; AB Ab A A A A A A&amp;#34; AB Ab A A A A A A&amp;#34; AB Ab A A A A B B&amp;#34; BB Bb B B B B &amp;#34;B &amp;amp;B&amp;#34; *BB .Bb 2B 6B :B &amp;gt;B BB FB&amp;#34; JBB NBb RB VB ZB ^B bB fB&amp;#34; jBB nBb rB vB zB ~B B B&amp;#34; BB Bb B B B B B B&amp;#34; B ...&amp;#39;
+0x016cfc: free(0x7f0acb2000) -&amp;gt; {n@b r@ v@ z@ ~@ @ @&amp;#34; @B @b @ @ @ @ @ @&amp;#34; @B @b @ @ @ @ @ @&amp;#34; @B @b @ @ @ @ @ @&amp;#34; @B @b @ @ @ @ A A&amp;#34; AB Ab A A A A &amp;#34;A &amp;amp;A&amp;#34; *AB .Ab 2A 6A :A &amp;gt;A BA FA&amp;#34; JAB NAb RA VA ZA ^A bA fA&amp;#34; jAB nAb rA vA zA ~A A A&amp;#34; AB Ab A A A A A A&amp;#34; AB Ab A A A A A A&amp;#34; AB Ab A A A A A A&amp;#34; AB Ab A A A A B B&amp;#34; BB Bb B B B B &amp;#34;B &amp;amp;B&amp;#34; *BB .Bb 2B 6B :B &amp;gt;B BB FB&amp;#34; JBB NBb RB VB ZB ^B bB fB&amp;#34; jBB nBb rB vB zB ~B B B&amp;#34; BB Bb B B B B B B&amp;#34; B ...
+0x017118: syscall: close(51)
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>From this output, we can infer the following logic:&lt;/p>
+&lt;ol>
+&lt;li>&lt;code>0x011fb0&lt;/code>: the function opens the libc&lt;/li>
+&lt;li>&lt;code>0x012884&lt;/code>: it reads the ELF header&lt;/li>
+&lt;li>&lt;code>0x013170&lt;/code>: it jumps to the ELF sections table&lt;/li>
+&lt;li>&lt;code>0x0145f8&lt;/code>: it looks for the &lt;code>.plt&lt;/code> section&lt;/li>
+&lt;li>&lt;code>0x015a68&lt;/code>, &lt;code>0x015fa0&lt;/code>: it reads the content of the &lt;code>.plt&lt;/code> section&lt;/li>
+&lt;/ol>
+&lt;p>These operations suggest that the function checks if the &lt;code>.plt&lt;/code> of &lt;code>/system/lib64/libc.so&lt;/code> is not tampered with.
+In particular, if we use Frida on a libc&amp;rsquo;s function this check won&amp;rsquo;t pass.&lt;/p>
+&lt;p>After this check, the function &lt;span class="green">sub_9080&lt;/span> spawns a thread:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text">0x0195dc: pthread_create(0xf1079f10, 0x0, 0x1a690, 0x0)
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>The libc integrity check makes more sense as it is probably used to protect the library against a hook of &lt;code>pthread_create()&lt;/code>.&lt;/p>
+&lt;p>The thread&amp;rsquo;s routine &lt;span class="red">sub_1a690&lt;/span> starts by making two calls to the mathematical function &lt;code>tan()&lt;/code>:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text">0x01b774: tan(0.): 0.
+0x01b79c: tan(-7832.0): -0.00951489
+0x01cc74: memcpy(0x7ffc006598, libnative-lib.so!0x1267f0, 80) -&amp;gt; !7Nl
+0x01ceb8: rand()
+0x01f774: tan(0.): 0.
+0x01f79c: tan(-7832.0): -0.00951489
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>My understanding of these calls is that the application tries to protect against tools that would not support
+floating-point instructions such as &lt;code>FCMP&lt;/code> or &lt;code>FMOV&lt;/code>. In addition, I think that if we mock the behavior of
+&lt;code>tan()&lt;/code> with a constant value it would trigger a crash.&lt;/p>
+&lt;p>&lt;img src="tan_instruction.png" alt="tan">&lt;/p>
+&lt;p>Then it follows a check of &lt;code>TracerPid&lt;/code> value in &lt;code>/proc/self/status&lt;/code>. This value is set when
+the process is ptrace-debugged (which is the case with gdb).
+Dynamically, we observe syscalls that open &lt;code>/proc/self/status&lt;/code> and read the content
+byte-per-byte:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text">0x020ee0: syscall: openat(0xffffffffffffff9c, &amp;#39;/proc/self/status&amp;#39;): 51
+0x0231e8: syscall: read(51, 0x7ffc00656c, 1): &amp;#39;N&amp;#39;
+0x0231e8: syscall: read(51, 0x7ffc00656c, 1): &amp;#39;a&amp;#39;
+0x0231e8: syscall: read(51, 0x7ffc00656c, 1): &amp;#39;m&amp;#39;
+0x0231e8: syscall: read(51, 0x7ffc00656c, 1): &amp;#39;e&amp;#39;
+0x0231e8: syscall: read(51, 0x7ffc00656c, 1): &amp;#39;:&amp;#39;
+0x0231e8: syscall: read(51, 0x7ffc00656c, 1)
+0x0231e8: syscall: read(51, 0x7ffc00656c, 1): &amp;#39;r&amp;#39;
+0x0231e8: syscall: read(51, 0x7ffc00656c, 1): &amp;#39;e&amp;#39;
+0x0231e8: syscall: read(51, 0x7ffc00656c, 1): &amp;#39;.&amp;#39;
+0x0231e8: syscall: read(51, 0x7ffc00656c, 1): &amp;#39;p&amp;#39;
+0x0231e8: syscall: read(51, 0x7ffc00656c, 1): &amp;#39;w&amp;#39;
+0x0231e8: syscall: read(51, 0x7ffc00656c, 1): &amp;#39;n&amp;#39;
+0x0231e8: syscall: read(51, 0x7ffc00656c, 1): &amp;#39;m&amp;#39;
+0x0231e8: syscall: read(51, 0x7ffc00656c, 1): &amp;#39;e&amp;#39;
+0x0231e8: syscall: read(51, 0x7ffc00656c, 1)
+0x0231e8: syscall: read(51, 0x7ffc00656c, 1): &amp;#39;S&amp;#39;
+0x0231e8: syscall: read(51, 0x7ffc00656c, 1): &amp;#39;t&amp;#39;
+0x0231e8: syscall: read(51, 0x7ffc00656c, 1): &amp;#39;a&amp;#39;
+0x0231e8: syscall: read(51, 0x7ffc00656c, 1): &amp;#39;t&amp;#39;
+0x0231e8: syscall: read(51, 0x7ffc00656c, 1): &amp;#39;e&amp;#39;
+0x0231e8: syscall: read(51, 0x7ffc00656c, 1): &amp;#39;:&amp;#39;
+...
+&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="anti-frida-1">Anti-Frida #1&lt;/h2>
+&lt;p>Still in the thread&amp;rsquo;s routine &lt;span class="red">sub_1a690&lt;/span>, the function checks if Frida is running by looking
+at all the values of &lt;code>/proc/self/task/&amp;lt;tid&amp;gt;/status&lt;/code> and by checking if one of the names is &lt;span class="red">&lt;b>&lt;u>gmain&lt;/u>&lt;/b>&lt;/span>.
+It turns out that it&amp;rsquo;s the case when Frida is used in the application :-)&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text">0x0368e4: snprintf(&amp;#39;/proc/self/task/9719/status&amp;#39;, &amp;#39;/proc/self/task/%s/status&amp;#39;): &amp;#39;/proc/self/task/9719/status&amp;#39;
+0x036a1c: syscall: openat(0xffffffffffffff9c, &amp;#39;/proc/self/task/9719/status&amp;#39;)
+0x03897c: syscall: read(73, 0x7ffc400af4, 1): &amp;#39;N&amp;#39;
+0x03897c: syscall: read(73, 0x7ffc400af4, 1): &amp;#39;a&amp;#39;
+0x03897c: syscall: read(73, 0x7ffc400af4, 1): &amp;#39;m&amp;#39;
+0x03897c: syscall: read(73, 0x7ffc400af4, 1): &amp;#39;e&amp;#39;
+0x03897c: syscall: read(73, 0x7ffc400af4, 1): &amp;#39;:&amp;#39;
+0x03897c: syscall: read(73, 0x7ffc400af4, 1)
+0x03897c: syscall: read(73, 0x7ffc400af4, 1): &amp;#39;g&amp;#39;
+0x03897c: syscall: read(73, 0x7ffc400af4, 1): &amp;#39;m&amp;#39;
+0x03897c: syscall: read(73, 0x7ffc400af4, 1): &amp;#39;a&amp;#39;
+0x03897c: syscall: read(73, 0x7ffc400af4, 1): &amp;#39;i&amp;#39;
+0x03897c: syscall: read(73, 0x7ffc400af4, 1): &amp;#39;n&amp;#39;
+0x03897c: syscall: read(73, 0x7ffc400af4, 1)
+0x03897c: closedir()
+# Crash!
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>To bypass this check, one can statically patch the syscall or we can dynamically
+change the behavior of &lt;code>snprintf(..., '/proc/self/task/%s/status')&lt;/code> in order to &lt;strong>always&lt;/strong> returns the same status (e.g. &lt;code>/proc/self/task/123/status&lt;/code>).
+Concretely, it could be done by hooking &lt;code>snprintf&lt;/code> and by forcing the &lt;em>output&lt;/em> string to &lt;code>/proc/self/task/123/status&lt;/code>.&lt;/p>
+&lt;h2 id="anti-frida-2">Anti-Frida #2&lt;/h2>
+&lt;p>Still in the &lt;span class="red">sub_1a690&lt;/span> function, the anti-frida checks continue by inspecting the file descriptors
+of the process. It iterates over &lt;code>/proc/self/fd/%s&lt;/code> and looks at the underlying symlink.&lt;/p>
+&lt;p>Frida &lt;span class="blue">server&lt;/span> &amp;mdash; which is running globally on the device &amp;mdash; and Frida agent &amp;mdash; which is injected in the
+process &amp;mdash; communicate with named pipes that are associated with a file descriptor.&lt;/p>
+&lt;p>If Frida server is running, we can observe the following values:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text">0x04308c: lstat(&amp;#39;/proc/self/fd/32&amp;#39;)
+0x043448: syscall: readlinkat(0xffffffffffffff9c, &amp;#39;/proc/self/fd/32&amp;#39;, 0x7ffbffdc10, 256): &amp;#39;anon_inode:[eventfd]&amp;#39;
+0x041844: readdir(&amp;#39;33&amp;#39;)
+0x043078: snprintf(&amp;#39;/proc/self/fd/33&amp;#39;, &amp;#39;/proc/self/fd/%s&amp;#39;): &amp;#39;/proc/self/fd/33&amp;#39;
+0x04308c: lstat(&amp;#39;/proc/self/fd/33&amp;#39;)
+0x043448: syscall: readlinkat(0xffffffffffffff9c, &amp;#39;/proc/self/fd/33&amp;#39;, 0x7ffbffdc10, 256): &amp;#39;anon_inode:[eventfd]&amp;#39;
+0x041844: readdir(&amp;#39;34&amp;#39;)
+0x043078: snprintf(&amp;#39;/proc/self/fd/34&amp;#39;, &amp;#39;/proc/self/fd/%s&amp;#39;): &amp;#39;/proc/self/fd/34&amp;#39;
+0x04308c: lstat(&amp;#39;/proc/self/fd/34&amp;#39;)
+0x043448: syscall: readlinkat(0xffffffffffffff9c, &amp;#39;/proc/self/fd/34&amp;#39;, 0x7ffbffdc10, 256): &amp;#39;/data/local/tmp/re.frida.server/linjector-500&amp;#39;
+# Crash!
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>In this case, the file descriptor &lt;code>34&lt;/code> is associated with &lt;code>/data/local/tmp/re.frida.server/linjector-500&lt;/code>
+which triggers the detection and the application crashes.&lt;/p>
+&lt;p>As for &lt;code>/proc/self/task/&amp;lt;tid&amp;gt;/status&lt;/code>, one can disable this check by &lt;strong>statically patching&lt;/strong> the syscalls or
+by &lt;strong>dynamically changing&lt;/strong> the result of &lt;code>readlinkat()&lt;/code>. For instance, we can use
+&lt;a href="https://qbdi.quarkslab.com/" target="_blank" rel="noopener">QBDI&lt;/a> to
+instrument syscall instructions and process the result of &lt;code>readlinkat()&lt;/code> in an user callback:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">
+vm.addMnemonicCB(&lt;span style="color:#e6db74">&amp;#34;SVC&amp;#34;&lt;/span>, POST_INST,
+[] (VMInstanceRef vm, GPRState&lt;span style="color:#f92672">*&lt;/span> gprState, FPRState&lt;span style="color:#f92672">*&lt;/span>, &lt;span style="color:#66d9ef">void&lt;/span>&lt;span style="color:#f92672">*&lt;/span> data) {
+&lt;span style="color:#66d9ef">if&lt;/span> (gprState&lt;span style="color:#f92672">-&amp;gt;&lt;/span>x8 &lt;span style="color:#f92672">!=&lt;/span> __NR_readlinkat) {
+&lt;span style="color:#66d9ef">return&lt;/span> VMAction&lt;span style="color:#f92672">::&lt;/span>CONTINUE;
+}
+std&lt;span style="color:#f92672">::&lt;/span>string buf &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#66d9ef">reinterpret_cast&lt;/span>&lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#66d9ef">char&lt;/span>&lt;span style="color:#f92672">*&amp;gt;&lt;/span>(gprState&lt;span style="color:#f92672">-&amp;gt;&lt;/span>x2);
+&lt;span style="color:#66d9ef">if&lt;/span> (buf.find(&lt;span style="color:#e6db74">&amp;#34;re.frida.server&amp;#34;&lt;/span>) &lt;span style="color:#f92672">!=&lt;/span> std&lt;span style="color:#f92672">::&lt;/span>string&lt;span style="color:#f92672">::&lt;/span>npos) {
+&lt;span style="color:#66d9ef">static&lt;/span> &lt;span style="color:#66d9ef">const&lt;/span> std&lt;span style="color:#f92672">::&lt;/span>string FAKE_VALUE &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;anon_inode:[eventfd]&amp;#34;&lt;/span>;
+&lt;span style="color:#75715e">// Bypass Frida detection!
+&lt;/span>&lt;span style="color:#75715e">&lt;/span> memcpy(
+&lt;span style="color:#66d9ef">reinterpret_cast&lt;/span>&lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#66d9ef">void&lt;/span>&lt;span style="color:#f92672">*&amp;gt;&lt;/span>(gprState&lt;span style="color:#f92672">-&amp;gt;&lt;/span>x2),
+&lt;span style="color:#66d9ef">reinterpret_cast&lt;/span>&lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#66d9ef">void&lt;/span>&lt;span style="color:#f92672">*&amp;gt;&lt;/span>(FAKE_VALUE.c_str()),
+FAKE_VALUE.size() &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#ae81ff">1&lt;/span>
+);
+gprState&lt;span style="color:#f92672">-&amp;gt;&lt;/span>x0 &lt;span style="color:#f92672">=&lt;/span> FAKE_VALUE.size() &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#ae81ff">1&lt;/span>;
+}
+&lt;span style="color:#66d9ef">return&lt;/span> VMAction&lt;span style="color:#f92672">::&lt;/span>CONTINUE;
+}, ctx);
+&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="anti-frida-3-">Anti-Frida #3 ?&lt;/h2>
+&lt;p>I&amp;rsquo;m not sure if the following calls sequence is used to check the libc&amp;rsquo;s integrity against Frida but
+at the end of the thread&amp;rsquo;s routine, we can observe these syscalls:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text">0x048ff0: syscall: openat(0xffffffffffffff9c, &amp;#39;/proc/self/maps&amp;#39;): 51
+0x04ae6c: syscall: read(51, 0x7ffc006578, 1): &amp;#39;1&amp;#39;
+0x04ae6c: syscall: read(51, 0x7ffc006578, 1): &amp;#39;2&amp;#39;
+0x04ae6c: syscall: read(51, 0x7ffc006578, 1): &amp;#39;c&amp;#39;
+0x04ae6c: syscall: read(51, 0x7ffc006578, 1): &amp;#39;0&amp;#39;
+0x04ae6c: syscall: read(51, 0x7ffc006578, 1): &amp;#39;0&amp;#39;
+0x04ae6c: syscall: read(51, 0x7ffc006578, 1): &amp;#39;0&amp;#39;
+0x04ae6c: syscall: read(51, 0x7ffc006578, 1): &amp;#39;0&amp;#39;
+0x04ae6c: syscall: read(51, 0x7ffc006578, 1): &amp;#39;0&amp;#39;
+...
+0x0513f8: sscanf(&amp;#39;7fa65c0000-7fa65dc000 r-xp 00000000 08:07 1275/system/lib64/libc.so&amp;#39;, &amp;#39;%lx-%lx %s %s %s %s %s&amp;#39;)
+0x056034: syscall: close(51)
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>The result of &lt;code>sscanf()&lt;/code> could be used to check the page permissions (e.g. &lt;code>r&lt;/code>&lt;span class="blue">w&lt;/span>&lt;code>xp&lt;/code>)
+or to the libc&amp;rsquo;s base address (to check if it is consistent).&lt;/p>
+&lt;h2 id="anti-root">Anti-Root&lt;/h2>
+&lt;p>In addition to the root-beer detection, the library embeds another root detection located in the &lt;strong>second&lt;/strong> ELF constructor.
+This constructor &amp;mdash; &lt;span class="yellow">sub_77D14&lt;/span> &amp;mdash; performs the same early checks as the first constructor
+on the libc&amp;rsquo;s &lt;code>.plt&lt;/code> integrity before spawning another thread routine, &lt;span class="yellow">sub_98c00&lt;/span>.&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text">0x08861c: pthread_create(0xfa780b70, 0x0, 0x98c00, 0x0)
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;img src="ctor_pthread.png" alt="ELF constructors: anti-frida and anti-root">&lt;/p>
+&lt;p>By tracing the thread&amp;rsquo;s routine, we notice that it checks if &lt;code>su&lt;/code> files are present on the device through
+three different calls:&lt;/p>
+&lt;ol>
+&lt;li>One call to &lt;code>open()&lt;/code>: &lt;span class="hl-literal">0x099180: open(&lt;span class="hl-strings">'/system/xbin/su'&lt;/span>)&lt;/span>&lt;/li>
+&lt;li>One syscall to &lt;code>openat()&lt;/code>: &lt;span class="hl-literal">0x0992a4: syscall: openat(&amp;hellip;, &lt;span class="hl-strings">'/data/su'&lt;/span>)&lt;/span>&lt;/li>
+&lt;li>One syscall to &lt;code>faccessat()&lt;/code>: &lt;span class="hl-literal">0x0993f0: syscall: faccessat(&lt;span class="hl-strings">'/sbin/su'&lt;/span>)&lt;/span>&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text">0x099180: open(&amp;#39;/data/local/su&amp;#39;): -1
+0x0992a4: syscall: openat(0xffffffffffffff9c, &amp;#39;/data/local/su&amp;#39;): -2
+0x0993f0: syscall: faccessat(&amp;#39;/data/local/su&amp;#39;): -2
+0x099180: open(&amp;#39;/data/local/bin/su&amp;#39;): -1
+0x0992a4: syscall: openat(0xffffffffffffff9c, &amp;#39;/data/local/bin/su&amp;#39;): -2
+0x0993f0: syscall: faccessat(&amp;#39;/data/local/bin/su&amp;#39;): -2
+0x099180: open(&amp;#39;/data/local/xbin/su&amp;#39;): -1
+0x0992a4: syscall: openat(0xffffffffffffff9c, &amp;#39;/data/local/xbin/su&amp;#39;): -2
+0x0993f0: syscall: faccessat(&amp;#39;/data/local/xbin/su&amp;#39;): -2
+0x099180: open(&amp;#39;/sbin/su&amp;#39;): 51
+0x0992a4: syscall: openat(0xffffffffffffff9c, &amp;#39;/sbin/su&amp;#39;): 52
+0x0993f0: syscall: faccessat(&amp;#39;/sbin/su&amp;#39;): 52
+Crash!
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>By forcing the results of these functions to &lt;code>-1&lt;/code> or &lt;code>-2&lt;/code>, we can disable the checks.&lt;/p>
+&lt;p>Here is the list of the su-files that are used in this detection:&lt;/p>
+&lt;ul>
+&lt;li>&lt;span class="hl-strings">/data/local/su&lt;/span>&lt;/li>
+&lt;li>&lt;span class="hl-strings">/data/local/bin/su&lt;/span>&lt;/li>
+&lt;li>&lt;span class="hl-strings">/data/local/xbin/su&lt;/span>&lt;/li>
+&lt;li>&lt;span class="hl-strings">/sbin/su&lt;/span>&lt;/li>
+&lt;li>&lt;span class="hl-strings">/su/bin/su&lt;/span>&lt;/li>
+&lt;li>&lt;span class="hl-strings">/system/bin/su&lt;/span>&lt;/li>
+&lt;li>&lt;span class="hl-strings">/system/bin/.ext/su&lt;/span>&lt;/li>
+&lt;li>&lt;span class="hl-strings">/system/bin/failsafe/su&lt;/span>&lt;/li>
+&lt;li>&lt;span class="hl-strings">/system/sd/xbin/su&lt;/span>&lt;/li>
+&lt;li>&lt;span class="hl-strings">/system/usr/we-need-root/su&lt;/span>&lt;/li>
+&lt;li>&lt;span class="hl-strings">/system/xbin/su&lt;/span>&lt;/li>
+&lt;li>&lt;span class="hl-strings">/cache/su&lt;/span>&lt;/li>
+&lt;li>&lt;span class="hl-strings">/data/su&lt;/span>&lt;/li>
+&lt;li>&lt;span class="hl-strings">/dev/su&lt;/span>&lt;/li>
+&lt;/ul>
+&lt;p>At the end of the thread&amp;rsquo;s routine, we can also observe the following calls that
+are probably used to check if the application is running on a real Android system.&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text">0x099e30: syscall: faccessat(&amp;#39;/system&amp;#39;)
+0x099e30: syscall: faccessat(&amp;#39;/system/bin&amp;#39;)
+0x099e30: syscall: faccessat(&amp;#39;/system/sbin&amp;#39;)
+0x099e30: syscall: faccessat(&amp;#39;/system/xbin&amp;#39;)
+0x099e30: syscall: faccessat(&amp;#39;/vendor/bin&amp;#39;)
+0x099e30: syscall: faccessat(&amp;#39;/sbin&amp;#39;)
+0x099e30: syscall: faccessat(&amp;#39;/etc&amp;#39;)
+&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="static-bypass-with-lief">Static bypass with LIEF&lt;/h2>
+&lt;p>In the previous sections, we described the anti-root, anti-debug and anti-frida checks
+made in the ELF constructors. The &lt;strong>same&lt;/strong> dynamic checks are also performed in the &lt;code>gXftm3iswpkVgBNDUp&lt;/code> function
+at the following locations:&lt;/p>
+&lt;ul>
+&lt;li>&lt;span class="hl-keyword">0x09f2f8&lt;/span>: &lt;span class="hl-literal">/proc/self/status&lt;/span>&lt;/li>
+&lt;li>&lt;span class="hl-keyword">0x0d4840&lt;/span>: &lt;span class="hl-literal">/proc/self/fd/&lt;/span>&lt;/li>
+&lt;li>&lt;span class="hl-keyword">0x0dec8c&lt;/span>: &lt;span class="hl-literal">/proc/self/task/&amp;lt;tid&amp;gt;/status&lt;/span>&lt;/li>
+&lt;/ul>
+&lt;p>While the checks in &lt;code>gXftm3iswpkVgBNDUp&lt;/code> can be dynamically disabled when instrumenting the function,
+the checks in the ELF constructors are annoying.&lt;/p>
+&lt;p>One way to disable the checks in the thread&amp;rsquo;s routines is to disable the &lt;code>pthread_create(...)&lt;/code>. It can
+be achieved by patching the &lt;code>.plt&lt;/code> entry associated with the function:&lt;/p>
+&lt;pre>&lt;code class="language-armasm" data-lang="armasm">mov x0, xzr;
+ret;
+&lt;/code>&lt;/pre>&lt;p>Thanks to &lt;code>llvm-mc&lt;/code>, we can get the raw bytes of these instructions:&lt;/p>
+&lt;pre>&lt;code class="language-console" data-lang="console">$ echo &amp;quot;mov x0, xzr;ret;&amp;quot;|llvm-mc -arch=aarch64 -show-encoding
+.text
+mov x0, xzr // encoding: [0xe0,0x03,0x1f,0xaa]
+ret // encoding: [0xc0,0x03,0x5f,0xd6]
+&lt;/code>&lt;/pre>&lt;p>Finally, we can patch the &lt;code>.plt&lt;/code> with
+&lt;a href="https://lief.quarkslab.com" target="_blank" rel="noopener">LIEF&lt;/a>:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">&lt;span style="color:#f92672">import&lt;/span> lief
+lib &lt;span style="color:#f92672">=&lt;/span> lief&lt;span style="color:#f92672">.&lt;/span>parse(&lt;span style="color:#e6db74">&amp;#34;./libnative-lib.so&amp;#34;&lt;/span>)
+lib&lt;span style="color:#f92672">.&lt;/span>patch_address(&lt;span style="color:#ae81ff">0x5870&lt;/span>, [&lt;span style="color:#ae81ff">0xe0&lt;/span>,&lt;span style="color:#ae81ff">0x03&lt;/span>,&lt;span style="color:#ae81ff">0x1f&lt;/span>,&lt;span style="color:#ae81ff">0xaa&lt;/span>])
+lib&lt;span style="color:#f92672">.&lt;/span>patch_address(&lt;span style="color:#ae81ff">0x5874&lt;/span>, [&lt;span style="color:#ae81ff">0xc0&lt;/span>,&lt;span style="color:#ae81ff">0x03&lt;/span>,&lt;span style="color:#ae81ff">0x5f&lt;/span>,&lt;span style="color:#ae81ff">0xd6&lt;/span>])
+lib&lt;span style="color:#f92672">.&lt;/span>write(&lt;span style="color:#e6db74">&amp;#34;./libnative-lib-patched.so&amp;#34;&lt;/span>)
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;img src="patching.png" alt="pthread_create patches">&lt;/p>
+&lt;p>Using these patches and the Frida script exposed in the first section, we are able to &lt;strong>load&lt;/strong> the application but the other
+detections are triggered in &lt;code>gXftm3iswpkVgBNDUp&lt;/code>. Nevertheless, with
+the Frida&amp;rsquo;s stalker or QBDI we can trace the instructions and disable the other checks.&lt;/p>
+&lt;p>If one wants to completely bypass all the protections statically, here are the patches:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">&lt;span style="color:#f92672">import&lt;/span> lief
+lib &lt;span style="color:#f92672">=&lt;/span> lief&lt;span style="color:#f92672">.&lt;/span>parse(&lt;span style="color:#e6db74">&amp;#34;./libnative-lib.so&amp;#34;&lt;/span>)
+&lt;span style="color:#75715e"># Keys are str objects for a better understanding :)&lt;/span>
+INST &lt;span style="color:#f92672">=&lt;/span> {
+&lt;span style="color:#e6db74">&amp;#34;mov x0, #0&amp;#34;&lt;/span>: [&lt;span style="color:#ae81ff">0xe0&lt;/span>, &lt;span style="color:#ae81ff">0x03&lt;/span>, &lt;span style="color:#ae81ff">0x1f&lt;/span>, &lt;span style="color:#ae81ff">0xaa&lt;/span>],
+&lt;span style="color:#e6db74">&amp;#34;ret&amp;#34;&lt;/span>: [&lt;span style="color:#ae81ff">0xc0&lt;/span>, &lt;span style="color:#ae81ff">0x03&lt;/span>, &lt;span style="color:#ae81ff">0x5f&lt;/span>, &lt;span style="color:#ae81ff">0xd6&lt;/span>],
+&lt;span style="color:#e6db74">&amp;#34;nop&amp;#34;&lt;/span>: [&lt;span style="color:#ae81ff">0x1f&lt;/span>, &lt;span style="color:#ae81ff">0x20&lt;/span>, &lt;span style="color:#ae81ff">0x03&lt;/span>, &lt;span style="color:#ae81ff">0xd5&lt;/span>],
+}
+PATCHES &lt;span style="color:#f92672">=&lt;/span> [
+&lt;span style="color:#75715e"># Patch the .plt entry of pthread_create&lt;/span>
+(&lt;span style="color:#ae81ff">0x5870&lt;/span>, INST[&lt;span style="color:#e6db74">&amp;#34;mov x0, #0&amp;#34;&lt;/span>]),
+(&lt;span style="color:#ae81ff">0x5874&lt;/span>, INST[&lt;span style="color:#e6db74">&amp;#34;ret&amp;#34;&lt;/span>]),
+&lt;span style="color:#75715e"># Disable anti-frida checks&lt;/span>
+(&lt;span style="color:#ae81ff">0x0d718c&lt;/span>, INST[&lt;span style="color:#e6db74">&amp;#34;mov x0, #0&amp;#34;&lt;/span>]), &lt;span style="color:#75715e"># /proc/self/fd : patch the result of readlinkat syscall&lt;/span>
+(&lt;span style="color:#ae81ff">0x0e1940&lt;/span>, INST[&lt;span style="color:#e6db74">&amp;#34;mov x0, #0&amp;#34;&lt;/span>]), &lt;span style="color:#75715e"># /proc/self/task/&amp;lt;tid&amp;gt;/status: patch the result of read syscall&lt;/span>
+&lt;span style="color:#75715e"># Disable .text integrity checks&lt;/span>
+(&lt;span style="color:#ae81ff">0xB64D0&lt;/span>, INST[&lt;span style="color:#e6db74">&amp;#34;nop&amp;#34;&lt;/span>]),
+]
+&lt;span style="color:#66d9ef">for&lt;/span> patch &lt;span style="color:#f92672">in&lt;/span> PATCHES:
+lib&lt;span style="color:#f92672">.&lt;/span>patch_address(&lt;span style="color:#f92672">*&lt;/span>patch)
+lib&lt;span style="color:#f92672">.&lt;/span>write(&lt;span style="color:#e6db74">&amp;#34;libnative-lib.so&amp;#34;&lt;/span>)
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>When writing this write-up, I realized that patching the syscalls involved in the anti-frida (&lt;span class="hl-literal">/proc/self/fd/&lt;/span> and &lt;span class="hl-literal">/proc/self/task/&amp;lt;tid&amp;gt;/status&lt;/span>)
+makes the application crash.&lt;/p>
+&lt;p>It turns out that the library seems to implement &lt;strong>code integrity on the &lt;code>.text&lt;/code> section&lt;/strong> that I didn&amp;rsquo;t notice when running
+the function through QBDI.
+Nevertheless, by tracing the basic block&lt;sup id="fnref:3">&lt;a href="#fn:3" class="footnote-ref" role="doc-noteref">3&lt;/a>&lt;/sup>
+we can identify the basic block involved in the integrity check and patch it.&lt;/p>
+&lt;p>&lt;img src="code_integrity.png" alt="Code integrity patches">&lt;/p>
+&lt;div class="alert alert-note">
+&lt;div>
+The scripts and the patched library are available &lt;a href="https://github.com/romainthomas/r2pay">here &lt;i class="fab fa-github">&lt;/i>&lt;/a>.
+&lt;/div>
+&lt;/div>
+&lt;p>Regarding &lt;code>JNI_OnLoad()&lt;/code>, a trace generated with
+&lt;a href="https://github.com/QBDI/examples/blob/d589d28b237f46d16cab3b11aa36bbb51102e307/packer-android-x86/src/libshellx_qbdi.cpp#L18-L85" target="_blank" rel="noopener">QBDI&amp;rsquo;s ExecBroker&lt;/a>
+leads to following result:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">JNI_OnLoad() {
+&lt;span style="color:#ae81ff">0x09af3c&lt;/span>&lt;span style="color:#f92672">:&lt;/span> GetEnv(&lt;span style="color:#ae81ff">0x7fcb507460&lt;/span>, &lt;span style="color:#ae81ff">0x10006&lt;/span>)
+&lt;span style="color:#ae81ff">0x09b0ac&lt;/span>&lt;span style="color:#f92672">:&lt;/span> FindClass(&lt;span style="color:#e6db74">&amp;#34;re/pwnme/MainActivity&amp;#34;&lt;/span>)&lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#ae81ff">537&lt;/span>
+&lt;span style="color:#ae81ff">0x09b1b4&lt;/span>&lt;span style="color:#f92672">:&lt;/span> RegisterNatives()
+gXftm3iswpkVgBNDUp ([BB)[B &lt;span style="color:#f92672">-&amp;gt;&lt;/span> &lt;span style="color:#e6db74">&amp;#34;libnative-lib.so@0x9b41c&amp;#34;&lt;/span>
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Then, we can extract the function&amp;rsquo;s offset: &lt;span class="blue">gXftm3iswpkVgBNDUp&lt;/span>: &lt;span class="red">0x9b41c&lt;/span>.&lt;/p>
+&lt;h2 id="summary--conclusion">Summary &amp;amp; Conclusion&lt;/h2>
+&lt;p>Whilst Frida detections are usually based on sockets and library names in &lt;code>/proc/self/maps&lt;/code>,
+this challenge introduces two detections based on named pipes:&lt;code>/proc/self/fd&lt;/code> and thread status: &lt;code>/proc/self/task/&amp;lt;tid&amp;gt;/status&lt;/code>
+which are pretty cool :-)&lt;/p>
+&lt;p>These checks are performed in two locations:&lt;/p>
+&lt;ol>
+&lt;li>The ELF constructors&lt;/li>
+&lt;li>The function &lt;code>gXftm3iswpkVgBNDUp()&lt;/code>&lt;/li>
+&lt;/ol>
+&lt;p>The implementation in the ELF constructors might be tricky to analyse since the functions are called before &lt;strong>any&lt;/strong>
+other classical functions (which includes &lt;code>JNI_OnLoad()&lt;/code>). Nevertheless, thanks to the interface of the ELF loader,
+it exposes the function &lt;code>call_array(...)&lt;/code>&lt;sup id="fnref:4">&lt;a href="#fn:4" class="footnote-ref" role="doc-noteref">4&lt;/a>&lt;/sup> which is handy to process the ELF constructors.&lt;/p>
+&lt;div class="alert alert-note">
+&lt;div>
+This function is mangled as &lt;code>__dl__ZL10call_arrayIPFviPPcS1_EEvPKcPT_mbS5_&lt;/code> in &lt;code>/system/bin/linker64&lt;/code>
+&lt;/div>
+&lt;/div>
+&lt;p>&lt;img src="protection_overview.png" alt="Overview of the anti-root and anti-frida">&lt;/p>
+&lt;p>Since QBDI is not detected in this challenge, it&amp;rsquo;s a good opportunity to give it a try:&lt;/p>
+&lt;center>&lt;i class="fab fa-github">&lt;/i> &lt;a href="https://github.com/QBDI/QBDI">https://github.com/QBDI/QBDI&lt;/a>&lt;/center>
+&lt;h2 id="acknowledgments">Acknowledgments&lt;/h2>
+&lt;p>Thanks to &lt;u>Eduardo Novella&lt;/u> (
+&lt;a href="https://twitter.com/enovella_" target="_blank" rel="noopener">@enovella_&lt;/a>)
+and &lt;u>Gautam Arvind&lt;/u> (
+&lt;a href="https://twitter.com/darvincisec" target="_blank" rel="noopener">@darvincisec&lt;/a>) for this interesting and realistic challenge they created!&lt;/p>
+&lt;p>Also thanks to &lt;u>
+&lt;a href="https://www.quarkslab.com" target="_blank" rel="noopener">Quarkslab&lt;/a>&lt;/u> that allowed this publication.
+For those who are interested in similar topics, you can take a look at the Quarkslab&amp;rsquo;s
+&lt;a href="https://blog.quarkslab.com/" target="_blank" rel="noopener">blog&lt;/a>.&lt;/p>
+&lt;h3 id="references">References&lt;/h3>
+&lt;section class="footnotes" role="doc-endnotes">
+&lt;hr>
+&lt;ol>
+&lt;li id="fn:1" role="doc-endnote">
+&lt;p>
+&lt;a href="https://github.com/GoSSIP-SJTU/Armariris" target="_blank" rel="noopener">GoSSIP-SJTU/Armariris&lt;/a> -
+&lt;a href="https://github.com/GoSSIP-SJTU/Armariris/blob/0cba41329244a29c7cb94e25458191b68967b6e8/lib/Transforms/Obfuscation/StringObfuscation.cpp#L140" target="_blank" rel="noopener">&lt;code>StringObfuscation.cpp#L140&lt;/code>&lt;/a>&amp;#160;&lt;a href="#fnref:1" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li id="fn:2" role="doc-endnote">
+&lt;p>&lt;a href="https://developer.android.com/training/articles/perf-jni#native-libraries">https://developer.android.com/training/articles/perf-jni#native-libraries&lt;/a>&amp;#160;&lt;a href="#fnref:2" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li id="fn:3" role="doc-endnote">
+&lt;p>
+&lt;a href="https://github.com/QBDI/QBDI/blob/a20653f07df3ae78250e7ecf28ed699b2d727027/include/QBDI/VM.h#L296-L305" target="_blank" rel="noopener">&lt;code>addVMEventCB(VMEvent::BASIC_BLOCK_ENTRY, ...);&lt;/code>&lt;/a>&amp;#160;&lt;a href="#fnref:3" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li id="fn:4" role="doc-endnote">
+&lt;p>
+&lt;a href="https://android.googlesource.com/platform/bionic/&amp;#43;/refs/tags/android-9.0.0_r60/linker/linker_soinfo.cpp#420" target="_blank" rel="noopener">&lt;code>linker/linker_soinfo.cpp:420&lt;/code>&lt;/a>&amp;#160;&lt;a href="#fnref:4" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;/section></description></item><item><title>A Glimpse Into Tencent's Legu Packer</title><link>/post/a-glimpse-into-tencents-legu-packer/</link><pubDate>Tue, 26 Nov 2019 00:00:00 +0000</pubDate><guid>/post/a-glimpse-into-tencents-legu-packer/</guid><description>&lt;style>
+.packedfile {
+color:green;
+font-family: 'Lucida Console', monospace;
+}
+.keyfile {
+color: blue;
+font-family: 'Lucida Console', monospace;
+}
+.libshell {
+color: #FF6347;
+font-family: 'Lucida Console', monospace;
+}
+.tencentclass {
+color: #df2b04;
+font-family: 'Lucida Console', monospace;
+}
+&lt;/style>
+&lt;div class="alert alert-note">
+&lt;div>
+This post has been originally posted on the &lt;a href=https://blog.quarkslab.com/a-glimpse-into-tencents-legu-packer.html>Quarkslab&amp;rsquo;s Blog&lt;/a>
+&lt;/div>
+&lt;/div>
+&lt;h2 id="introduction">Introduction&lt;/h2>
+&lt;p>This blog post deals with the Legu packer, an Android protector developed by Tencent that is currently one of the
+state-of-the-art solutions to protect APK DEX files. The packer is updated frequently and this blog post focuses on
+versions &lt;code>4.1.0.15&lt;/code> and &lt;code>4.1.0.18&lt;/code>.&lt;/p>
+&lt;h2 id="overview">Overview&lt;/h2>
+&lt;p>An application protected with Legu is composed of two native libraries: &lt;span class="libshell">libshell-super.2019.so&lt;/span>
+and &lt;code>libshella-4.1.0.XY.so&lt;/code> as well as raw binary files embedded in the resources of the APK:&lt;/p>
+&lt;ul>
+&lt;li>&lt;span class="keyfile">tosversion&lt;/span>&lt;/li>
+&lt;li>&lt;span class="packedfile">0OO00l111l1l&lt;/span>&lt;/li>
+&lt;li>&lt;code>0OO00oo01l1l&lt;/code>&lt;/li>
+&lt;li>&lt;code>o0oooOO0ooOo.dat&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;p>The main logic of the packer is located in the native library &lt;span class="libshell">libshell-super.2019.so&lt;/span> which basically
+unpacks and loads the protected DEX files from the resources.&lt;/p>
+&lt;p>Some functions of the library are obfuscated but thanks to Frida/QBDI their analysis is not a big deal.&lt;/p>
+&lt;h2 id="internals">Internals&lt;/h2>
+&lt;p>Basically, the original DEX files are located in the &lt;span class="packedfile">assets/0OO00l111l1l&lt;/span> file along with the information required to
+unpack them.&lt;/p>
+&lt;p>The following figure lays out the structure of this file.&lt;/p>
+&lt;p>&lt;img src="packed_file.png" alt="">&lt;/p>
+&lt;p>In the &lt;span class="packedfile">assets/0OO00l111l1l&lt;/span> file, the first part contains the original DEX files with the same number of &lt;code>classes&amp;lt;N&amp;gt;.dex&lt;/code> according to the multi-DEX feature of the original APK. These
+DEX files are not exactly the original ones, as their Dalvik bytecode have been &lt;em>NOP-ed&lt;/em> by Legu.
+Therefore, a dump of these files only gives information about the classes' names, not the code logic:&lt;/p>
+&lt;p>&lt;img src="noped.png" alt="">&lt;/p>
+&lt;p>Then follows what we called a &lt;em>hashmap&lt;/em> that is used to link a class name (e.g. &lt;span class="tencentclass">Lcom/tencent/mmkv/MMKV;&lt;/span>) to an offset in
+the data block located in the third part of the file.
+This data block contains the original Dalvik bytecode of the methods.&lt;/p>
+&lt;p>Actually, the first part that contains the altered DEX files, is compressed with &lt;strong>NRV&lt;/strong> &lt;sup id="fnref:1">&lt;a href="#fn:1" class="footnote-ref" role="doc-noteref">1&lt;/a>&lt;/sup>.
+The second part — the hashmap — is also compressed with NRV but the packer adds a layer of
+encryption through a slightly modified version of &lt;strong>XTEA&lt;/strong> &lt;sup id="fnref:2">&lt;a href="#fn:2" class="footnote-ref" role="doc-noteref">2&lt;/a>&lt;/sup>. Finally, the last part is compressed and encrypted with the
+same algorithms as the previous one.&lt;/p>
+&lt;p>Regarding the &lt;em>hashmap&lt;/em>, it uses a custom structure that has been reversed and lead to a Kaitai structure available
+here:
+&lt;a href="https://github.com/quarkslab/legu_unpacker_2019/blob/master/legu_packed_file.ksy" target="_blank" rel="noopener">legu_packed_file.ksy&lt;/a>,
+&lt;a href="https://github.com/quarkslab/legu_unpacker_2019/blob/master/legu_hashmap.ksy" target="_blank" rel="noopener">legu_hashmap.ksy&lt;/a>&lt;/p>
+&lt;p>Its overall layout is exposed in the next figure:&lt;/p>
+&lt;p>&lt;img src="hashmap.png" alt="">&lt;/p>
+&lt;h2 id="unpacking-process">Unpacking process&lt;/h2>
+&lt;p>Let&amp;rsquo;s say that the application needs to use the packed Java class &lt;span class="tencentclass">Lcom/tencent/mmkv/MMKV;&lt;/span>.&lt;/p>
+&lt;p>First, the packer&amp;rsquo;s runtime transforms the class name into an integer with the &lt;code>dvmComputeUtf8Hash()&lt;/code> hash function &lt;sup id="fnref:3">&lt;a href="#fn:3" class="footnote-ref" role="doc-noteref">3&lt;/a>&lt;/sup>. This integer is then used
+as an index into the &lt;em>hashmap&lt;/em> whose value is a structure that contains information about the class in the packed data (blue area in
+the figure). The first attribute of this structure — &lt;code>utf8_hash&lt;/code> — is a copy of the hash value which is used to check that it is the right key/value association.&lt;/p>
+&lt;p>The &lt;code>class_info&lt;/code> structure (blue block in the figure) next contains the packed method information (yellow area in the figure) whose size is the same as the original number of
+methods in the class. This structure makes the relationship between the NOP-ed bytecode offset in the altered DEX
+files and the offset in the original bytecode (red block).
+Finally, the packer copies the original bytecode into the altered DEX files.&lt;/p>
+&lt;p>To summarize, the first part contains the original DEX files with the Dalvik bytecode removed (&lt;em>NOP-ed&lt;/em>).
+The last part contains the missing Dalvik bytecode and the second part makes the
+bridge between the altered DEX files and the Dalvik bytecode.&lt;/p>
+&lt;h1 id="compression--encryption">Compression &amp;amp; Encryption&lt;/h1>
+&lt;p>To decrypt the hashmap and the Dalvik bytecode, the packer uses the first 16 bytes of &lt;span class="keyfile">assets/tosversion&lt;/span>
+xored with a hard-coded key: &lt;code>^hHc7Ql]N9Z4:+1m~nTcA&amp;amp;3a7|?GB1z@&lt;/code>.&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">LIB_KEY &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">b&lt;/span>&lt;span style="color:#e6db74">&amp;#34;^hHc7Ql]N9Z4:+1m~nTcA&amp;amp;3a7|?GB1z@&amp;#34;&lt;/span>
+&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">key_derivation&lt;/span>(key: bytes) &lt;span style="color:#f92672">-&amp;gt;&lt;/span> bytes:
+&lt;span style="color:#66d9ef">return&lt;/span> bytes(x1 &lt;span style="color:#f92672">^&lt;/span> x2 &lt;span style="color:#66d9ef">for&lt;/span> x1, x2 &lt;span style="color:#f92672">in&lt;/span> zip(LIB_KEY, cycle(key)))
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Then, it uses a slightly modified version of XTEA that is given in the next listing:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="color:#66d9ef">int&lt;/span> &lt;span style="color:#a6e22e">xtea_decrypt&lt;/span>(&lt;span style="color:#66d9ef">uint32_t&lt;/span>&lt;span style="color:#f92672">*&lt;/span> key, &lt;span style="color:#66d9ef">uint32_t&lt;/span>&lt;span style="color:#f92672">*&lt;/span> buf, size_t ilen, size_t nb_round) {
+&lt;span style="color:#66d9ef">const&lt;/span> size_t count &lt;span style="color:#f92672">=&lt;/span> ilen &lt;span style="color:#f92672">/&lt;/span> &lt;span style="color:#ae81ff">8&lt;/span>;
+&lt;span style="color:#66d9ef">const&lt;/span> size_t key_off &lt;span style="color:#f92672">=&lt;/span> (ilen &lt;span style="color:#f92672">&amp;amp;&lt;/span> &lt;span style="color:#ae81ff">8&lt;/span>) &lt;span style="color:#f92672">/&lt;/span> &lt;span style="color:#ae81ff">4&lt;/span>;
+&lt;span style="color:#66d9ef">static&lt;/span> &lt;span style="color:#66d9ef">constexpr&lt;/span> &lt;span style="color:#66d9ef">uint32_t&lt;/span> DELTA &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">0x9e3779b9&lt;/span>;
+&lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#66d9ef">uint32_t&lt;/span> key_0 &lt;span style="color:#f92672">=&lt;/span> key[key_off &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>];
+&lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#66d9ef">uint32_t&lt;/span> key_1 &lt;span style="color:#f92672">=&lt;/span> key[key_off &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#ae81ff">1&lt;/span>];
+&lt;span style="color:#66d9ef">for&lt;/span> (size_t i &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>; i &lt;span style="color:#f92672">&amp;lt;&lt;/span> count &lt;span style="color:#f92672">*&lt;/span> &lt;span style="color:#ae81ff">2&lt;/span>; i &lt;span style="color:#f92672">+=&lt;/span> &lt;span style="color:#ae81ff">2&lt;/span>) {
+buf[i &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>] &lt;span style="color:#f92672">^=&lt;/span> key_0;
+buf[i &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#ae81ff">1&lt;/span>] &lt;span style="color:#f92672">^=&lt;/span> key_1;
+&lt;span style="color:#66d9ef">uint32_t&lt;/span> sum &lt;span style="color:#f92672">=&lt;/span> DELTA &lt;span style="color:#f92672">*&lt;/span> nb_round;
+&lt;span style="color:#66d9ef">uint32_t&lt;/span> temp0 &lt;span style="color:#f92672">=&lt;/span> buf[i &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>];
+&lt;span style="color:#66d9ef">uint32_t&lt;/span> temp1 &lt;span style="color:#f92672">=&lt;/span> buf[i &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#ae81ff">1&lt;/span>];
+&lt;span style="color:#66d9ef">for&lt;/span> (size_t j &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>; j &lt;span style="color:#f92672">&amp;lt;&lt;/span> nb_round; &lt;span style="color:#f92672">++&lt;/span>j) {
+temp1 &lt;span style="color:#f92672">-=&lt;/span> (key[&lt;span style="color:#ae81ff">2&lt;/span>] &lt;span style="color:#f92672">+&lt;/span> (temp0 &lt;span style="color:#f92672">&amp;lt;&amp;lt;&lt;/span> &lt;span style="color:#ae81ff">4&lt;/span>)) &lt;span style="color:#f92672">^&lt;/span> (key[&lt;span style="color:#ae81ff">3&lt;/span>] &lt;span style="color:#f92672">+&lt;/span> (temp0 &lt;span style="color:#f92672">&amp;gt;&amp;gt;&lt;/span> &lt;span style="color:#ae81ff">5&lt;/span>)) &lt;span style="color:#f92672">^&lt;/span> (temp0 &lt;span style="color:#f92672">+&lt;/span> sum);
+temp0 &lt;span style="color:#f92672">-=&lt;/span> (key[&lt;span style="color:#ae81ff">0&lt;/span>] &lt;span style="color:#f92672">+&lt;/span> (temp1 &lt;span style="color:#f92672">&amp;lt;&amp;lt;&lt;/span> &lt;span style="color:#ae81ff">4&lt;/span>)) &lt;span style="color:#f92672">^&lt;/span> (key[&lt;span style="color:#ae81ff">1&lt;/span>] &lt;span style="color:#f92672">+&lt;/span> (temp1 &lt;span style="color:#f92672">&amp;gt;&amp;gt;&lt;/span> &lt;span style="color:#ae81ff">5&lt;/span>)) &lt;span style="color:#f92672">^&lt;/span> (temp1 &lt;span style="color:#f92672">+&lt;/span> sum);
+sum &lt;span style="color:#f92672">-=&lt;/span> DELTA;
+}
+buf[i &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>] &lt;span style="color:#f92672">=&lt;/span> temp0;
+buf[i &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#ae81ff">1&lt;/span>] &lt;span style="color:#f92672">=&lt;/span> temp1;
+}
+&lt;span style="color:#66d9ef">return&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>;
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>After the decryption routine, the packer decompresses the data with &lt;code>NRV&lt;/code>, the same algorithm used to compress the altered DEX
+files:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">key &lt;span style="color:#f92672">=&lt;/span> key_derivation(open(&lt;span style="color:#e6db74">&amp;#34;assets/tosversion&amp;#34;&lt;/span>, &lt;span style="color:#e6db74">&amp;#34;rb&amp;#34;&lt;/span>)&lt;span style="color:#f92672">.&lt;/span>read()[:&lt;span style="color:#ae81ff">16&lt;/span>])
+&lt;span style="color:#66d9ef">for&lt;/span> i &lt;span style="color:#f92672">in&lt;/span> range(nb_dex_files):
+hashmap[i] &lt;span style="color:#f92672">=&lt;/span> nrv_decompress(xtea_decrypt(blob1, key))
+dalvik_bytecodes[i] &lt;span style="color:#f92672">=&lt;/span> nrv_decompress(xtea_decrypt(blob2, key))
+&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="unpacking">Unpacking&lt;/h2>
+&lt;p>Putting all the pieces together, we can &lt;strong>statically&lt;/strong> unpack protected APKs and recover the original bytecode:&lt;/p>
+&lt;p>&lt;img src="unpacked.png" alt="">&lt;/p>
+&lt;p>Hence, as we can automatically unpack such APKs, the unpacking process could be integrated into an automatic analysis pipeline.&lt;/p>
+&lt;p>The script and the Kaitai structures are available on the Quarkslab&amp;rsquo;s repository:
+&lt;a href="https://github.com/quarkslab/legu_unpacker_2019" target="_blank" rel="noopener">legu_unpacker_2019&lt;/a>,
+along with a suspicious application &lt;sup id="fnref:4">&lt;a href="#fn:4" class="footnote-ref" role="doc-noteref">4&lt;/a>&lt;/sup>,
+&lt;a href="https://github.com/quarkslab/legu_unpacker_2019/blob/master/samples/com.intotherain.voicechange.apk" target="_blank" rel="noopener">packed&lt;/a> and
+&lt;a href="https://github.com/quarkslab/legu_unpacker_2019/blob/master/samples/com.intotherain.voicechange_unpacked.apk" target="_blank" rel="noopener">unpacked&lt;/a>.&lt;/p>
+&lt;h2 id="acknowledgments">Acknowledgments&lt;/h2>
+&lt;p>Thanks to my colleagues who proofread this article.&lt;/p>
+&lt;h3 id="references">References&lt;/h3>
+&lt;section class="footnotes" role="doc-endnotes">
+&lt;hr>
+&lt;ol>
+&lt;li id="fn:1" role="doc-endnote">
+&lt;p>&lt;a href="http://www.oberhumer.com/opensource/ucl/">http://www.oberhumer.com/opensource/ucl/&lt;/a>&amp;#160;&lt;a href="#fnref:1" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li id="fn:2" role="doc-endnote">
+&lt;p>&lt;a href="https://en.wikipedia.org/wiki/XTEA">https://en.wikipedia.org/wiki/XTEA&lt;/a>&amp;#160;&lt;a href="#fnref:2" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li id="fn:3" role="doc-endnote">
+&lt;p>&lt;a href="http://androidxref.com/4.4.4_r1/xref/dalvik/vm/UtfString.cpp#88">http://androidxref.com/4.4.4_r1/xref/dalvik/vm/UtfString.cpp#88&lt;/a>&amp;#160;&lt;a href="#fnref:3" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li id="fn:4" role="doc-endnote">
+&lt;p>&lt;a href="https://www.virustotal.com/gui/file/708e6967920dcf2789b7183d714e73ab79a2f8b3ca71929b12aadeb2c58c2867/detection">https://www.virustotal.com/gui/file/708e6967920dcf2789b7183d714e73ab79a2f8b3ca71929b12aadeb2c58c2867/detection&lt;/a>&amp;#160;&lt;a href="#fnref:4" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;/section></description></item></channel></rss>

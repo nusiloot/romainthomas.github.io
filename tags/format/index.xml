@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>format | Romain Thomas</title><link>/tags/format/</link><atom:link href="/tags/format/index.xml" rel="self" type="application/rss+xml"/><description>format</description><generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>Published with Academic Website Builder - Icons made by Freepik</copyright><lastBuildDate>Mon, 25 Jun 2018 00:00:00 +0000</lastBuildDate><image><url>/images/icon_hu2654a0fcc87c65a864822ac27b001d3b_698_512x512_fill_lanczos_center_2.png</url><title>format</title><link>/tags/format/</link></image><item><title>Android VDEX formats</title><link>/post/android-vdex/</link><pubDate>Mon, 25 Jun 2018 00:00:00 +0000</pubDate><guid>/post/android-vdex/</guid><description>&lt;p>Here are internal structures of Android VDEX:&lt;/p>
+&lt;h1 id="vdex-10">VDEX 10&lt;/h1>
+&lt;p>&lt;img src="vdex_10.png" alt="VDEX 10">&lt;/p>
+&lt;p>
+&lt;a href="vdex_10.pdf">PDF Version&lt;/a>&lt;/p>
+&lt;h1 id="vdex-06">VDEX 06&lt;/h1>
+&lt;p>&lt;img src="vdex_06.png" alt="VDEX 06">&lt;/p>
+&lt;p>
+&lt;a href="vdex_06.pdf">PDF Version&lt;/a>&lt;/p></description></item></channel></rss>

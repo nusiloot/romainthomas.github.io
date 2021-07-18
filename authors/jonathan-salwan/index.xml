@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Jonathan Salwan | Romain Thomas</title><link>/authors/jonathan-salwan/</link><atom:link href="/authors/jonathan-salwan/index.xml" rel="self" type="application/rss+xml"/><description>Jonathan Salwan</description><generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>Published with Academic Website Builder - Icons made by Freepik</copyright><lastBuildDate>Thu, 10 Nov 2016 00:00:00 +0000</lastBuildDate><image><url>/images/icon_hu2654a0fcc87c65a864822ac27b001d3b_698_512x512_fill_lanczos_center_2.png</url><title>Jonathan Salwan</title><link>/authors/jonathan-salwan/</link></image><item><title>How Triton can help to reverse virtual machine based software protections</title><link>/publication/triton-vm-protection/</link><pubDate>Thu, 10 Nov 2016 00:00:00 +0000</pubDate><guid>/publication/triton-vm-protection/</guid><description>&lt;h2 id="hahahugoshortcode-s0-hbhb-slides">
+&lt;i class="fas fa-file-pdf pr-1 fa-fw">&lt;/i> Slides&lt;/h2>
+&lt;div class="pdfpreview shortcode shortcode--pdfpreview">
+&lt;embed src="csaw2016-sos-rthomas-jsalwan.pdf" type="application/pdf" width="100%" height=600px />
+&lt;/div>
+&lt;h2 id="hahahugoshortcode-s2-hbhb-video">
+&lt;i class="fas fa-file-video pr-1 fa-fw">&lt;/i> Video&lt;/h2>
+&lt;video controls >
+&lt;source src="how-triton-can-help-to-reverse-virtual-machine-based-software-protections.mp4" type="video/mp4">
+&lt;/video></description></item><item><title>Dynamic Binary Analysis and Obfuscated Codes</title><link>/publication/dynamic-binary-analysis-and-obfuscation/</link><pubDate>Fri, 08 Apr 2016 00:00:00 +0000</pubDate><guid>/publication/dynamic-binary-analysis-and-obfuscation/</guid><description>&lt;div class="pdfpreview shortcode shortcode--pdfpreview">
+&lt;embed src="sthack2016-rthomas-jsalwan.pdf" type="application/pdf" width="100%" height=600px />
+&lt;/div></description></item><item><title>Code coverage using a dynamic symbolic execution</title><link>/post/triton-code-coverage/</link><pubDate>Mon, 12 Oct 2015 00:00:00 +0200</pubDate><guid>/post/triton-code-coverage/</guid><description/></item><item><title>How Triton may help to analyse obfuscated binaries</title><link>/publication/triton/</link><pubDate>Tue, 01 Sep 2015 00:00:00 +0000</pubDate><guid>/publication/triton/</guid><description>&lt;div class="pdfpreview shortcode shortcode--pdfpreview">
+&lt;embed src="misc82-triton.pdf" type="application/pdf" width="100%" height=900px />
+&lt;/div></description></item></channel></rss>

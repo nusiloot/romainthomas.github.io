@@ -1,0 +1,436 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>qbdi | Romain Thomas</title><link>/tags/qbdi/</link><atom:link href="/tags/qbdi/index.xml" rel="self" type="application/rss+xml"/><description>qbdi</description><generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>Published with Academic Website Builder - Icons made by Freepik</copyright><lastBuildDate>Mon, 03 Jun 2019 00:00:00 +0000</lastBuildDate><image><url>/images/icon_hu2654a0fcc87c65a864822ac27b001d3b_698_512x512_fill_lanczos_center_2.png</url><title>qbdi</title><link>/tags/qbdi/</link></image><item><title>Android Native Library Analysis with QBDI</title><link>/post/android-native-library-analysis-with-qbdi/</link><pubDate>Mon, 03 Jun 2019 00:00:00 +0000</pubDate><guid>/post/android-native-library-analysis-with-qbdi/</guid><description>&lt;div class="alert alert-note">
+&lt;div>
+This post has been originally posted on the &lt;a href=https://blog.quarkslab.com/android-native-library-analysis-with-qbdi.html>Quarkslab&amp;rsquo;s Blog&lt;/a>
+&lt;/div>
+&lt;/div>
+&lt;h2 id="introduction">Introduction&lt;/h2>
+&lt;p>During the past few months we improved the ARM support in QBDI. More precisely, we enhanced the QBDI&amp;rsquo;s engine
+to support Thumb and Thumb2 instructions as well as Neon registers.&lt;/p>
+&lt;p>Development is still in progress and we need to clean the code and add non-regression tests
+compared to the x86-64 support.&lt;/p>
+&lt;p>To add Thumb and Thumb2 support, we tested the DBI against well-known obfuscators such as
+&lt;a href="https://epona.quarkslab.com" target="_blank" rel="noopener">Epona&lt;/a>,
+&lt;a href="https://github.com/obfuscator-llvm/obfuscator" target="_blank" rel="noopener">O-LLVM&lt;/a>
+or
+&lt;a href="https://www.arxan.com/" target="_blank" rel="noopener">Arxan&lt;/a>, as we could expect good instruction coverage, corner cases and nice use cases.
+The native code came from Android JNI libraries embedded in different APKs.&lt;/p>
+&lt;p>This blog post introduces some QBDI features that could be useful to assess native code
+and speedup reverse engineering.
+To expose these features, we analyzed an Android SDK that aims to protect applications against API misuse.&lt;/p>
+&lt;h2 id="dynamic-instrumentation-on-android">Dynamic Instrumentation on Android&lt;/h2>
+&lt;p>
+&lt;a href="https://www.frida.re/" target="_blank" rel="noopener">Frida&lt;/a> is one of the Android day-to-day dynamic instrumentation framework widely
+used to instrument applications.
+It can address both native code with inline hooking and &lt;em>Java&lt;/em> side thanks to ART instrumentation &lt;sup id="fnref:1">&lt;a href="#fn:1" class="footnote-ref" role="doc-noteref">1&lt;/a>&lt;/sup>.&lt;/p>
+&lt;p>Frida works at the function level and in some cases we may need to have a finer granularity
+at the basic-block level or at the instruction level (i.e. have &lt;em>hooks&lt;/em> on instructions)&lt;/p>
+&lt;p>To address this limitation, one trick commonly used is to combine hooking with emulation.
+One can use Frida to hook the function that we are interested in, then we can dump the CPU context
+and the memory state of the process and eventually continue the execution through an emulator like
+&lt;a href="https://miasm.re/blog/" target="_blank" rel="noopener">Miasm&lt;/a>
+or
+&lt;a href="https://www.unicorn-engine.org/" target="_blank" rel="noopener">Unicorn&lt;/a>&lt;/p>
+&lt;p>This approach works pretty well but has a few limitations:&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>Speed&lt;/strong>: For large sets of functions.&lt;/li>
+&lt;li>&lt;strong>External calls&lt;/strong>: One needs to mock external calls behavior (e.g. &lt;code>strlen&lt;/code>, &lt;code>malloc&lt;/code>, &amp;hellip;).&lt;/li>
+&lt;li>&lt;strong>Some behaviors can be difficult to emulate&lt;/strong>: Thread, Android internal frameworks, &amp;hellip;&lt;/li>
+&lt;/ul>
+&lt;p>Moreover, while it is quite simple to mock the behavior of &lt;code>strlen&lt;/code>, it may be more challenging to mock
+JNI functions behavior like &lt;code>FindClass()&lt;/code>, &lt;code>GetMethodID()&lt;/code>, &lt;code>RegisterNatives()&lt;/code>, &amp;hellip;&lt;/p>
+&lt;p>The design of QBDI provides a good trade-off between full instrumentation and partial emulation thanks to
+the &lt;code>ExecBrocker&lt;/code> that enables to switch between instrumented code — our function — and non-instrumented
+code: &lt;code>strlen()&lt;/code>, &lt;code>FindClass()&lt;/code>, &lt;code>pthread_call_once()&lt;/code>, &amp;hellip;&lt;/p>
+&lt;p>This diagram represents the instrumentation flow for the different scenarios:&lt;/p>
+&lt;p>&lt;img src="qbdi_flow.png" alt="">&lt;/p>
+&lt;p>For those who are interested in QBDI internals you can look at the 34C3 talk by Charles and Cédric &lt;sup id="fnref:2">&lt;a href="#fn:2" class="footnote-ref" role="doc-noteref">2&lt;/a>&lt;/sup>.
+There are also examples in the GitHub repository &lt;sup id="fnref:3">&lt;a href="#fn:3" class="footnote-ref" role="doc-noteref">3&lt;/a>&lt;/sup>.&lt;/p>
+&lt;p>To summarize, we can bootstrap QBDI as follows:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="color:#75715e">// QBDI main interface
+&lt;/span>&lt;span style="color:#75715e">&lt;/span>QBDI&lt;span style="color:#f92672">::&lt;/span>VM vm;
+&lt;span style="color:#75715e">// QBDI CPU state for GPR registers
+&lt;/span>&lt;span style="color:#75715e">&lt;/span>GPRState&lt;span style="color:#f92672">*&lt;/span> state &lt;span style="color:#f92672">=&lt;/span> vm.getGPRState();
+&lt;span style="color:#75715e">// Setup virtual stack
+&lt;/span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#66d9ef">uint8_t&lt;/span> &lt;span style="color:#f92672">*&lt;/span>fakestack &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#66d9ef">nullptr&lt;/span>;
+QBDI&lt;span style="color:#f92672">::&lt;/span>allocateVirtualStack(state, &lt;span style="color:#75715e">/* size */&lt;/span>&lt;span style="color:#ae81ff">0x100000&lt;/span>, &lt;span style="color:#f92672">&amp;amp;&lt;/span>fakestack);
+&lt;span style="color:#75715e">// {
+&lt;/span>&lt;span style="color:#75715e">// Setup instrumentation ranges, callbacks etc, ...
+&lt;/span>&lt;span style="color:#75715e">// }
+&lt;/span>&lt;span style="color:#75715e">&lt;/span>
+&lt;span style="color:#75715e">// Start Instrumentation:
+&lt;/span>&lt;span style="color:#75715e">&lt;/span>uintptr_t retval;
+&lt;span style="color:#66d9ef">bool&lt;/span> ok &lt;span style="color:#f92672">=&lt;/span> vm.call(&lt;span style="color:#f92672">&amp;amp;&lt;/span>retval, &lt;span style="color:#75715e">/* Address of the function to instrument */&lt;/span>);
+&lt;span style="color:#75715e">// Instrumentation Finished
+&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="sdk-overview">SDK Overview&lt;/h2>
+&lt;p>Among the QBDI tests, we analyzed an SDK that aims to protect applications against API abuses.
+This kind of protection is used to protect API endpoints against illegitimate uses: emulator, bots, &amp;hellip;&lt;/p>
+&lt;p>To protect the main application, the solution collects information about the device state: rooted, debugged,
+custom, then encodes this information with a &lt;em>proprietary&lt;/em> algorithm and sends the encoded data to a server.&lt;/p>
+&lt;p>The &lt;strong>server&lt;/strong> decodes the information sent by the device collector, performs analyses to check the device
+integrity and sends back a token that handles the information about whether the device is corrupted or not.&lt;/p>
+&lt;p>The following figure summarizes this process:&lt;/p>
+&lt;p>&lt;img src="overview.png" alt="">&lt;/p>
+&lt;p>Such architecture is robust and similar to the one in
+&lt;a href="https://developer.android.com/training/safetynet/attestation" target="_blank" rel="noopener">Safetynet&lt;/a> &lt;sup id="fnref:4">&lt;a href="#fn:4" class="footnote-ref" role="doc-noteref">4&lt;/a>&lt;/sup>. On the other hand,
+the SDK has fewer permissions than Safetynet, therefore it cannot collect as much data about
+the device as SafetyNet does.&lt;/p>
+&lt;p>We started the analysis by monitoring the network traffic between the SDK and its server. At some point,
+we can observe the following request:&lt;/p>
+&lt;p>&lt;img src="network.png" alt="">&lt;/p>
+&lt;p>It is JSON encoded and the characters that look like random values are the encoded information sent
+by the device collector.&lt;/p>
+&lt;p>The analysis of the SDK aims to address these questions:&lt;/p>
+&lt;ul>
+&lt;li>How the SDK checks if the device is rooted or not ?&lt;/li>
+&lt;li>How the SDK detects if the application is being debugged ?&lt;/li>
+&lt;li>What kind of information is collected from the device and how it is encoded ?&lt;/li>
+&lt;/ul>
+&lt;p>After a look at the Java layer, we found that the logic of the solution is implemented
+in a JNI library that will be named &lt;code>libApp.so&lt;/code> &lt;sup id="fnref:5">&lt;a href="#fn:5" class="footnote-ref" role="doc-noteref">5&lt;/a>&lt;/sup>. The library exposes the following JNI functions:&lt;/p>
+&lt;p>! 
+&lt;a href="exports.png">&lt;/a>&lt;/p>
+&lt;p>With static analysis, we can identify that the function &lt;code>Java_XXX_JNIWrapper_ca3_14008()&lt;/code> is the one
+involved in the generation of the sequence &lt;code>&amp;quot;QJRR{JJJGQJ~|MJJJ...&amp;quot;&lt;/code>. It returns the encoded data as a
+&lt;code>java.lang.String&lt;/code> and takes two parameters that are not mandatory: &lt;code>bArr&lt;/code>, &lt;code>iArr&lt;/code> &lt;sup id="fnref:6">&lt;a href="#fn:6" class="footnote-ref" role="doc-noteref">6&lt;/a>&lt;/sup>.&lt;/p>
+&lt;p>&lt;img src="java.png" alt="">&lt;/p>
+&lt;p>The library as a whole is not especially obfuscated. Nonetheless, we find strings encoding
+and syscall replacement on well-known &lt;code>libc&lt;/code> functions:&lt;/p>
+&lt;ul>
+&lt;li>&lt;code>read&lt;/code>&lt;/li>
+&lt;li>&lt;code>openat&lt;/code>&lt;/li>
+&lt;li>&lt;code>close&lt;/code>&lt;/li>
+&lt;li>&amp;hellip;&lt;/li>
+&lt;/ul>
+&lt;p>This technique is commonly used to avoid hooking but the fact is that the given syscalls are wrapped
+in functions that are not inlined. Hence, one can hook the functions that wrap
+the associated syscall.&lt;/p>
+&lt;h2 id="get-started-with-qbdi">Get Started with QBDI&lt;/h2>
+&lt;p>In order to fully understand the logic of this function, we instrumented the function through QBDI &lt;sup id="fnref:7">&lt;a href="#fn:7" class="footnote-ref" role="doc-noteref">7&lt;/a>&lt;/sup> associated
+with a set of instrumentation callbacks.&lt;/p>
+&lt;p>These callbacks aim to provide different kinds of information that will be useful to the analyst to understand the
+function logic. For instance, we can setup a first callback that records
+all the syscall instructions, we can also add a callback that records memory access.&lt;/p>
+&lt;p>The purpose of this blog post is to show how few — but well chosen — callbacks enable to understand the
+logic of the function.&lt;/p>
+&lt;p>First of all, the native library embedded in the SDK can be loaded outside of the original APK using
+&lt;code>dlopen()&lt;/code> / &lt;code>dlsym()&lt;/code>.
+Moreover, one can instantiate a JVM thanks to the ART runtime (&lt;code>libart.so&lt;/code>):&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="color:#66d9ef">int&lt;/span> &lt;span style="color:#a6e22e">main&lt;/span>(&lt;span style="color:#66d9ef">int&lt;/span> argc, &lt;span style="color:#66d9ef">char&lt;/span>&lt;span style="color:#f92672">**&lt;/span> argv) {
+&lt;span style="color:#66d9ef">static&lt;/span> &lt;span style="color:#66d9ef">constexpr&lt;/span> &lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#66d9ef">char&lt;/span>&lt;span style="color:#f92672">*&lt;/span> TARGET_LIB &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;libApp.so&amp;#34;&lt;/span>;
+&lt;span style="color:#66d9ef">void&lt;/span>&lt;span style="color:#f92672">*&lt;/span> hdl &lt;span style="color:#f92672">=&lt;/span> dlopen(TARGET_LIB, RTLD_NOW);
+&lt;span style="color:#66d9ef">using&lt;/span> jni_func_t &lt;span style="color:#f92672">=&lt;/span> jstring(&lt;span style="color:#f92672">*&lt;/span>)(JNIEnv&lt;span style="color:#f92672">*&lt;/span> &lt;span style="color:#75715e">/* Other parameters are not required */&lt;/span>);
+&lt;span style="color:#66d9ef">auto&lt;/span> jni_func &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#66d9ef">reinterpret_cast&lt;/span>&lt;span style="color:#f92672">&amp;lt;&lt;/span>jni_func_t&lt;span style="color:#f92672">&amp;gt;&lt;/span>(dlsym(hdl, &lt;span style="color:#e6db74">&amp;#34;Java_XXX_JNIWrapper_ca3_14008&amp;#34;&lt;/span>));
+JavaVM&lt;span style="color:#f92672">*&lt;/span> jvm, JNIEnv&lt;span style="color:#f92672">*&lt;/span> env;
+ART_Kitchen(jvm, env); &lt;span style="color:#75715e">// Instantiate the JVM and initialize the jvm and env pointers
+&lt;/span>&lt;span style="color:#75715e">&lt;/span>}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>At this point, the &lt;code>jni_func()&lt;/code> function is tied to &lt;code>Java_XXX_JNIWrapper_ca3_14008&lt;/code> and ready to be
+executed in &lt;code>main()&lt;/code>:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">jstring output &lt;span style="color:#f92672">=&lt;/span> jni_func(env);
+&lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#66d9ef">char&lt;/span>&lt;span style="color:#f92672">*&lt;/span> cstring &lt;span style="color:#f92672">=&lt;/span> env&lt;span style="color:#f92672">-&amp;gt;&lt;/span>GetStringUTFChars(output, &lt;span style="color:#66d9ef">nullptr&lt;/span>);
+console&lt;span style="color:#f92672">-&amp;gt;&lt;/span>info(&lt;span style="color:#e6db74">&amp;#34;Real Output: {}&amp;#34;&lt;/span>, cstring);
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;img src="real_output.png" alt="">&lt;/p>
+&lt;p>The output seems consistent with the network capture and the value &lt;code>&amp;quot;root: 1&amp;quot;&lt;/code> too since we are on a rooted device &lt;sup id="fnref:8">&lt;a href="#fn:8" class="footnote-ref" role="doc-noteref">8&lt;/a>&lt;/sup>&lt;/p>
+&lt;p>Now, let&amp;rsquo;s run the function through QBDI:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">console&lt;span style="color:#f92672">-&amp;gt;&lt;/span>info(&lt;span style="color:#e6db74">&amp;#34;Initializing VM ...&amp;#34;&lt;/span>);
+QBDI&lt;span style="color:#f92672">::&lt;/span>VM vm;
+GPRState&lt;span style="color:#f92672">*&lt;/span> state &lt;span style="color:#f92672">=&lt;/span> vm.getGPRState();
+&lt;span style="color:#66d9ef">uint8_t&lt;/span> &lt;span style="color:#f92672">*&lt;/span>fakestack &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#66d9ef">nullptr&lt;/span>;
+QBDI&lt;span style="color:#f92672">::&lt;/span>allocateVirtualStack(state, &lt;span style="color:#ae81ff">0x100000&lt;/span>, &lt;span style="color:#f92672">&amp;amp;&lt;/span>fakestack);
+console&lt;span style="color:#f92672">-&amp;gt;&lt;/span>info(&lt;span style="color:#e6db74">&amp;#34;Instument module: {}&amp;#34;&lt;/span>, TARGET_LIB);
+vm.addInstrumentedModule(TARGET_LIB);
+console&lt;span style="color:#f92672">-&amp;gt;&lt;/span>info(&lt;span style="color:#e6db74">&amp;#34;Simulate call in QBDI&amp;#34;&lt;/span>);
+jstring dbioutput;
+&lt;span style="color:#66d9ef">bool&lt;/span> ok &lt;span style="color:#f92672">=&lt;/span> vm.call(&lt;span style="color:#f92672">&amp;amp;&lt;/span>dbioutput, &lt;span style="color:#66d9ef">reinterpret_cast&lt;/span>&lt;span style="color:#f92672">&amp;lt;&lt;/span>rword&lt;span style="color:#f92672">&amp;gt;&lt;/span>(jni_func), {&lt;span style="color:#66d9ef">reinterpret_cast&lt;/span>&lt;span style="color:#f92672">&amp;lt;&lt;/span>rword&lt;span style="color:#f92672">&amp;gt;&lt;/span>(env)});
+&lt;span style="color:#66d9ef">if&lt;/span> (ok and dbioutput &lt;span style="color:#f92672">!=&lt;/span> &lt;span style="color:#66d9ef">nullptr&lt;/span>) {
+console&lt;span style="color:#f92672">-&amp;gt;&lt;/span>info(&lt;span style="color:#e6db74">&amp;#34;DBI output {:x}&amp;#34;&lt;/span>, env&lt;span style="color:#f92672">-&amp;gt;&lt;/span>GetStringUTFChars(dbioutput, &lt;span style="color:#66d9ef">nullptr&lt;/span>));
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>This code provides the following output:&lt;/p>
+&lt;p>&lt;img src="dbi_output.png" alt="">&lt;/p>
+&lt;p>Everything looks good, QBDI managed to &lt;strong>fully&lt;/strong> instrument the function (which includes ARM / Thumb switch)
+and the result is similar to the real execution.&lt;/p>
+&lt;h1 id="analysis">Analysis&lt;/h1>
+&lt;p>Now that we are able to run and instrument the function,
+we can start to add instrumentation callbacks to analyze its behavior.&lt;/p>
+&lt;p>One of the first callbacks that is useful to setup is a callback that instruments syscall
+instructions (i.e. &lt;code>svc #0&lt;/code>). To do so, we can use the &lt;code>vm.addSyscallCB(position, callback, data)&lt;/code>.&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>position&lt;/strong> - It stands for the position of the callback: Before or after the syscall.&lt;/li>
+&lt;li>&lt;strong>callback&lt;/strong> - The callback itself.&lt;/li>
+&lt;li>&lt;strong>data&lt;/strong> - Pointer to user data (e.g. user context that register dynamic information)&lt;/li>
+&lt;/ul>
+&lt;p>It leads to the following piece of code:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="color:#66d9ef">auto&lt;/span> syscall_enter_cbk &lt;span style="color:#f92672">=&lt;/span> [] (VMInstanceRef vm, GPRState &lt;span style="color:#f92672">*&lt;/span>gprState, FPRState &lt;span style="color:#f92672">*&lt;/span>fprState, &lt;span style="color:#66d9ef">void&lt;/span> &lt;span style="color:#f92672">*&lt;/span>data) {
+&lt;span style="color:#66d9ef">const&lt;/span> InstAnalysis&lt;span style="color:#f92672">*&lt;/span> analysis &lt;span style="color:#f92672">=&lt;/span> vm&lt;span style="color:#f92672">-&amp;gt;&lt;/span>getInstAnalysis(ANALYSIS_INSTRUCTION &lt;span style="color:#f92672">|&lt;/span> ANALYSIS_DISASSEMBLY);
+rword syscall_number &lt;span style="color:#f92672">=&lt;/span> gprState&lt;span style="color:#f92672">-&amp;gt;&lt;/span>r7;
+&lt;span style="color:#75715e">/*
+&lt;/span>&lt;span style="color:#75715e"> * std::string sys_str = lookup[syscall_number]; // Lookup table that convert syscall number to function
+&lt;/span>&lt;span style="color:#75715e"> */&lt;/span>
+console&lt;span style="color:#f92672">-&amp;gt;&lt;/span>info(&lt;span style="color:#e6db74">&amp;#34;0x{:06x} {} ({})&amp;#34;&lt;/span>, addr, analysis&lt;span style="color:#f92672">-&amp;gt;&lt;/span>disassembly, sys_str);
+&lt;span style="color:#66d9ef">return&lt;/span> VMAction&lt;span style="color:#f92672">::&lt;/span>CONTINUE;
+}
+vm.addSyscallCB(PREINST, syscall_enter_cbk, &lt;span style="color:#75715e">/* data */&lt;/span> &lt;span style="color:#66d9ef">nullptr&lt;/span>);
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Before any syscall instructions, we perform a basic lookup on the syscall number stored in the &lt;strong>R7&lt;/strong> register
+to resolve its name.&lt;/p>
+&lt;p>It results in the following output:&lt;/p>
+&lt;p>&lt;img src="syscall.1.png" alt="">&lt;/p>
+&lt;p>Since we are able to resolve syscall numbers into function names, we can improve the logic of callback
+to dispatch and print function parameters:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="color:#66d9ef">auto&lt;/span> syscall_enter_cbk &lt;span style="color:#f92672">=&lt;/span> [] (...) {
+...
+&lt;span style="color:#75715e">/*
+&lt;/span>&lt;span style="color:#75715e"> * Lookup table (syscall number, function pointer)
+&lt;/span>&lt;span style="color:#75715e"> * {
+&lt;/span>&lt;span style="color:#75715e"> * 322 -&amp;gt; on_openat
+&lt;/span>&lt;span style="color:#75715e"> * }
+&lt;/span>&lt;span style="color:#75715e"> */&lt;/span>
+&lt;span style="color:#66d9ef">auto&lt;/span> function_wrapper &lt;span style="color:#f92672">=&lt;/span> func_lookup[syscall_number];
+&lt;span style="color:#66d9ef">return&lt;/span> &lt;span style="color:#a6e22e">function_wrapper&lt;/span>(...)
+}
+&lt;span style="color:#75715e">// Wrapper for openat syscall
+&lt;/span>&lt;span style="color:#75715e">&lt;/span>VMAction on_openat(VMInstanceRef vm, GPRState &lt;span style="color:#f92672">*&lt;/span>gprState, ...) {
+&lt;span style="color:#66d9ef">auto&lt;/span> path &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#66d9ef">reinterpret_cast&lt;/span>&lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#66d9ef">char&lt;/span>&lt;span style="color:#f92672">*&amp;gt;&lt;/span>(gprState&lt;span style="color:#f92672">-&amp;gt;&lt;/span>r1);
+console&lt;span style="color:#f92672">-&amp;gt;&lt;/span>info(&lt;span style="color:#e6db74">&amp;#34;openat({})&amp;#34;&lt;/span>, path);
+&lt;span style="color:#66d9ef">return&lt;/span> VMAction&lt;span style="color:#f92672">::&lt;/span>CONTINUE;
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>By doing so on the common syscalls number, we get this new trace:&lt;/p>
+&lt;p>&lt;img src="syscall.2.png" alt="">&lt;/p>
+&lt;p>Based on this output, we can figure out how root check (orange area) is done. It is performed by checking
+the existence of the following binaries:&lt;/p>
+&lt;ul>
+&lt;li>/system/bin/su&lt;/li>
+&lt;li>/system/xbin/su&lt;/li>
+&lt;li>/sbin/su&lt;/li>
+&lt;li>&amp;hellip;&lt;/li>
+&lt;/ul>
+&lt;p>The function also checks if some directories are present on the device (&lt;code>faccessat&lt;/code> syscall):&lt;/p>
+&lt;ul>
+&lt;li>/data&lt;/li>
+&lt;li>/tmp&lt;/li>
+&lt;li>/system&lt;/li>
+&lt;li>&amp;hellip;&lt;/li>
+&lt;/ul>
+&lt;p>Especially, it would be suspicious if the directory &lt;code>/tmp&lt;/code> were present on the &lt;em>device&lt;/em> while it is standard to
+have &lt;code>/system&lt;/code> and &lt;code>/data&lt;/code> directories.&lt;/p>
+&lt;p>Regarding the debug state of the process (blue area), it is done by looking at &lt;code>/proc/self/status&lt;/code>. After
+analysis, the function checks the &lt;code>TracerPID&lt;/code> attribute
+(cf
+&lt;a href="https://www.vantagepoint.sg/blog/89-more-android-anti-debugging-fun" target="_blank" rel="noopener">More Android Anti-Debugging Fun - B. Mueller&lt;/a>)&lt;/p>
+&lt;p>Finally, the function processes the output of &lt;code>/proc/self/maps&lt;/code> right before to returning the encoded values.
+It suggests that the data collected by the solution are based on this resource.&lt;/p>
+&lt;h3 id="encoding-routine">Encoding Routine&lt;/h3>
+&lt;p>In the previous part we got a global overview about how the solution achieves root detection,
+debug detection and what kind of data is collected (i.e. process memory map).&lt;/p>
+&lt;p>However, some questions are pending:&lt;/p>
+&lt;ul>
+&lt;li>What part of the process memory map is used: Base addresses ? Module paths ? Permissions ?&lt;/li>
+&lt;li>How the data are encoded (i.e. how &lt;code>QJRR{JJJGQJ~|MJJJ...&lt;/code> is generated) ?&lt;/li>
+&lt;/ul>
+&lt;p>Along with the QBDI ARM support, we also added ARM support to resolve &lt;strong>memory addresses&lt;/strong> during the
+instrumentation.
+It means that QBDI is now able to resolve &lt;strong>the effective memory address&lt;/strong> of instructions such as:&lt;/p>
+&lt;pre>&lt;code class="language-armasm" data-lang="armasm">LDR R0, [R1, R2]; # Resolve R1 + R2
+STR R1, [R2, R3, LSL #2]; # Resolve R2 + R3 * 4
+LDRB [PC, #4]; # Resolve **real** PC + 4
+&lt;/code>&lt;/pre>&lt;p>Moreover, QBDI is also able to get &lt;strong>the effective memory value&lt;/strong> that is read or written. This feature
+is quite useful in the case of conditional instructions such as:&lt;/p>
+&lt;pre>&lt;code class="language-armasm" data-lang="armasm">ITT LS;
+LDRLS R0, [R4];
+LDRLS R1, [R0, #4]
+&lt;/code>&lt;/pre>&lt;p>The &lt;strong>effective&lt;/strong> value of &lt;code>R0&lt;/code> and &lt;code>R1&lt;/code> is stored in QBDI. It may not be
+&lt;code>*(r4)&lt;/code> and &lt;code>*(r0 + 4)&lt;/code> since the &lt;code>LS&lt;/code> condition may not be verified.&lt;/p>
+&lt;p>To add a callback on memory accesses, we can use the &lt;code>addMemAccessCB(...)&lt;/code> function on the VM instance:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">vm.addMemAccessCB(MEMORY_READ_WRITE, memory_callback, &lt;span style="color:#75715e">/* data */&lt;/span> &lt;span style="color:#66d9ef">nullptr&lt;/span>);
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>In the given &lt;code>memory_callback(...)&lt;/code> function, we perform the following actions:&lt;/p>
+&lt;ul>
+&lt;li>Track memory &lt;strong>byte&lt;/strong> accesses.&lt;/li>
+&lt;li>Check if the value is printable.&lt;/li>
+&lt;li>Pretty print the R/W value.&lt;/li>
+&lt;/ul>
+&lt;p>The idea of this callback is to track memory accesses that are performed on printable characters. It enables
+to quickly identify strings encoding/decoding routines.&lt;/p>
+&lt;p>Here is the implementation of the callback:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">VMAction &lt;span style="color:#a6e22e">memory_callback&lt;/span>(VMInstanceRef vm, GPRState &lt;span style="color:#f92672">*&lt;/span>gprState, ...) {
+&lt;span style="color:#66d9ef">auto&lt;/span>&lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> acc &lt;span style="color:#f92672">=&lt;/span> vm&lt;span style="color:#f92672">-&amp;gt;&lt;/span>getInstMemoryAccess();
+&lt;span style="color:#75715e">// Get last memory access
+&lt;/span>&lt;span style="color:#75715e">&lt;/span> MemoryAccess maccess &lt;span style="color:#f92672">=&lt;/span> acc.back();
+&lt;span style="color:#75715e">// Retrieve access information:
+&lt;/span>&lt;span style="color:#75715e">&lt;/span> rword addr &lt;span style="color:#f92672">=&lt;/span> maccess.accessAddress; &lt;span style="color:#75715e">// Address accessed
+&lt;/span>&lt;span style="color:#75715e">&lt;/span> rword value &lt;span style="color:#f92672">=&lt;/span> maccess.value; &lt;span style="color:#75715e">// Value read or written
+&lt;/span>&lt;span style="color:#75715e">&lt;/span> rword size &lt;span style="color:#f92672">=&lt;/span> maccess.size; &lt;span style="color:#75715e">// Access size
+&lt;/span>&lt;span style="color:#75715e">&lt;/span>
+&lt;span style="color:#75715e">// Only look for byte access
+&lt;/span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">if&lt;/span> (size &lt;span style="color:#f92672">!=&lt;/span> &lt;span style="color:#66d9ef">sizeof&lt;/span>(&lt;span style="color:#66d9ef">char&lt;/span>)) {
+&lt;span style="color:#66d9ef">return&lt;/span> VMAction&lt;span style="color:#f92672">::&lt;/span>CONTINUE;
+}
+&lt;span style="color:#75715e">// Read / Write operation as a string
+&lt;/span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">const&lt;/span> std&lt;span style="color:#f92672">::&lt;/span>string kind &lt;span style="color:#f92672">=&lt;/span> maccess.type &lt;span style="color:#f92672">==&lt;/span> MemoryAccessType&lt;span style="color:#f92672">::&lt;/span>MEMORY_READ &lt;span style="color:#f92672">?&lt;/span> &lt;span style="color:#e6db74">&amp;#34;[R]&amp;#34;&lt;/span> &lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#e6db74">&amp;#34;[W]&amp;#34;&lt;/span>;
+&lt;span style="color:#75715e">// Cast the value into a char
+&lt;/span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#66d9ef">char&lt;/span> cvalue &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#66d9ef">static_cast&lt;/span>&lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#66d9ef">char&lt;/span>&lt;span style="color:#f92672">&amp;gt;&lt;/span>(value);
+&lt;span style="color:#75715e">// Check if the value read or written is printable
+&lt;/span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">if&lt;/span> (&lt;span style="color:#f92672">::&lt;/span>isprint(cvalue)) {
+logger&lt;span style="color:#f92672">-&amp;gt;&lt;/span>info(&lt;span style="color:#e6db74">&amp;#34;0x{:x} {}: {}&amp;#34;&lt;/span>, addr, kind, cvalue); &lt;span style="color:#75715e">// Pretty print
+&lt;/span>&lt;span style="color:#75715e">&lt;/span> }
+&lt;span style="color:#75715e">// Continue this execution
+&lt;/span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">return&lt;/span> VMAction&lt;span style="color:#f92672">::&lt;/span>CONTINUE;
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>With this new callback, we can observe such output between two &lt;code>openat()&lt;/code> syscalls involved in the
+&lt;code>root&lt;/code> check routine:&lt;/p>
+&lt;p>&lt;img src="su_decode.png" alt="">&lt;/p>
+&lt;p>It is basically the string decoding routine in action. Note that some read operations are missing
+since we only track &lt;strong>printable&lt;/strong> characters. However all write operations are present.&lt;/p>
+&lt;p>The routine &lt;strong>loads&lt;/strong> characters with the instruction at address &lt;strong>0x295e&lt;/strong> and &lt;strong>stores&lt;/strong> the decoded
+value at address &lt;strong>0x2972&lt;/strong>. If we look at the function that handles these two addresses, we find
+the decoding routine:&lt;/p>
+&lt;p>&lt;img src="decoding_routine.png" alt="">&lt;/p>
+&lt;p>In the above figure, the &lt;strong>green&lt;/strong> section highlights the memory &lt;strong>load access&lt;/strong> while the &lt;strong>red&lt;/strong> one highlights
+the &lt;strong>write operation&lt;/strong>. The &lt;strong>blue&lt;/strong> area is the &lt;strong>decoding logic&lt;/strong>.&lt;/p>
+&lt;p>The output of &lt;strong>all&lt;/strong> read / write accesses turns out to be quite verbose on the whole execution of the function.
+We can improve the instrumentation by adding two callbacks before and after function &lt;strong>calls&lt;/strong>
+with this purpose:&lt;/p>
+&lt;ol>
+&lt;li>Before calls, we print the target address (e.g. &lt;code>0x123: blx r3 -&amp;gt; .text!0xABC&lt;/code>).&lt;/li>
+&lt;li>After calls we print &lt;strong>all&lt;/strong> printable characters being read or written &lt;strong>within the called function&lt;/strong>.&lt;/li>
+&lt;/ol>
+&lt;p>The &lt;code>addCallCB(...)&lt;/code> is still in experimentation but it aims to put callbacks before or after call instructions:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="color:#75715e">// Callback before ``call`` instructions
+&lt;/span>&lt;span style="color:#75715e">&lt;/span>vm.addCallCB(PRECALL, on_call_enter, &lt;span style="color:#66d9ef">nullptr&lt;/span>);
+&lt;span style="color:#75715e">// Callback when a ``call`` returns
+&lt;/span>&lt;span style="color:#75715e">&lt;/span>vm.addCallCB(POSTCALL, on_call_exit, &lt;span style="color:#66d9ef">nullptr&lt;/span>);
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>With these two callbacks we get the following output:&lt;/p>
+&lt;p>&lt;img src="memtrace.0.png" alt="">&lt;/p>
+&lt;p>By going further in the memory trace, we can observe this output:&lt;/p>
+&lt;p>&lt;img src="memtrace.png" alt="">&lt;/p>
+&lt;p>From this output we can infer the behavior of the collector (pseudo-code):&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">f &lt;span style="color:#f92672">=&lt;/span> open(&lt;span style="color:#e6db74">&amp;#34;/proc/self/maps&amp;#34;&lt;/span>)
+&lt;span style="color:#66d9ef">for&lt;/span> line &lt;span style="color:#f92672">in&lt;/span> f&lt;span style="color:#f92672">.&lt;/span>readlines():
+&lt;span style="color:#66d9ef">if&lt;/span> &lt;span style="color:#f92672">not&lt;/span> &lt;span style="color:#e6db74">&amp;#34;/&amp;#34;&lt;/span> &lt;span style="color:#f92672">in&lt;/span> line: &lt;span style="color:#75715e"># Avoid entries such as XXX-YYY ... [anon:linker_alloc]&lt;/span>
+&lt;span style="color:#66d9ef">continue&lt;/span>
+&lt;span style="color:#66d9ef">if&lt;/span> &lt;span style="color:#f92672">not&lt;/span> &lt;span style="color:#e6db74">&amp;#34;-xp&amp;#34;&lt;/span> &lt;span style="color:#f92672">in&lt;/span> line &lt;span style="color:#75715e"># Process executable segments only&lt;/span>
+&lt;span style="color:#66d9ef">continue&lt;/span>
+buffer &lt;span style="color:#f92672">+=&lt;/span> encode(line)
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>We can also observe a sequence of&lt;/p>
+&lt;ol>
+&lt;li>&lt;strong>READ&lt;/strong> &lt;code>line[i]&lt;/code>&lt;/li>
+&lt;li>&lt;strong>CALL&lt;/strong> &lt;code>.text!0xd2ba&lt;/code>&lt;/li>
+&lt;li>&lt;strong>WRITE&lt;/strong> &lt;code>encoded(line[i])&lt;/code>&lt;/li>
+&lt;/ol>
+&lt;p>It suggests that the logic of the &lt;code>encode()&lt;/code> function is implemented at address &lt;strong>0xd2ba&lt;/strong>.&lt;/p>
+&lt;p>The CFG of this function is compounded by instructions that compare the input against &lt;em>magic&lt;/em> printable
+values and we manually checked that it is the encoding function. Moreover this function is — by design — reversible since
+the server side algorithm needs to process the &lt;em>encoded&lt;/em> data.&lt;/p>
+&lt;p>&lt;img src="encoding_routine.png" alt="">&lt;/p>
+&lt;h1 id="library-lifting">Library lifting&lt;/h1>
+&lt;p>In the previous parts, we targeted the ARM version of the library. It turns out that SDKs which use
+native libraries usually provide the libraries for all architectures (&lt;code>arm&lt;/code>, &lt;code>arm64&lt;/code>, &lt;code>x86&lt;/code>, &lt;code>x86-64&lt;/code>).&lt;/p>
+&lt;p>Indeed, they do not want to limit developers to some architectures. The solution previously analyzed also
+comes with a &lt;code>x86-64&lt;/code> version of &lt;code>libApp.so&lt;/code> with the exact same interface.&lt;/p>
+&lt;p>Moreover, the analysis done in the previous sections shows that there are no real dependencies to the Android system:&lt;/p>
+&lt;ul>
+&lt;li>Syscall are standards and available on Linux.&lt;/li>
+&lt;li>&lt;code>/proc/self/maps&lt;/code> and &lt;code>/proc/self/status&lt;/code> are available on Linux.&lt;/li>
+&lt;/ul>
+&lt;p>Thus, we can &lt;em>lift&lt;/em> the library and run it on Linux. This technique has already been described in this
+blog post:
+&lt;a href="https://blog.quarkslab.com/when-sidechannelmarvels-meet-lief.html" target="_blank" rel="noopener">When SideChannelMarvels meet LIEF&lt;/a>.&lt;/p>
+&lt;p>In a first step, we have to patch the library with LIEF:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">&lt;span style="color:#f92672">import&lt;/span> lief
+libApp &lt;span style="color:#f92672">=&lt;/span> lief&lt;span style="color:#f92672">.&lt;/span>parse(&lt;span style="color:#e6db74">&amp;#34;libApp.so&amp;#34;&lt;/span>)
+&lt;span style="color:#75715e"># Patch library names&lt;/span>
+&lt;span style="color:#75715e"># ===================&lt;/span>
+libApp&lt;span style="color:#f92672">.&lt;/span>get_library(&lt;span style="color:#e6db74">&amp;#34;libc.so&amp;#34;&lt;/span>)&lt;span style="color:#f92672">.&lt;/span>name &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;libc.so.6&amp;#34;&lt;/span>
+libApp&lt;span style="color:#f92672">.&lt;/span>get_library(&lt;span style="color:#e6db74">&amp;#34;liblog.so&amp;#34;&lt;/span>)&lt;span style="color:#f92672">.&lt;/span>name &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;libc.so.6&amp;#34;&lt;/span>
+libApp&lt;span style="color:#f92672">.&lt;/span>get_library(&lt;span style="color:#e6db74">&amp;#34;libm.so&amp;#34;&lt;/span>)&lt;span style="color:#f92672">.&lt;/span>name &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;libm.so.6&amp;#34;&lt;/span>
+libApp&lt;span style="color:#f92672">.&lt;/span>get_library(&lt;span style="color:#e6db74">&amp;#34;libdl.so&amp;#34;&lt;/span>)&lt;span style="color:#f92672">.&lt;/span>name &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;libdl.so.2&amp;#34;&lt;/span>
+&lt;span style="color:#75715e"># Patch dynamic entries&lt;/span>
+&lt;span style="color:#75715e"># =====================&lt;/span>
+&lt;span style="color:#75715e"># 1. Remove ELF constructors&lt;/span>
+libApp[lief&lt;span style="color:#f92672">.&lt;/span>ELF&lt;span style="color:#f92672">.&lt;/span>DYNAMIC_TAGS&lt;span style="color:#f92672">.&lt;/span>INIT_ARRAY]&lt;span style="color:#f92672">.&lt;/span>array &lt;span style="color:#f92672">=&lt;/span> []
+libApp[lief&lt;span style="color:#f92672">.&lt;/span>ELF&lt;span style="color:#f92672">.&lt;/span>DYNAMIC_TAGS&lt;span style="color:#f92672">.&lt;/span>INIT_ARRAY]&lt;span style="color:#f92672">.&lt;/span>tag &lt;span style="color:#f92672">=&lt;/span> lief&lt;span style="color:#f92672">.&lt;/span>ELF&lt;span style="color:#f92672">.&lt;/span>DYNAMIC_TAGS&lt;span style="color:#f92672">.&lt;/span>DEBUG
+libApp[lief&lt;span style="color:#f92672">.&lt;/span>ELF&lt;span style="color:#f92672">.&lt;/span>DYNAMIC_TAGS&lt;span style="color:#f92672">.&lt;/span>INIT_ARRAYSZ]&lt;span style="color:#f92672">.&lt;/span>value &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>
+libApp[lief&lt;span style="color:#f92672">.&lt;/span>ELF&lt;span style="color:#f92672">.&lt;/span>DYNAMIC_TAGS&lt;span style="color:#f92672">.&lt;/span>FINI_ARRAY]&lt;span style="color:#f92672">.&lt;/span>array &lt;span style="color:#f92672">=&lt;/span> []
+libApp[lief&lt;span style="color:#f92672">.&lt;/span>ELF&lt;span style="color:#f92672">.&lt;/span>DYNAMIC_TAGS&lt;span style="color:#f92672">.&lt;/span>FINI_ARRAY]&lt;span style="color:#f92672">.&lt;/span>tag &lt;span style="color:#f92672">=&lt;/span> lief&lt;span style="color:#f92672">.&lt;/span>ELF&lt;span style="color:#f92672">.&lt;/span>DYNAMIC_TAGS&lt;span style="color:#f92672">.&lt;/span>DEBUG
+libApp[lief&lt;span style="color:#f92672">.&lt;/span>ELF&lt;span style="color:#f92672">.&lt;/span>DYNAMIC_TAGS&lt;span style="color:#f92672">.&lt;/span>FINI_ARRAYSZ]&lt;span style="color:#f92672">.&lt;/span>value &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>
+&lt;span style="color:#75715e"># 2. Remove symbol versioning&lt;/span>
+libApp[lief&lt;span style="color:#f92672">.&lt;/span>ELF&lt;span style="color:#f92672">.&lt;/span>DYNAMIC_TAGS&lt;span style="color:#f92672">.&lt;/span>VERNEEDNUM]&lt;span style="color:#f92672">.&lt;/span>tag &lt;span style="color:#f92672">=&lt;/span> lief&lt;span style="color:#f92672">.&lt;/span>ELF&lt;span style="color:#f92672">.&lt;/span>DYNAMIC_TAGS&lt;span style="color:#f92672">.&lt;/span>DEBUG
+libApp[lief&lt;span style="color:#f92672">.&lt;/span>ELF&lt;span style="color:#f92672">.&lt;/span>DYNAMIC_TAGS&lt;span style="color:#f92672">.&lt;/span>VERNEED]&lt;span style="color:#f92672">.&lt;/span>tag &lt;span style="color:#f92672">=&lt;/span> lief&lt;span style="color:#f92672">.&lt;/span>ELF&lt;span style="color:#f92672">.&lt;/span>DYNAMIC_TAGS&lt;span style="color:#f92672">.&lt;/span>DEBUG
+libApp[lief&lt;span style="color:#f92672">.&lt;/span>ELF&lt;span style="color:#f92672">.&lt;/span>DYNAMIC_TAGS&lt;span style="color:#f92672">.&lt;/span>VERDEFNUM]&lt;span style="color:#f92672">.&lt;/span>tag &lt;span style="color:#f92672">=&lt;/span> lief&lt;span style="color:#f92672">.&lt;/span>ELF&lt;span style="color:#f92672">.&lt;/span>DYNAMIC_TAGS&lt;span style="color:#f92672">.&lt;/span>DEBUG
+libApp[lief&lt;span style="color:#f92672">.&lt;/span>ELF&lt;span style="color:#f92672">.&lt;/span>DYNAMIC_TAGS&lt;span style="color:#f92672">.&lt;/span>VERDEF]&lt;span style="color:#f92672">.&lt;/span>tag &lt;span style="color:#f92672">=&lt;/span> lief&lt;span style="color:#f92672">.&lt;/span>ELF&lt;span style="color:#f92672">.&lt;/span>DYNAMIC_TAGS&lt;span style="color:#f92672">.&lt;/span>DEBUG
+libApp[lief&lt;span style="color:#f92672">.&lt;/span>ELF&lt;span style="color:#f92672">.&lt;/span>DYNAMIC_TAGS&lt;span style="color:#f92672">.&lt;/span>VERSYM]&lt;span style="color:#f92672">.&lt;/span>tag &lt;span style="color:#f92672">=&lt;/span> lief&lt;span style="color:#f92672">.&lt;/span>ELF&lt;span style="color:#f92672">.&lt;/span>DYNAMIC_TAGS&lt;span style="color:#f92672">.&lt;/span>DEBUG
+libApp&lt;span style="color:#f92672">.&lt;/span>write(&lt;span style="color:#e6db74">&amp;#34;libApp-x86-64.so&amp;#34;&lt;/span>)
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Then, we can instantiate a Linux JVM and run the native function:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="color:#66d9ef">int&lt;/span> &lt;span style="color:#a6e22e">main&lt;/span>() {
+JavaVM &lt;span style="color:#f92672">*&lt;/span>jvm &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#66d9ef">nullptr&lt;/span>;
+JNIEnv&lt;span style="color:#f92672">*&lt;/span> env &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#66d9ef">nullptr&lt;/span>;
+&lt;span style="color:#75715e">// JVM options
+&lt;/span>&lt;span style="color:#75715e">&lt;/span> JavaVMOption opt[&lt;span style="color:#ae81ff">1&lt;/span>];
+JavaVMInitArgs args;
+...
+&lt;span style="color:#75715e">// JVM instantiation
+&lt;/span>&lt;span style="color:#75715e">&lt;/span> JNI_CreateJavaVM(&lt;span style="color:#f92672">&amp;amp;&lt;/span>jvm, &lt;span style="color:#66d9ef">reinterpret_cast&lt;/span>&lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#66d9ef">void&lt;/span>&lt;span style="color:#f92672">**&amp;gt;&lt;/span>(&lt;span style="color:#f92672">&amp;amp;&lt;/span>env), &lt;span style="color:#f92672">&amp;amp;&lt;/span>args);
+&lt;span style="color:#75715e">// Load the library
+&lt;/span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">void&lt;/span>&lt;span style="color:#f92672">*&lt;/span> hdl &lt;span style="color:#f92672">=&lt;/span> dlopen(&lt;span style="color:#e6db74">&amp;#34;libApp-x86-64.so&amp;#34;&lt;/span>, RTLD_LAZY &lt;span style="color:#f92672">|&lt;/span> RTLD_LOCAL);
+&lt;span style="color:#75715e">// Resolve the functions
+&lt;/span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">using&lt;/span> abi_t &lt;span style="color:#f92672">=&lt;/span> jint(&lt;span style="color:#f92672">*&lt;/span>)(JNIEnv&lt;span style="color:#f92672">*&lt;/span>);
+&lt;span style="color:#66d9ef">using&lt;/span> jni_func_t &lt;span style="color:#f92672">=&lt;/span> jstring(&lt;span style="color:#f92672">*&lt;/span>)(JNIEnv&lt;span style="color:#f92672">*&lt;/span>);
+&lt;span style="color:#66d9ef">auto&lt;/span>&lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> jni_get_abi &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#66d9ef">reinterpret_cast&lt;/span>&lt;span style="color:#f92672">&amp;lt;&lt;/span>abi_t&lt;span style="color:#f92672">&amp;gt;&lt;/span>(dlsym(hdl, &lt;span style="color:#e6db74">&amp;#34;Java_XXX_JNIWrapper_ca3_14007&amp;#34;&lt;/span>));
+&lt;span style="color:#66d9ef">auto&lt;/span>&lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> jni_func &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#66d9ef">reinterpret_cast&lt;/span>&lt;span style="color:#f92672">&amp;lt;&lt;/span>jni_func_t&lt;span style="color:#f92672">&amp;gt;&lt;/span>(dlsym(hdl, &lt;span style="color:#e6db74">&amp;#34;Java_XXX_JNIWrapper_ca3_14008&amp;#34;&lt;/span>));
+&lt;span style="color:#75715e">// Execute
+&lt;/span>&lt;span style="color:#75715e">&lt;/span> jint abi &lt;span style="color:#f92672">=&lt;/span> jni_get_abi(env);
+console&lt;span style="color:#f92672">-&amp;gt;&lt;/span>info(&lt;span style="color:#e6db74">&amp;#34;ABI: {:d}&amp;#34;&lt;/span>, abi);
+jstring encoded &lt;span style="color:#f92672">=&lt;/span> jni_func(env);
+console&lt;span style="color:#f92672">-&amp;gt;&lt;/span>info(&lt;span style="color:#e6db74">&amp;#34;ca3_14008(): {}&amp;#34;&lt;/span>, env&lt;span style="color:#f92672">-&amp;gt;&lt;/span>GetStringUTFChars(encoded, &lt;span style="color:#66d9ef">nullptr&lt;/span>));
+&lt;span style="color:#66d9ef">return&lt;/span> EXIT_SUCCESS;
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>By executing this code, we get a similar output as seen in the previous parts:&lt;/p>
+&lt;p>&lt;img src="rip.png" alt="">&lt;/p>
+&lt;p>We can also run the &lt;code>strace&lt;/code> utility to inspect the syscalls:&lt;/p>
+&lt;p>&lt;img src="strace.png" alt="">&lt;/p>
+&lt;p>Since we are able to run the function on Linux, we could also use &lt;code>gdb&lt;/code>, &lt;code>Intel PIN&lt;/code> or &lt;code>QBDI(x86-64)&lt;/code>
+to analyze the library.&lt;/p>
+&lt;h2 id="conclusion">Conclusion&lt;/h2>
+&lt;p>While it has been quite challenging to add the whole ARM support in QBDI, it starts to work pretty well on real
+use cases. Such support should also lead to interesting applications among which:&lt;/p>
+&lt;ul>
+&lt;li>HongFuzz / QBDI for Android.&lt;/li>
+&lt;li>
+&lt;a href="https://github.com/SideChannelMarvels" target="_blank" rel="noopener">SideChannelMarvels&lt;/a> integration for CPA attacks.&lt;/li>
+&lt;li>Trustlets instrumentation.&lt;/li>
+&lt;/ul>
+&lt;p>The raw traces used in this blog post are available here: &lt;code>traces.zip &amp;lt;resources/2019-06-15-android-jni-library-p1/traces.zip&amp;gt;&lt;/code>_&lt;/p>
+&lt;h2 id="acknowledgments">Acknowledgments&lt;/h2>
+&lt;p>Many thanks to Charles Hubain and Cédric Tessier who developed and designed QBDI. It is really pleasant
+to work on the concepts involved in this DBI.&lt;/p>
+&lt;p>Thanks to the LLVM community to provide such framework without which this project would not be possible.&lt;/p>
+&lt;p>Thanks to my Quarkslab colleagues who proofread this article.&lt;/p>
+&lt;h2 id="references">References&lt;/h2>
+&lt;section class="footnotes" role="doc-endnotes">
+&lt;hr>
+&lt;ol>
+&lt;li id="fn:1" role="doc-endnote">
+&lt;p>Frida modifies fields of the &lt;code>art::ArtMethod&lt;/code> object associated with the Java method.&amp;#160;&lt;a href="#fnref:1" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li id="fn:2" role="doc-endnote">
+&lt;p>
+&lt;a href="https://qbdi.quarkslab.com/QBDI_34c3.pdf" target="_blank" rel="noopener">Slides&lt;/a> -
+&lt;a href="https://media.ccc.de/v/34c3-9006-implementing_an_llvm_based_dynamic_binary_instrumentation_framework" target="_blank" rel="noopener">Talk&lt;/a>&amp;#160;&lt;a href="#fnref:2" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li id="fn:3" role="doc-endnote">
+&lt;p>&lt;a href="https://github.com/QBDI/QBDI/blob/master/examples">https://github.com/QBDI/QBDI/blob/master/examples&lt;/a>&amp;#160;&lt;a href="#fnref:3" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li id="fn:4" role="doc-endnote">
+&lt;p>DroidGuard being the SafetyNet module that collects information about the device.&amp;#160;&lt;a href="#fnref:4" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li id="fn:5" role="doc-endnote">
+&lt;p>The name has been intentionally changed.&amp;#160;&lt;a href="#fnref:5" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li id="fn:6" role="doc-endnote">
+&lt;p>Plus the &lt;code>this&lt;/code> parameter which is a &lt;code>jclass&lt;/code> object for a static method.&amp;#160;&lt;a href="#fnref:6" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li id="fn:7" role="doc-endnote">
+&lt;p>Even though static analysis would be enough in this case.&amp;#160;&lt;a href="#fnref:7" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li id="fn:8" role="doc-endnote">
+&lt;p>Nexus 5X - Android 8.1.0 - Rooted with Magisk.&amp;#160;&lt;a href="#fnref:8" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;/section></description></item></channel></rss>

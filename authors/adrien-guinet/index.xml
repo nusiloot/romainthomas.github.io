@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Adrien Guinet | Romain Thomas</title><link>/authors/adrien-guinet/</link><atom:link href="/authors/adrien-guinet/index.xml" rel="self" type="application/rss+xml"/><description>Adrien Guinet</description><generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>Published with Academic Website Builder - Icons made by Freepik</copyright><lastBuildDate>Thu, 03 Jun 2021 00:00:00 +0000</lastBuildDate><image><url>/images/icon_hu2654a0fcc87c65a864822ac27b001d3b_698_512x512_fill_lanczos_center_2.png</url><title>Adrien Guinet</title><link>/authors/adrien-guinet/</link></image><item><title>QBDL</title><link>/project/qbdl/</link><pubDate>Thu, 03 Jun 2021 00:00:00 +0000</pubDate><guid>/project/qbdl/</guid><description>&lt;p>QBDL (&lt;strong>Q&lt;/strong>uarksla&lt;strong>B&lt;/strong> &lt;strong>D&lt;/strong>ynamic &lt;strong>L&lt;/strong>oader) is a cross-platform library that enables
+to load ELF, PE and Mach-O binaries with an abstraction on the targeted system.
+It abstracts the memory model on which the binary is loaded
+and provides an enhanced API to the user to process symbols resolution.
+In a nutshell, it enables to load binaries on foreign systems without reinventing the wheel.&lt;/p>
+&lt;p>Here is an
+&lt;a href="https://github.com/quarkslab/QBDL/blob/83a64211dae71e870495bc795dd065278f93993f/bindings/python/examples/triton_macho_x64.py" target="_blank" rel="noopener">example&lt;/a> to load a Mach-O in
+&lt;a href="https://github.com/JonathanSalwan/Triton" target="_blank" rel="noopener">Triton&lt;/a> with QBDL:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">&lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">TritonVM&lt;/span>(pyqbdl&lt;span style="color:#f92672">.&lt;/span>TargetMemory):
+&lt;span style="color:#66d9ef">def&lt;/span> __init__(self, ctx: TritonContext):
+super()&lt;span style="color:#f92672">.&lt;/span>__init__()
+self&lt;span style="color:#f92672">.&lt;/span>ctx &lt;span style="color:#f92672">=&lt;/span> ctx
+&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">mmap&lt;/span>(self, ptr, size):
+&lt;span style="color:#66d9ef">return&lt;/span> ptr
+&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">mprotect&lt;/span>(self, ptr, size, access):
+&lt;span style="color:#66d9ef">return&lt;/span> True
+&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">write&lt;/span>(self, ptr, data):
+self&lt;span style="color:#f92672">.&lt;/span>ctx&lt;span style="color:#f92672">.&lt;/span>setConcreteMemoryAreaValue(ptr, bytes(data))
+&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">read&lt;/span>(self, ptr, size):
+&lt;span style="color:#66d9ef">return&lt;/span> self&lt;span style="color:#f92672">.&lt;/span>ctx&lt;span style="color:#f92672">.&lt;/span>getConcreteMemoryAreaValue(ptr, size)
+&lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">TritonSystem&lt;/span>(pyqbdl&lt;span style="color:#f92672">.&lt;/span>TargetSystem):
+&lt;span style="color:#66d9ef">def&lt;/span> __init__(self, arch, ctx):
+super()&lt;span style="color:#f92672">.&lt;/span>__init__(TritonVM(ctx))
+self&lt;span style="color:#f92672">.&lt;/span>arch &lt;span style="color:#f92672">=&lt;/span> arch
+self&lt;span style="color:#f92672">.&lt;/span>ctx &lt;span style="color:#f92672">=&lt;/span> ctx
+&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">symlink&lt;/span>(self, loader, sym):
+&lt;span style="color:#66d9ef">for&lt;/span> name, impl, addr &lt;span style="color:#f92672">in&lt;/span> externalFunctions:
+&lt;span style="color:#66d9ef">if&lt;/span> sym&lt;span style="color:#f92672">.&lt;/span>name &lt;span style="color:#f92672">==&lt;/span> name:
+&lt;span style="color:#66d9ef">return&lt;/span> addr
+&lt;span style="color:#66d9ef">return&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>
+&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">supports&lt;/span>(self, bin_):
+&lt;span style="color:#66d9ef">return&lt;/span> pyqbdl&lt;span style="color:#f92672">.&lt;/span>Arch&lt;span style="color:#f92672">.&lt;/span>from_bin(bin_) &lt;span style="color:#f92672">==&lt;/span> self&lt;span style="color:#f92672">.&lt;/span>arch
+&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">base_address_hint&lt;/span>(self, bin_ba, vsize):
+&lt;span style="color:#66d9ef">return&lt;/span> bin_ba
+x86_64_arch &lt;span style="color:#f92672">=&lt;/span> pyqbdl&lt;span style="color:#f92672">.&lt;/span>Arch(lief&lt;span style="color:#f92672">.&lt;/span>ARCHITECTURES&lt;span style="color:#f92672">.&lt;/span>X86, lief&lt;span style="color:#f92672">.&lt;/span>ENDIANNESS&lt;span style="color:#f92672">.&lt;/span>LITTLE, True)
+loader &lt;span style="color:#f92672">=&lt;/span> pyqbdl&lt;span style="color:#f92672">.&lt;/span>loaders&lt;span style="color:#f92672">.&lt;/span>MachO&lt;span style="color:#f92672">.&lt;/span>from_file(args&lt;span style="color:#f92672">.&lt;/span>filename, x86_64_arch,
+TritonSystem(x86_64_arch, ctx), pyqbdl&lt;span style="color:#f92672">.&lt;/span>Loader&lt;span style="color:#f92672">.&lt;/span>BIND&lt;span style="color:#f92672">.&lt;/span>NOW)
+&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>QBDL: QuarkslaB Dynamic Loader</title><link>/publication/21-sstic-qbdl/</link><pubDate>Thu, 03 Jun 2021 00:00:00 +0000</pubDate><guid>/publication/21-sstic-qbdl/</guid><description>&lt;h2 id="hahahugoshortcode-s0-hbhb-slides">
+&lt;i class="fas fa-copy pr-1 fa-fw">&lt;/i> Slides&lt;/h2>
+&lt;div class="pdfpreview shortcode shortcode--pdfpreview">
+&lt;embed src="SSTIC2021-Slides-qbdl_quarkslab_dynamic_loader-guinet_thomas.pdf" type="application/pdf" width="100%" height=450px />
+&lt;/div>
+&lt;h2 id="hahahugoshortcode-s2-hbhb-talk-in-french">
+&lt;i class="fas fa-laptop-code pr-1 fa-fw">&lt;/i> Talk (In French)&lt;/h2>
+&lt;video controls >
+&lt;source src="https://static.sstic.org/videos2021/1080p/qbdl_quarkslab_dynamic_loader.mp4" type="video/mp4">
+&lt;/video></description></item></channel></rss>

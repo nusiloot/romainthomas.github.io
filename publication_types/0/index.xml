@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>0 | Romain Thomas</title><link>/publication_types/0/</link><atom:link href="/publication_types/0/index.xml" rel="self" type="application/rss+xml"/><description>0</description><generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>Published with Academic Website Builder - Icons made by Freepik</copyright><lastBuildDate>Thu, 03 Jun 2021 00:00:00 +0000</lastBuildDate><image><url>/images/icon_hu2654a0fcc87c65a864822ac27b001d3b_698_512x512_fill_lanczos_center_2.png</url><title>0</title><link>/publication_types/0/</link></image><item><title>QBDL: QuarkslaB Dynamic Loader</title><link>/publication/21-sstic-qbdl/</link><pubDate>Thu, 03 Jun 2021 00:00:00 +0000</pubDate><guid>/publication/21-sstic-qbdl/</guid><description>&lt;h2 id="hahahugoshortcode-s0-hbhb-slides">
+&lt;i class="fas fa-copy pr-1 fa-fw">&lt;/i> Slides&lt;/h2>
+&lt;div class="pdfpreview shortcode shortcode--pdfpreview">
+&lt;embed src="SSTIC2021-Slides-qbdl_quarkslab_dynamic_loader-guinet_thomas.pdf" type="application/pdf" width="100%" height=450px />
+&lt;/div>
+&lt;h2 id="hahahugoshortcode-s2-hbhb-talk-in-french">
+&lt;i class="fas fa-laptop-code pr-1 fa-fw">&lt;/i> Talk (In French)&lt;/h2>
+&lt;video controls >
+&lt;source src="https://static.sstic.org/videos2021/1080p/qbdl_quarkslab_dynamic_loader.mp4" type="video/mp4">
+&lt;/video></description></item><item><title>Android Runtime Restrictions Bypass</title><link>/publication/android-restrictions-bypass/</link><pubDate>Sat, 23 Mar 2019 00:00:00 +0000</pubDate><guid>/publication/android-restrictions-bypass/</guid><description>&lt;div class="alert alert-note">
+&lt;div>
+This publication is also available on the &lt;a href="https://blog.quarkslab.com/android-runtime-restrictions-bypass.html">Quarkslab Blog&lt;/a>.
+&lt;/div>
+&lt;/div>
+&lt;p>With the release of Android Nougat, Google introduced restriction about native libraries that can be loaded from an Android application. Basically, it prevents developers to link against some internal libraries such as &lt;code>libart.so&lt;/code>.&lt;/p>
+&lt;p>Later on and with the release of Android Pie, they introduced a new restriction on the access to internal Java methods (or fields). Basically, these restrictions are used to prevent developers to access parts of the Android internal framework.&lt;/p>
+&lt;p>Whereas these limitations aim to be used for compatibility purposes, this article shows how we can take advantage of Android internal to disable them. We briefly explain how these restrictions work and how to disable them from an application without &lt;strong>privileges&lt;/strong>.&lt;/p>
+&lt;p>The first part deals with the native library loading restriction while the second is about Java internal framework restriction.&lt;/p>
+&lt;div class="pdfpreview shortcode shortcode--pdfpreview">
+&lt;embed src="/publication/android-restrictions-bypass/report.pdf" type="application/pdf" width="100%" height=900px />
+&lt;/div></description></item><item><title>LIEF: Library to Instrument Executable Formats</title><link>/publication/lief/</link><pubDate>Tue, 04 Jul 2017 00:00:00 +0000</pubDate><guid>/publication/lief/</guid><description>&lt;p>When analyzing executable, the first layer of information is the format in which the executable is wrapped. It turns out that a lot of tools and libraries exist to analyze and instrument machine code wrapped by the format, but there is not such library to handle the three mainstream executable formats and to both read and modify these formats. LIEF has been developed to that end.&lt;/p>
+&lt;p>In the talk we will explain the rationale behind LIEF architecture choices, what LIEF allows to do and have a look at use cases.&lt;/p>
+&lt;p>LIEF is a cross platform library and it can be used through a Python, C++ and C API. The library enables to parse standard structures as well as more complex ones like PE Signature (Authenticode) and ELF hash table. As use cases we can inject code into a binary or a library, we can also redirect the control flow to hook functions and it can be used to obfuscate some parts of a binary. Another feature of LIEF is that common characteristics of these formats are factorized so that we can develop a single script which works for the three formats.&lt;/p>
+&lt;p>&lt;img src="lief.png" alt="LIEF">&lt;/p>
+&lt;h2 id="hahahugoshortcode-s0-hbhb-slides-of-the-talk-given-at-rmll">
+&lt;i class="fas fa-file-pdf pr-1 fa-fw">&lt;/i> Slides of the talk given at RMLL&lt;/h2>
+&lt;div class="pdfpreview shortcode shortcode--pdfpreview">
+&lt;embed src="17-07-RMLL-LIEF.pdf" type="application/pdf" width="100%" height=600px />
+&lt;/div>
+&lt;p>You can also grab the slides of the talk given at
+&lt;a href="https://project.inria.fr/FranceJapanICST/wokshops/2017-program/presentations/" target="_blank" rel="noopener">Cybersecurity France-Japan&lt;/a>:
+&lt;a href="17-04-cybersecurity-frjp-LIEF.pdf">17-04-cybersecurity-frjp-LIEF.pdf&lt;/a>&lt;/p></description></item><item><title>How Triton can help to reverse virtual machine based software protections</title><link>/publication/triton-vm-protection/</link><pubDate>Thu, 10 Nov 2016 00:00:00 +0000</pubDate><guid>/publication/triton-vm-protection/</guid><description>&lt;h2 id="hahahugoshortcode-s0-hbhb-slides">
+&lt;i class="fas fa-file-pdf pr-1 fa-fw">&lt;/i> Slides&lt;/h2>
+&lt;div class="pdfpreview shortcode shortcode--pdfpreview">
+&lt;embed src="csaw2016-sos-rthomas-jsalwan.pdf" type="application/pdf" width="100%" height=600px />
+&lt;/div>
+&lt;h2 id="hahahugoshortcode-s2-hbhb-video">
+&lt;i class="fas fa-file-video pr-1 fa-fw">&lt;/i> Video&lt;/h2>
+&lt;video controls >
+&lt;source src="how-triton-can-help-to-reverse-virtual-machine-based-software-protections.mp4" type="video/mp4">
+&lt;/video></description></item></channel></rss>

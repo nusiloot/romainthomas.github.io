@@ -1,0 +1,792 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>iOS | Romain Thomas</title><link>/categories/ios/</link><atom:link href="/categories/ios/index.xml" rel="self" type="application/rss+xml"/><description>iOS</description><generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>Published with Academic Website Builder - Icons made by Freepik</copyright><lastBuildDate>Sun, 18 Jul 2021 00:00:00 +0000</lastBuildDate><image><url>/images/icon_hu2654a0fcc87c65a864822ac27b001d3b_698_512x512_fill_lanczos_center_2.png</url><title>iOS</title><link>/categories/ios/</link></image><item><title>Gotta Catch 'Em All: Frida &amp; jailbreak detection</title><link>/post/21-07-pokemongo-anti-frida-jailbreak-bypass/</link><pubDate>Sun, 18 Jul 2021 00:00:00 +0000</pubDate><guid>/post/21-07-pokemongo-anti-frida-jailbreak-bypass/</guid><description>&lt;style>
+.green {
+color:green;
+font-family: 'Fira Code', monospace;
+font-size: 87.5%;
+}
+.blue {
+color: blue;
+font-family: 'Fira Code', monospace;
+font-size: 87.5%;
+}
+.orange {
+color: #FF6347;
+font-family: 'Fira Code', monospace;
+font-size: 87.5%;
+}
+.red {
+color: #df2b04;
+font-family: 'Fira Code', monospace;
+font-size: 87.5%;
+}
+.hl-comment {
+color: #df2b04;
+font-family: 'Fira Code', monospace;
+font-size: 87.5%;
+}
+.hl-keyword {
+color: #A90D91;
+font-family: 'Fira Code', monospace;
+font-size: 87.5%;
+}
+.hl-literal {
+color: #1C01CE;
+font-family: 'Fira Code', monospace;
+font-size: 87.5%;
+}
+.hl-preproc {
+color: #633820;
+font-family: 'Fira Code', monospace;
+font-size: 87.5%;
+}
+.hl-strings {
+color: #C41A16;
+font-family: 'Fira Code', monospace;
+font-size: 87.5%;
+}
+.yellow {
+color: #CC7000;
+font-family: 'Fira Code', monospace;
+font-size: 87.5%;
+}
+&lt;/style>
+&lt;div class="alert alert-note">
+&lt;div>
+Do not expect a &lt;em>click &amp;amp; play&lt;/em> solution for PokemonGO in this blog post. This blog post is more about
+the technical aspects of jailbreak detection than a bypass for this game.
+&lt;/div>
+&lt;/div>
+&lt;h2 id="introduction">Introduction&lt;/h2>
+&lt;p>While working on LIEF during my vacations to support in-memory parsing for Mach-O files, I found that
+PokemonGO was an interesting use case to introduce this feature. It led me to look at the jailbreak
+and Frida detection implemented in this game.
+Being more familiar with Android than iOS, the analysis workflow on this platform is quite different, which
+is also a good opportunity to improve tooling.&lt;/p>
+&lt;p>The first challenge stems from jailbreaking the device. Fortunately, checkra1n eases this step.
+The second difficulty lies in extracting the encrypted iOS app from the device. In contrast to Android,
+iOS apps are encrypted on the disk and decrypted by the kernel when loaded. It means that one way to get
+the unencrypted code is to dump the file from memory. One could also leverage the function &lt;code>mremap_encrypted()&lt;/code>
+as described in
+&lt;a href="https://www.linkedin.com/pulse/decrypting-apps-ios-john-coates/" target="_blank" rel="noopener">Decrypting Apps on iOS&lt;/a>.&lt;/p>
+&lt;h2 id="pokemongo-overview">PokemonGO Overview&lt;/h2>
+&lt;p>When running PokemonGO on a jailbroken device&lt;sup id="fnref:1">&lt;a href="#fn:1" class="footnote-ref" role="doc-noteref">1&lt;/a>&lt;/sup>, the application immediately crashes with the following backtrace:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text">0 ??? 0x000000020ac46ab8 0 + 8770579128
+1 libdyld.dylib 0x0000000184df8304 invocation function for block in dyld3::AllImages::runAllInitializersInImage(dyld3::closure::Image const*, dyld3::MachOLoaded const*) + 136
+2 libdyld.dylib 0x0000000184dea5b0 dyld3::closure::Image::forEachInitializer(void const*, void (void const*) block_pointer) const + 96
+3 libdyld.dylib 0x0000000184df8160 invocation function for block in dyld3::AllImages::runInitialzersBottomUp(dyld3::closure::Image const*) + 296
+4 libdyld.dylib 0x0000000184deae6c dyld3::closure::Image::forEachImageToInitBefore(void (unsigned int, bool&amp;amp;) block_pointer) const + 92
+5 libdyld.dylib 0x0000000184df8b48 dyld3::AllImages::loadImage(Diagnostics&amp;amp;, char const*, unsigned int, dyld3::closure::DlopenClosure const*, bool, bool, bool, bool, void const*) + 776
+6 libdyld.dylib 0x0000000184df8698 dyld3::AllImages::dlopen(Diagnostics&amp;amp;, char const*, bool, bool, bool, bool, bool, void const*, bool) + 872
+7 libdyld.dylib 0x0000000184dfa2b4 dyld3::dlopen_internal(char const*, int, void*) + 368
+8 libdyld.dylib 0x0000000184ded5b0 dlopen_internal(char const*, int, void*) + 108
+9 CoreFoundation 0x00000001850ed038 _CFBundleDlfcnLoadFramework + 136
+10 CoreFoundation 0x00000001850be974 _CFBundleLoadExecutableAndReturnError + 376
+11 Foundation 0x0000000186359ba8 -[NSBundle loadAndReturnError:] + 332
+12 pokemongo 0x00000001041a7c5c 0x1041a0000 + 31836
+13 pokemongo 0x00000001041a7d50 0x1041a0000 + 32080
+14 libdyld.dylib 0x0000000184de9588 start + 4
+&lt;/code>&lt;/pre>&lt;/div>&lt;div class="alert alert-note">
+&lt;div>
+The full crash log is available &lt;a href="backtrace.log">here&lt;/a>.
+&lt;/div>
+&lt;/div>
+&lt;p>In this backtrace, the main &lt;code>pokemongo&lt;/code> binary is a kind of &lt;em>stub&lt;/em> that loads the Unity binary: &lt;code>UnityFramework&lt;/code> which
+contains the main logic of the game.&lt;/p>
+&lt;p>This library is loaded by the &lt;code>dlopen_internal&lt;/code> function at index &lt;strong>8&lt;/strong> in the backtrace as a
+result of &lt;code>-[NSBundle loadAndReturnError:]&lt;/code>.
+Since &lt;code>UnityFramework&lt;/code> depends on other libraries, they are (pre)loaded with &lt;code>Image::forEachImageToInitBefore&lt;/code>
+which processes the following files:&lt;/p>
+&lt;ol>
+&lt;li>&lt;span class="yellow">@/usr/lib/libc++.1.dylib&lt;/span>&lt;/li>
+&lt;li>&amp;hellip;&lt;/li>
+&lt;li>&lt;span class="blue">@rpath/NianticLabsPlugin.framework/NianticLabsPlugin&lt;/span>&lt;/li>
+&lt;li>&amp;hellip;&lt;/li>
+&lt;li>&lt;span class="yellow">@rpath/libswiftos.dylib&lt;/span>&lt;/li>
+&lt;/ol>
+&lt;p>Among those dependencies, we can notice the &lt;span class="blue">NianticLabsPlugin&lt;/span> library which is a cross-platform
+Unity plugin &amp;ndash; also present in the Android version &amp;ndash; that contains the main protections of the game.
+These protections are used to prevent cheat, bots, GPS spoofing, in PokemonGO. The whole
+being obfuscated by Digital.ai (formerly known as Arxan). &lt;span class="blue">NianticLabsPlugin&lt;/span> communicates with the &lt;code>UnityFramework&lt;/code> through
+an exported function &lt;code>GetN2Api&lt;/code> that returns an array of functions (pointers).&lt;/p>
+&lt;p>The following figure outlines these different components:&lt;/p>
+&lt;p>&lt;img src="overview.png" alt="PokemonGO overview">&lt;/p>
+&lt;p>Getting back to the backtrace, if we assume that the application crashes when loading &lt;span class="blue">NianticLabsPlugin&lt;/span>,
+it precisely crashes when calling the Mach-O constructors in &lt;code>AllImages::runAllInitializersInImage&lt;/code>.
+Since the application is heavily obfuscated, a static analysis reaches quickly its limits, which forces us
+to emulate or dynamically analyze the functions of interest.&lt;/p>
+&lt;div class="alert alert-note">
+&lt;div>
+&lt;p>The addresses of the functions/instructions mentioned in this blog post are based on the following version of NianticLabsPlugin:&lt;/p>
+&lt;p>&lt;i class="fas fa-shield-alt">&lt;/i> &lt;a href="NianticLabsPlugin.bin">NianticLabsPlugin - 2140426ccdfdfb2529f454697cb5cc83&lt;/a>&lt;/p>
+&lt;p>&lt;i class="fas fa-code-branch">&lt;/i> PokemonGO v0.211.2 - June 2021&lt;/p>
+&lt;/div>
+&lt;/div>
+&lt;h2 id="analyzing-mach-o-constructors-with-frida">Analyzing Mach-O constructors with Frida&lt;/h2>
+&lt;p>From the previous section, we surmised that the application crashed because of the &lt;span class="blue">NianticLabsPlugin&lt;/span>&amp;rsquo;s constructors.
+Since these functions are called before &lt;strong>any other functions&lt;/strong> of the library, it raises the question of finding
+a way to perform actions (or hook) before they are executed.&lt;/p>
+&lt;p>On Android, when we need to analyse a library&amp;rsquo;s constructors, we can hook the &lt;code>call_array&lt;/code> function from
+&lt;a href="https://github.com/aosp-mirror/platform_bionic/blob/c44b1d0676ded732df4b3b21c5f798eacae93228/linker/linker_soinfo.cpp#L488" target="_blank" rel="noopener">Bionic&amp;rsquo;s linker (ELF loader)&lt;/a>:&lt;/p>
+&lt;script src="https://gist.github.com/romainthomas/c10298387a921df730c1556c2ee9cecb.js">&lt;/script>
+&lt;p>If we try to apply the same approach on iOS, the mirror of the ELF loader on iOS is &lt;code>dyld&lt;/code> which contains
+most of the logic to load Mach-O files.
+It turns out that at some points, the Mach-O&amp;rsquo;s constructors are processed in the &lt;code>doModInitFunctions&lt;/code> function
+(from
+&lt;a href="https://github.com/apple-opensource/dyld/blob/1128192c016372ae94793d88530bc5978c1fce93/src/ImageLoaderMachO.cpp#L2290" target="_blank" rel="noopener">ImageLoaderMachO.cpp&lt;/a>).&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="color:#66d9ef">void&lt;/span> ImageLoaderMachO&lt;span style="color:#f92672">::&lt;/span>doModInitFunctions(&lt;span style="color:#66d9ef">const&lt;/span> LinkContext&lt;span style="color:#f92672">&amp;amp;&lt;/span> context) {
+...
+&lt;span style="color:#66d9ef">for&lt;/span> (&lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#66d9ef">struct&lt;/span> &lt;span style="color:#a6e22e">macho_section&lt;/span>&lt;span style="color:#f92672">*&lt;/span> sect&lt;span style="color:#f92672">=&lt;/span>sectionsStart; sect &lt;span style="color:#f92672">&amp;lt;&lt;/span> sectionsEnd; &lt;span style="color:#f92672">++&lt;/span>sect) {
+&lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#66d9ef">uint8_t&lt;/span> type &lt;span style="color:#f92672">=&lt;/span> sect&lt;span style="color:#f92672">-&amp;gt;&lt;/span>flags &lt;span style="color:#f92672">&amp;amp;&lt;/span> SECTION_TYPE;
+&lt;span style="color:#66d9ef">if&lt;/span> ( type &lt;span style="color:#f92672">==&lt;/span> S_MOD_INIT_FUNC_POINTERS ) {
+Initializer&lt;span style="color:#f92672">*&lt;/span> inits &lt;span style="color:#f92672">=&lt;/span> (Initializer&lt;span style="color:#f92672">*&lt;/span>)(sect&lt;span style="color:#f92672">-&amp;gt;&lt;/span>addr &lt;span style="color:#f92672">+&lt;/span> fSlide);
+...
+&lt;span style="color:#66d9ef">if&lt;/span> (&lt;span style="color:#f92672">!&lt;/span>&lt;span style="color:#66d9ef">this&lt;/span>&lt;span style="color:#f92672">-&amp;gt;&lt;/span>containsAddress(stripPointer((&lt;span style="color:#66d9ef">void&lt;/span>&lt;span style="color:#f92672">*&lt;/span>)func)) ) {
+dyld&lt;span style="color:#f92672">::&lt;/span>throwf(&lt;span style="color:#e6db74">&amp;#34;initializer function %p not in mapped image for %s&lt;/span>&lt;span style="color:#ae81ff">\n&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>, func, &lt;span style="color:#66d9ef">this&lt;/span>&lt;span style="color:#f92672">-&amp;gt;&lt;/span>getPath());
+}
+...
+func(context.argc, context.argv, context.envp, context.apple, &lt;span style="color:#f92672">&amp;amp;&lt;/span>context.programVars);
+}
+}
+...
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>From this code, we can notice that &lt;strong>all&lt;/strong> constructor addresses are checked &lt;strong>beforehand&lt;/strong> by the
+&lt;code>containsAddress&lt;/code> function. Therefore, it makes this function a good hooking spot as it is executed before
+calling the constructor itself. One can use the native SDK of
+&lt;a href="https://github.com/frida/frida-gum" target="_blank" rel="noopener">frida-gum&lt;/a>
+to perform this action:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="color:#75715e">// Address of ImageLoader::containsAddress in /usr/lib/dyld
+&lt;/span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#66d9ef">const&lt;/span> uintptr_t containsAddress_ptr &lt;span style="color:#f92672">=&lt;/span> ...;
+&lt;span style="color:#75715e">// Setup hooks with gum_interceptor_attach
+&lt;/span>&lt;span style="color:#75715e">&lt;/span>GumAttachReturn attach_ret &lt;span style="color:#f92672">=&lt;/span> gum_interceptor_attach(
+listener_&lt;span style="color:#f92672">-&amp;gt;&lt;/span>interceptor,
+&lt;span style="color:#75715e">/* target */&lt;/span> &lt;span style="color:#66d9ef">reinterpret_cast&lt;/span>&lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#66d9ef">void&lt;/span>&lt;span style="color:#f92672">*&amp;gt;&lt;/span>(containsAddress_ptr),
+&lt;span style="color:#66d9ef">reinterpret_cast&lt;/span>&lt;span style="color:#f92672">&amp;lt;&lt;/span>GumInvocationListener&lt;span style="color:#f92672">*&amp;gt;&lt;/span>(listener_),
+&lt;span style="color:#75715e">/* ID */&lt;/span> &lt;span style="color:#66d9ef">reinterpret_cast&lt;/span>&lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#66d9ef">void&lt;/span>&lt;span style="color:#f92672">*&amp;gt;&lt;/span>(containsAddress_ptr)
+);
+....
+&lt;span style="color:#75715e">// Equivalent of onEnter in Javascript
+&lt;/span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#66d9ef">void&lt;/span> native_listener_on_enter(GumInvocationListener&lt;span style="color:#f92672">*&lt;/span> listener, GumInvocationContext&lt;span style="color:#f92672">*&lt;/span> ic) {
+&lt;span style="color:#66d9ef">const&lt;/span> uintptr_t ctor_function_addr &lt;span style="color:#f92672">=&lt;/span> ic&lt;span style="color:#f92672">-&amp;gt;&lt;/span>cpu_context&lt;span style="color:#f92672">-&amp;gt;&lt;/span>x[&lt;span style="color:#ae81ff">1&lt;/span>];
+&lt;span style="color:#75715e">// Do stuff with ctor_function_addr
+&lt;/span>&lt;span style="color:#75715e">&lt;/span>}
+&lt;/code>&lt;/pre>&lt;/div>&lt;div class="alert alert-note">
+&lt;div>
+&lt;code>containsAddress&lt;/code> is a member function, therefore &lt;code>x0&lt;/code> contains a pointer on &lt;code>this&lt;/code> and the address
+to check is located in &lt;code>x1&lt;/code>.
+&lt;/div>
+&lt;/div>
+&lt;p>By hooking &lt;code>containsAddress()&lt;/code>, we get the &lt;strong>control before&lt;/strong> the execution of the constructors.
+It gives us the ability to perform the following actions that can help to identify the constructor involved in the crash:&lt;/p>
+&lt;ol>
+&lt;li>Trace the constructors (see:
+&lt;a href="constructors_trace.log">constructors_trace.log&lt;/a>)&lt;/li>
+&lt;li>Replace/disable a constructor (&lt;code>gum_interceptor_replace&lt;/code>)&lt;/li>
+&lt;li>Detect the &lt;strong>first&lt;/strong> constructor and hook the next ones (&lt;code>gum_interceptor_attach&lt;/code>)&lt;/li>
+&lt;/ol>
+&lt;p>&lt;span class="blue">NianticLabsPlugin&lt;/span> embeds no less than 120 constructors
+among those, 6&lt;sup id="fnref:2">&lt;a href="#fn:2" class="footnote-ref" role="doc-noteref">2&lt;/a>&lt;/sup> are involved in detecting Frida, jailbroken devices, anti-debug, etc:&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>Index&lt;/th>
+&lt;th>Offset&lt;/th>
+&lt;th>Description&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>15&lt;/td>
+&lt;td>0x4369e0&lt;/td>
+&lt;td>Anti-debug &amp;amp; anti-emulation&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>16&lt;/td>
+&lt;td>0x00e0d8&lt;/td>
+&lt;td>Frida detection&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>17&lt;/td>
+&lt;td>0x26bd5c&lt;/td>
+&lt;td>Anti-bypass?&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>18&lt;/td>
+&lt;td>0x449b84&lt;/td>
+&lt;td>Anti-jailbreak, anti-Frida&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>19&lt;/td>
+&lt;td>0x731b90&lt;/td>
+&lt;td>Anti-jailbreak, anti-debug, anti-frida&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>20&lt;/td>
+&lt;td>0x359194&lt;/td>
+&lt;td>Anti-jailbreak&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;p>Once we reduced the set of functions involved in the crash, we can combine dynamic analysis with Frida
+and emulation with Unicorn.&lt;/p>
+&lt;h2 id="anti-debug">Anti-debug&lt;/h2>
+&lt;p>One of the redundant checks we can find in many functions (not only the constructors) are the
+anti-debugs. They always come in two parts:&lt;/p>
+&lt;ol>
+&lt;li>Try to &lt;em>&amp;ldquo;kill&amp;rdquo;&lt;/em> its own pid with the 0-signal&lt;/li>
+&lt;li>Check if PTRACE is flagged&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="color:#66d9ef">void&lt;/span> &lt;span style="color:#a6e22e">try_kill&lt;/span>() {
+&lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#66d9ef">int&lt;/span> pid &lt;span style="color:#f92672">=&lt;/span> getpid(); &lt;span style="color:#75715e">// syscall@0x436cdc
+&lt;/span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">int&lt;/span> ret &lt;span style="color:#f92672">=&lt;/span> kill(pid, &lt;span style="color:#ae81ff">0&lt;/span>); &lt;span style="color:#75715e">// syscall@0x436d28
+&lt;/span>&lt;span style="color:#75715e">&lt;/span>}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>According to the man page of kill (&lt;code>man 2 kill&lt;/code>), the signal &lt;code>0&lt;/code> is used to check
+that the &lt;code>pid&lt;/code> given in the first parameter really exists.&lt;/p>
+&lt;blockquote>
+&lt;p>[&amp;hellip;] A value of 0, however, will cause error checking to be performed (with no signal being sent). This can be used
+to check the validity of pid.&lt;/p>
+&lt;/blockquote>
+&lt;p>This &lt;em>kill&lt;/em> operation is followed by three &lt;code>PTRACE&lt;/code> checks:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="color:#75715e">// Done three times
+&lt;/span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#66d9ef">inline&lt;/span> &lt;span style="color:#66d9ef">bool&lt;/span> &lt;span style="color:#a6e22e">ptrace_detect&lt;/span>() {
+&lt;span style="color:#66d9ef">int32_t&lt;/span> opt[&lt;span style="color:#ae81ff">4&lt;/span>] &lt;span style="color:#f92672">=&lt;/span> {
+CTL_KERN,
+KERN_PROC,
+KERN_PROC_PID,
+getpid(),
+};
+kinfo_proc info;
+sysctl(opt, &lt;span style="color:#ae81ff">4&lt;/span>, &lt;span style="color:#f92672">&amp;amp;&lt;/span>info, &lt;span style="color:#66d9ef">sizeof&lt;/span>(kinfo_proc), &lt;span style="color:#66d9ef">nullptr&lt;/span>, &lt;span style="color:#ae81ff">0&lt;/span>);
+&lt;span style="color:#66d9ef">return&lt;/span> info.kp_proc.p_flag &lt;span style="color:#f92672">&amp;amp;&lt;/span> P_TRACED;
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>These three &lt;code>P_TRACED&lt;/code> checks &lt;strong>always&lt;/strong> come together:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text">0x436cdc: getpid(): 6015
+0x436d28: kill(6015, 0): 0
+0x4374b0: sysctl(CTL_KERN, KERN_PROC, KERN_PROC_PID, 6015)
+0x4371e8: sysctl(CTL_KERN, KERN_PROC, KERN_PROC_PID, 6015)
+0x437398: sysctl(CTL_KERN, KERN_PROC, KERN_PROC_PID, 6015)
+&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="frida-detection">Frida Detection&lt;/h2>
+&lt;p>Frida is detected by the application through its client-server mode, which binds the localhost on the port &lt;code>27042&lt;/code>.
+When PokemonGO is starting, it tries to open a socket on this port and if it manages to connect, it tests the Frida handshake.&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text">0x00e3b8: getifaddrs(0x16b7fb518): 0x0
+0x016990: socket(&amp;#39;IPV4&amp;#39;, &amp;#39;TCP&amp;#39;, &amp;#39;0&amp;#39;): 0x8
+0x019d60: bind(&amp;#39;PF_INET&amp;#39;, 0x8, &amp;#39;127.0.0.1:27042&amp;#39;)
+0x01805c: close(0x8)
+0x016990: socket(&amp;#39;IPV4&amp;#39;, &amp;#39;TCP&amp;#39;, &amp;#39;0&amp;#39;): 0x8
+0x019d60: bind(&amp;#39;PF_INET&amp;#39;, 0x8, &amp;#39;192.168.0.26:27042&amp;#39;)
+0x01805c: close(0x8)
+0x00e3ec: freeifaddrs(0x10601ac00): 0x105360a00
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>The application also iterates over the list of the libraries loaded in memory with the
+&lt;code>_dyld_image_count&lt;/code>/&lt;code>_dyld_get_image_name&lt;/code> functions. Nevertheless, it seems that they are not used to detect
+Frida libraries artifacts (like &lt;code>FridaGadget.dylib&lt;/code>).&lt;/p>
+&lt;h2 id="jailbreak-detection">Jailbreak Detection&lt;/h2>
+&lt;p>The application implements jailbreak detection by checking if some files are accessible or not on the device.
+Most of the checks are done by using the &lt;code>access()&lt;/code> syscalls that are inlined in different places:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text">0x44c390: access(&amp;#39;/bin/grep&amp;#39;, 0x0)
+...
+0x7326b0: access(&amp;#39;/private/var/checkra1n.dmg&amp;#39;, 0x0)
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>The list of the checked files is given in the
+&lt;a href="#annexes">annexes of the blog post&lt;/a>.&lt;/p>
+&lt;div class="alert alert-success">
+&lt;div>
+This list is very close to &lt;a href="https://github.com/XsF1re/vnodebypass/blob/870b21fd3566736cca285355b4faf7f289baa4d5/layout/usr/share/vnodebypass/hidePathList.plist">vnodebypass/hidePathList.plist&lt;/a>
+&lt;/div>
+&lt;/div>
+&lt;p>In addition to &lt;em>raw&lt;/em> &lt;code>access&lt;/code> syscall, the application enhances its detection by creating a symbolic link of the
+root directory in a temporary app data directory:&lt;/p>
+&lt;pre>&lt;code>0x734e08: symlink('/Applications/..', '/private/var/mobile/Containers/Data/Application/D933FBC9-90E7-4584-851E-CE2D5E900446/tmp/WCH38bnM0x101a9e7d0')
+&lt;/code>&lt;/pre>&lt;p>Then, it performs the same checks with the app data directory as prefix: &lt;code>[...]/tmp/WCH38bnM0x101a9e7d0&lt;/code>:&lt;/p>
+&lt;pre>&lt;code>0x7376d8: access('/private/var/mobile/Containers/Data/Application/D933FBC9-90E7-4584-851E-CE2D5E900446/tmp/3Odis0x101a9dfd0/usr/bin/passwd', 0x0)
+&lt;/code>&lt;/pre>&lt;h2 id="signature-check">Signature Check&lt;/h2>
+&lt;p>At some point, one function checks the integrity of the signature of the &lt;code>pokemongo&lt;/code> binary.
+This check starts by opening the main &lt;code>pokemongo&lt;/code> binary from &lt;strong>the disk&lt;/strong>:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text">0x7392ec: add x0, x19, #6,lsl#12
+0x7392f0: add x0, x0, #0x540
+0x7392f4: mov w1, #0x1000000
+0x7392f8: mov x2, #0
+0x7392fc: svc 0x80 ; x16 -&amp;gt; SYS_open = 5
+// open(&amp;#39;/private/var/containers/Bundle/Application/[...]/pokemongo.app/pokemongo&amp;#39;): fd_pgo
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Then, it reads the beginning of the file in a stack buffer:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text">0x74b494: ldr x0, [x19, #0xc0] ; fd
+0x74b498: ldr x1, [x19, #0x130] ; buff
+0x74b49c: ldr x2, [x19, #0xb8] ; buff_size
+0x74b4a0: svc 0x80 ; x16 -&amp;gt; SYS_read = 3
+// uint8_t macho_head[0x4167];
+// 0x74b4a0: read(fd_pgo, macho_header, 0x4167);
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>to iterate over the Mach-O load commands:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text">; x8 points to the read&amp;#39;s buffer
+0x73942c: ldr w8, [x8, #0x10] ; Number of LC_COMMANDS
+for (size_t i = 0; i &amp;lt; nb_cmds; ++i) {
+0x74bc40: ldr w10, [x9, #4] ; Command&amp;#39;s size
+0x74ade4: ldr w9, [x9] ; command&amp;#39;s type
+if (cmd.type == LC_CODE_SIGNATURE) {
+0x74b1b8: ldr w10, [x10, #8] ; read signature offset -&amp;gt; 0xc3d0
+}
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>With the offset of the Mach-O &lt;code>LC_CODE_SIGNATURE&lt;/code> command, it reads the raw signature using the
+&lt;code>lseek/read&lt;/code> syscalls:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text">uint8_t sig_header[0x205];
+0x73a978: lseek(fd_pgo, LC_CODE_SIGNATURE offset, 0x0)
+0x73aecc: read(fd_pgo, &amp;amp;sig_header, 0x205);
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>The raw signature buffer is processed by chunks of 10 bytes in
+a function that looks like a checksum:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text">[...]
+0x73ad58: ldrsb w13, [x12]
+0x73ad5c: mov w14, #83
+0x73ad60: sub w13, w14, w13
+0x73ad64: ldrsb w14, [x12, #1]
+0x73ad68: mov w15, #87
+0x73ad6c: sub w14, w15, w14
+0x73ad70: ldrsb w16, [x12, #2]
+0x73ad74: mov w17, #53
+0x73ad78: sub w16, w17, w16
+0x73ad7c: ldrsb w17, [x12, #3]
+0x73ad80: mov w0, #52
+0x73ad84: sub w17, w0, w17
+0x73ad88: ldrsb w0, [x12, #4]
+0x73ad8c: sub w0, w15, w0
+0x73ad90: ldrsb w1, [x12, #5]
+0x73ad94: mov w2, #51
+0x73ad98: sub w1, w2, w1
+0x73ad9c: ldrsb w2, [x12, #6]
+0x73ada0: mov w3, #54
+0x73ada4: sub w2, w3, w2
+0x73ada8: ldrsb w3, [x12, #7]
+0x73adac: sub w15, w15, w3
+0x73adb0: ldrsb w3, [x12, #8]
+0x73adb4: mov w4, #78
+0x73adb8: sub w3, w4, w3
+0x73adbc: ldrsb w12, [x12, #9]
+0x73adc0: mov w4, #70
+0x73adc4: sub w4, w4, w12
+[...]
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>I did not manage to identify the underlying checksum algorithm, but it involves square multiplications and
+the key(?): &lt;code>SW5436NF&lt;/code>&lt;/p>
+&lt;h2 id="control-fault-injection">Control-Fault Injection&lt;/h2>
+&lt;p>Once we determined the functions involved in the detections, we might want to disable them in order to
+run the game smoothly.
+Actually, PokemonGO is protected against such bypass with global variables that assert if a function
+ran successfully or not.&lt;/p>
+&lt;p>This protection is equivalent to the following piece of code:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="color:#66d9ef">static&lt;/span> &lt;span style="color:#66d9ef">constexpr&lt;/span> uintptr_t GOOD &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">0x00627178&lt;/span>; &lt;span style="color:#75715e">// bqx ?
+&lt;/span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#66d9ef">static&lt;/span> uintptr_t MAGIC_CFI &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">0xdeadc0de&lt;/span>;
+__attribute__((constructor))
+&lt;span style="color:#66d9ef">void&lt;/span> frida_detect() {
+&lt;span style="color:#66d9ef">if&lt;/span> (is_frida_running()) {
+crash();
+}
+MAGIC_CFI &lt;span style="color:#f92672">=&lt;/span> GOOD;
+}
+__attribute__((constructor))
+&lt;span style="color:#66d9ef">void&lt;/span> control_fault_check() {
+&lt;span style="color:#66d9ef">if&lt;/span> (MAGIC_CFI &lt;span style="color:#f92672">!=&lt;/span> GOOD) {
+crash();
+}
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>If we only disable &lt;code>frida_detect()&lt;/code>, the application will crash because of &lt;code>control_fault_check()&lt;/code>.&lt;/p>
+&lt;p>We could bypass this protection by identifying the address of the
+&lt;code>MAGIC_CFI&lt;/code> in the &lt;code>__data&lt;/code> section, or by disabling the &lt;code>control_fault_check()&lt;/code>.&lt;/p>
+&lt;h2 id="what-about-lief">What about LIEF?&lt;/h2>
+&lt;p>As mentioned in the introduction, it started with an ongoing feature to parse Mach-O files from memory.
+Basically, LIEF will&lt;sup id="fnref:3">&lt;a href="#fn:3" class="footnote-ref" role="doc-noteref">3&lt;/a>&lt;/sup> enable to parse Mach-O files&lt;sup id="fnref:4">&lt;a href="#fn:4" class="footnote-ref" role="doc-noteref">4&lt;/a>&lt;/sup> from an absolute address with this kind of API:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="color:#75715e">// 0x10234400 -&amp;gt; start of the Mach-O file
+&lt;/span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#66d9ef">auto&lt;/span> bin &lt;span style="color:#f92672">=&lt;/span> LIEF&lt;span style="color:#f92672">::&lt;/span>MachO&lt;span style="color:#f92672">::&lt;/span>Parser&lt;span style="color:#f92672">::&lt;/span>parse_from_memory(&lt;span style="color:#ae81ff">0x10234400&lt;/span>);
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Depending on the user&amp;rsquo;s needs, the &lt;code>write()&lt;/code> operation will optionally undo all the relocations and the symbol bindings.
+This could be useful if we aim at (re)running the file dumped (on a Apple M1?).&lt;/p>
+&lt;p>As expected, the strings used within the &lt;span class="blue">NianticLabsPlugin&lt;/span> library are encoded
+by the obfuscator. We could statically analyze the decoding routine (cf. Tim Blazytko&amp;rsquo;s
+&lt;a href="https://synthesis.to/2021/06/30/automating_string_decryption.html" target="_blank" rel="noopener">blog post&lt;/a>)
+,but another technique consists in using a property of the obfuscator&amp;rsquo;s string encoding mechanism.&lt;/p>
+&lt;p>It seems that the obfuscator put &lt;strong>all&lt;/strong> the strings&lt;sup id="fnref:5">&lt;a href="#fn:5" class="footnote-ref" role="doc-noteref">5&lt;/a>&lt;/sup> in the data section and decrypts &lt;strong>all of them&lt;/strong>
+in a &lt;strong>single&lt;/strong> constructor function.&lt;/p>
+&lt;p>For instance, if we have the string &amp;ldquo;TOKEN&amp;rdquo; to protect in the following functions:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="color:#66d9ef">void&lt;/span> &lt;span style="color:#a6e22e">protect_me&lt;/span>() {
+sensitive(&lt;span style="color:#e6db74">&amp;#34;TOKEN&amp;#34;&lt;/span>);
+}
+&lt;span style="color:#66d9ef">void&lt;/span> &lt;span style="color:#a6e22e">protect_me_2&lt;/span>() {
+sensitive(&lt;span style="color:#e6db74">&amp;#34;TOKEN2&amp;#34;&lt;/span>);
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>The obfuscator transforms and decodes the strings into something like:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="color:#75715e">// __data section
+&lt;/span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#66d9ef">static&lt;/span> &lt;span style="color:#66d9ef">char&lt;/span> var_TOKEN[] &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;&lt;/span>&lt;span style="color:#ae81ff">\x00\x1D\xDD\xEE\xAB&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>;
+&lt;span style="color:#66d9ef">static&lt;/span> &lt;span style="color:#66d9ef">char&lt;/span> var_TOKEN_2[] &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;&lt;/span>&lt;span style="color:#ae81ff">\x00\x1D\xDD\xEE\xAF&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>;
+__attribute__((constructor))
+&lt;span style="color:#66d9ef">void&lt;/span> decode_strings() {
+decode(var_TOKEN);
+decode(var_TOKEN_2);
+}
+&lt;span style="color:#66d9ef">void&lt;/span> &lt;span style="color:#a6e22e">protect_me&lt;/span>() {
+sensitive(var_TOKEN);
+}
+&lt;span style="color:#66d9ef">void&lt;/span> &lt;span style="color:#a6e22e">protect_me_2&lt;/span>() {
+sensitive(var_TOKEN_2);
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Since &lt;strong>all&lt;/strong> the strings are decoded at once in one of the first constructors, if we manage to dump the binary
+right after this constructor,
+we can recover the original strings for free.&lt;/p>
+&lt;p>Programmatically, it can be done using (again) frida-gum SDK with the following pseudocode:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="color:#75715e">// Hook associated with ImageLoader::containsAddress
+&lt;/span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#66d9ef">void&lt;/span> &lt;span style="color:#a6e22e">native_listener_on_enter&lt;/span>(GumInvocationListener&lt;span style="color:#f92672">*&lt;/span> listener,
+GumInvocationContext&lt;span style="color:#f92672">*&lt;/span> ic) {
+&lt;span style="color:#66d9ef">static&lt;/span> size_t CTOR_ID &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>;
+&lt;span style="color:#66d9ef">const&lt;/span> uintptr_t ctor_function_addr &lt;span style="color:#f92672">=&lt;/span> ic&lt;span style="color:#f92672">-&amp;gt;&lt;/span>cpu_context&lt;span style="color:#f92672">-&amp;gt;&lt;/span>x[&lt;span style="color:#ae81ff">1&lt;/span>];
+std&lt;span style="color:#f92672">::&lt;/span>string libname &lt;span style="color:#f92672">=&lt;/span> module_from_addr(ctor_function_addr);
+&lt;span style="color:#66d9ef">if&lt;/span> (libname &lt;span style="color:#f92672">==&lt;/span> &lt;span style="color:#e6db74">&amp;#34;NianticLabsPlugin&amp;#34;&lt;/span> &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> CTOR_ID&lt;span style="color:#f92672">++&lt;/span> &lt;span style="color:#f92672">==&lt;/span> &lt;span style="color:#ae81ff">3&lt;/span>) {
+&lt;span style="color:#66d9ef">const&lt;/span> uintptr_t base_address &lt;span style="color:#f92672">=&lt;/span> base_addr_from_ptr(ctor_function_addr);
+&lt;span style="color:#66d9ef">auto&lt;/span> bin &lt;span style="color:#f92672">=&lt;/span> LIEF&lt;span style="color:#f92672">::&lt;/span>MachO&lt;span style="color:#f92672">::&lt;/span>Parser&lt;span style="color:#f92672">::&lt;/span>parse_from_memory(base_address);
+bin&lt;span style="color:#f92672">-&amp;gt;&lt;/span>write(&lt;span style="color:#e6db74">&amp;#34;/tmp/pokemongo_after_ctor.bin&amp;#34;&lt;/span>); &lt;span style="color:#75715e">// /tmp on the iPhone
+&lt;/span>&lt;span style="color:#75715e">&lt;/span> }
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>At end, the dumped file contains the decoded strings:&lt;/p>
+&lt;p>&lt;img src="strings.png" alt="Data area after LIEF dump">&lt;/p>
+&lt;p>If we skim the &lt;code>__data&lt;/code> section, we can also observe the following changes:&lt;/p>
+&lt;p>&lt;img src="data_dump.png" alt="Data area after LIEF dump">&lt;/p>
+&lt;p>A practiced eye might notice&lt;sup id="fnref:6">&lt;a href="#fn:6" class="footnote-ref" role="doc-noteref">6&lt;/a>&lt;/sup> that some strings of the section are actually
+embedded in protobuf structures. We can confirm this observation by trying to infer the data as protobuf
+types:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">&lt;span style="color:#f92672">from&lt;/span> . &lt;span style="color:#f92672">import&lt;/span> proto_dump
+&lt;span style="color:#f92672">import&lt;/span> lief
+pgo &lt;span style="color:#f92672">=&lt;/span> lief&lt;span style="color:#f92672">.&lt;/span>parse(&lt;span style="color:#e6db74">&amp;#34;pokemongo_after_ctor.bin&amp;#34;&lt;/span>)
+start &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">0x12A51A7&lt;/span>
+end &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">0x12A51E2&lt;/span>
+raw_proto &lt;span style="color:#f92672">=&lt;/span> pgo&lt;span style="color:#f92672">.&lt;/span>get_content_from_virtual_address(start, end &lt;span style="color:#f92672">-&lt;/span> start)
+&lt;span style="color:#66d9ef">print&lt;/span>(proto_dump(raw_proto))
+&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text">{
+#3 = 4
+#4 (repeated) = 1 {
+#1 = &amp;#34;CheatReputation&amp;#34;
+#2 (repeated) = {
+#1 = &amp;#34;UNSET&amp;#34;
+#2 = 0
+} {
+#1 = &amp;#34;BOT&amp;#34;
+#2 = 1
+} {
+#1 = &amp;#34;SPOOFER&amp;#34;
+#2 = 2
+}
+}
+#5 = 8
+#8 = []
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="final-words">Final Words&lt;/h2>
+&lt;p>The application embeds other checks in the constructors and in the functions returned by &lt;code>GetN2Api&lt;/code>. It can
+make a good exercise for those that are interested in.&lt;/p>
+&lt;p>Generally speaking, the application and the protections are well designed since they slow down reverse engineers.
+Nevertheless, &lt;code>anti-{jb, frida, debug}&lt;/code> are quite difficult to protect as they need to interact with the OS
+through functions or syscalls with unprotected parameters. As a result, and once identified, we can bypass them.&lt;/p>
+&lt;p>One technique consists in injecting a library with Frida&amp;rsquo;s injector that aims at hooking
+the &lt;code>containsAddress()&lt;/code> to disable/patch the functions involved in the detections:&lt;/p>
+&lt;p>&lt;img src="jbfree.png" alt="PokemonGo Jailbreak bypass">&lt;/p>
+&lt;video controls >
+&lt;source src="pokemongo_jb_bypass.mp4" type="video/mp4">
+&lt;/video>
+&lt;p>Nevertheless, this technique is &lt;strong>not persistent&lt;/strong> and version-dependant.&lt;/p>
+&lt;p>After writing this post, it turned out that its structure is very close to
+&lt;a href="https://hot3eed.github.io/2020/08/02/starling_p2_detections_mitigations.html" target="_blank" rel="noopener">Reverse Engineering Starling Bank&lt;/a>.
+In particular, we can find the same anti-debug and the same Frida detection routine. These similarities suggest
+that these two application uses the same obfuscator that also provides &lt;code>anti-{jb, frida, debug}&lt;/code> as built-in.&lt;/p>
+&lt;p>You might also be interested in the recent talk of
+&lt;a href="https://twitter.com/elvanderb" target="_blank" rel="noopener">Eloi Benoist-Vanderbeken&lt;/a>
+&lt;a href="https://2021.pass-the-salt.org/" target="_blank" rel="noopener">@Pass the Salt&lt;/a>
+&lt;a href="https://archives.pass-the-salt.org/Pass%20the%20SALT/2021/videos/PTS2021-Talk-01-JailBreak_detection.mp4">
+&lt;i class="fas fa-laptop-code pr-1 fa-fw">&lt;/i>&lt;/a>
+&lt;a href="https://archives.pass-the-salt.org/Pass%20the%20SALT/2021/slides/PTS2021-Talk-01-JailBreak_detection.pdf">
+&lt;i class="fas fa-file-pdf pr-1 fa-fw">&lt;/i>&lt;/a>
+who detailed another approach to identify and bypass
+jailbreak detections.&lt;/p>
+&lt;div class="alert alert-">
+&lt;div>
+&lt;a href="https://lief.quarkslab.com/">LIEF&lt;/a> is a tool developed at &lt;a href="https://www.quarkslab.com/">Quarkslab&lt;/a> along with
+&lt;a href="https://qbdi.quarkslab.com">QBDI&lt;/a> &amp;amp; &lt;a href="https://triton.quarkslab.com">Triton&lt;/a>.
+&lt;/div>
+&lt;/div>
+&lt;hr>
+&lt;h3 id="annexes">Annexes&lt;/h3>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>Files that trigger the JB detection&lt;/th>
+&lt;th>Files that should be present&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>&lt;code>/.bootstrapped_electra&lt;/code>&lt;/td>
+&lt;td>&lt;code>/cores&lt;/code>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/Applications/Anemone.app&lt;/code>&lt;/td>
+&lt;td>&lt;code>/dev/null&lt;/code>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/Applications/Cydia.app&lt;/code>&lt;/td>
+&lt;td>&lt;code>/etc/hosts&lt;/code>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/Applications/SafeMode.app&lt;/code>&lt;/td>
+&lt;td>&lt;code>/etc/passwd&lt;/code>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/Library/Frameworks/CydiaSubstrate.framework&lt;/code>&lt;/td>
+&lt;td>&lt;code>/sbin&lt;/code>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/Library/MobileSubstrate/DynamicLibraries/FlyJB.dylb&lt;/code>&lt;/td>
+&lt;td>&lt;code>/sbin/launchd&lt;/code>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/Library/MobileSubstrate/MobileSubstrate.dylib&lt;/code>&lt;/td>
+&lt;td>&lt;code>/sbin/mount&lt;/code>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/Library/PreferenceBundles/LaunchInSafeMode.bundle&lt;/code>&lt;/td>
+&lt;td>&lt;code>/usr&lt;/code>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/Library/PreferenceLoader/Preferences/LaunchInSafeMode.plist&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/Library/Themes&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/Library/dpkg/info/com.inoahdev.launchinsafemode.list&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/Library/dpkg/info/com.inoahdev.launchinsafemode.md5sums&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/bin/bash&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/bin/bunzip2&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/bin/bzip2&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/bin/cat&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/bin/chgrp&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/bin/chmod&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/bin/chown&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/bin/cp&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/bin/grep&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/bin/gzip&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/bin/kill&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/bin/ln&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/bin/ls&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/bin/mkdir&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/bin/mv&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/bin/sed&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/bin/sh&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/bin/su&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/bin/tar&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/binpack&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/bootstrap&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/chimera&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/electra&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/etc/apt&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/etc/profile&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/jb&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/private/var/binpack&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/private/var/checkra1n.dmg&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/private/var/lib/apt&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/usr/bin/diff&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/usr/bin/hostinfo&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/usr/bin/killall&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/usr/bin/passwd&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/usr/bin/recache&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/usr/bin/tar&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/usr/bin/which&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/usr/bin/xargs&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/usr/lib/SBInject&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/usr/lib/SBInject.dylib&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/usr/lib/TweakInject&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/usr/lib/TweakInject.dylib&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/usr/lib/TweakInjectMapsCheck.dylib&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/usr/lib/libjailbreak.dylib&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/usr/lib/libsubstitute.0.dylib&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/usr/lib/libsubstitute.dylib&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/usr/lib/libsubstrate.dylib&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/usr/libexec/sftp-server&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/usr/sbin/sshd&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/usr/share/terminfo&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/var/mobile/Library/.sbinjectSafeMode&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>/var/mobile/Library/Preferences/jp.akusio.kernbypass.plist&lt;/code>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;section class="footnotes" role="doc-endnotes">
+&lt;hr>
+&lt;ol>
+&lt;li id="fn:1" role="doc-endnote">
+&lt;p>iPhone 6 running on iOS 14.2 with checkra1n.&amp;#160;&lt;a href="#fnref:1" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li id="fn:2" role="doc-endnote">
+&lt;p>We can identify them by trial and error.&amp;#160;&lt;a href="#fnref:2" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li id="fn:3" role="doc-endnote">
+&lt;p>ETA: likely by the end of the year&amp;#160;&lt;a href="#fnref:3" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li id="fn:4" role="doc-endnote">
+&lt;p>The Mach-O format is very suitable for this feature as
+the header in mapped in memory. Therefore, it eases the parsing.&amp;#160;&lt;a href="#fnref:4" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li id="fn:5" role="doc-endnote">
+&lt;p>More generally, it can encode local data (strings, bytes arrays, &amp;hellip;)&amp;#160;&lt;a href="#fnref:5" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li id="fn:6" role="doc-endnote">
+&lt;p>Protobuf strings can be identified as they usually start with &lt;code>0xA&lt;/code>, &lt;code>0xB&lt;/code>, followed by their lengths
+and the string itself (see:
+&lt;a href="https://developers.google.com/protocol-buffers/docs/encoding#strings" target="_blank" rel="noopener">protocol-buffers/docs/encoding&lt;/a>)&amp;#160;&lt;a href="#fnref:6" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;/section></description></item></channel></rss>

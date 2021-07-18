@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>1 | Romain Thomas</title><link>/publication_types/1/</link><atom:link href="/publication_types/1/index.xml" rel="self" type="application/rss+xml"/><description>1</description><generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>Published with Academic Website Builder - Icons made by Freepik</copyright><lastBuildDate>Thu, 01 Oct 2020 00:00:00 +0000</lastBuildDate><image><url>/images/icon_hu2654a0fcc87c65a864822ac27b001d3b_698_512x512_fill_lanczos_center_2.png</url><title>1</title><link>/publication_types/1/</link></image><item><title>Dynamic Binary Instrumentation Techniques to Address Native Code Obfuscation</title><link>/publication/20-bh-asia-dbi/</link><pubDate>Thu, 01 Oct 2020 00:00:00 +0000</pubDate><guid>/publication/20-bh-asia-dbi/</guid><description>&lt;h2 id="hahahugoshortcode-s0-hbhb-slides">
+&lt;i class="fas fa-copy pr-1 fa-fw">&lt;/i> Slides&lt;/h2>
+&lt;div class="pdfpreview shortcode shortcode--pdfpreview">
+&lt;embed src="asia-20-Thomas-Dynamic-Binary-Instrumentation-Techniques-to-Address-Native-Code-Obfuscation.pdf" type="application/pdf" width="100%" height=450px />
+&lt;/div>
+&lt;h2 id="hahahugoshortcode-s2-hbhb-whitepaper">
+&lt;i class="fas fa-file-pdf pr-1 fa-fw">&lt;/i> Whitepaper&lt;/h2>
+&lt;div class="pdfpreview shortcode shortcode--pdfpreview">
+&lt;embed src="asia-20-Thomas-Dynamic-Binary-Instrumentation-Techniques-to-Address-Native-Code-Obfuscation-wp.pdf" type="application/pdf" width="100%" height=1060px />
+&lt;/div>
+&lt;div id="demo1">&lt;/div>
+&lt;h2 id="hahahugoshortcode-s4-hbhb-demo-1-snapchat">
+&lt;i class="fas fa-laptop-code pr-1 fa-fw">&lt;/i> Demo #1: Snapchat&lt;/h2>
+&lt;video controls >
+&lt;source src="snapchat_demo.mp4" type="video/mp4">
+&lt;/video>
+&lt;div id="demo2">&lt;/div>
+&lt;h2 id="hahahugoshortcode-s6-hbhb-demo-2-legu-packer">
+&lt;i class="fas fa-laptop-code pr-1 fa-fw">&lt;/i> Demo #2: Legu Packer&lt;/h2>
+&lt;video controls >
+&lt;source src="qbdi-tencent-packer.mp4" type="video/mp4">
+&lt;/video>
+&lt;p>&lt;em>Note: The videos are intentionally quick. Do not hesite to pause them.&lt;/em>&lt;/p></description></item><item><title>Static Instrumentation Based on Executable Formats</title><link>/publication/static-instrumentation/</link><pubDate>Wed, 20 Jun 2018 00:00:00 +0000</pubDate><guid>/publication/static-instrumentation/</guid><description>&lt;p>Many instrumentation techniques are based on modifying code or system environment of the target. It can be suitable for scenarios but it could not work under certain circumstance (integrity checking, non-rooted environment…) In this talk we propose similar techniques by only modifying the executable format. This enables to be architecture independent, injection and hooking does not require privileged environment.&lt;/p>
+&lt;p>Talk given at
+&lt;a href="https://recon.cx/2018/montreal/" target="_blank" rel="noopener">Recon Montréal&lt;/a> and
+&lt;a href="https://2018.pass-the-salt.org/schedule/#instrumentation" target="_blank" rel="noopener">Pass The Salt&lt;/a>&lt;/p>
+&lt;div class="pdfpreview shortcode shortcode--pdfpreview">
+&lt;embed src="18-06-Recon18-Formats-Instrumentation.pdf" type="application/pdf" width="100%" height=600px />
+&lt;/div></description></item><item><title>Dynamic Binary Analysis and Obfuscated Codes</title><link>/publication/dynamic-binary-analysis-and-obfuscation/</link><pubDate>Fri, 08 Apr 2016 00:00:00 +0000</pubDate><guid>/publication/dynamic-binary-analysis-and-obfuscation/</guid><description>&lt;div class="pdfpreview shortcode shortcode--pdfpreview">
+&lt;embed src="sthack2016-rthomas-jsalwan.pdf" type="application/pdf" width="100%" height=600px />
+&lt;/div></description></item></channel></rss>
