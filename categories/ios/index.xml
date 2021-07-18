@@ -436,7 +436,7 @@ std&lt;span style="color:#f92672">::&lt;/span>string libname &lt;span style="col
 bin&lt;span style="color:#f92672">-&amp;gt;&lt;/span>write(&lt;span style="color:#e6db74">&amp;#34;/tmp/pokemongo_after_ctor.bin&amp;#34;&lt;/span>); &lt;span style="color:#75715e">// /tmp on the iPhone
 &lt;/span>&lt;span style="color:#75715e">&lt;/span> }
 }
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>At end, the dumped file contains the decoded strings:&lt;/p>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>In the end, the dumped file contains the decoded strings:&lt;/p>
 &lt;p>&lt;img src="strings.png" alt="Data area after LIEF dump">&lt;/p>
 &lt;p>If we skim the &lt;code>__data&lt;/code> section, we can also observe the following changes:&lt;/p>
 &lt;p>&lt;img src="data_dump.png" alt="Data area after LIEF dump">&lt;/p>

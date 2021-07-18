@@ -255,7 +255,7 @@ we can recover the original strings for free.</p><p>Programmatically, it can be 
     bin<span style=color:#f92672>-&gt;</span>write(<span style=color:#e6db74>&#34;/tmp/pokemongo_after_ctor.bin&#34;</span>); <span style=color:#75715e>// /tmp on the iPhone
 </span><span style=color:#75715e></span>  }
 }
-</code></pre></div><p>At end, the dumped file contains the decoded strings:</p><p><img src=strings.png alt="Data area after LIEF dump"></p><p>If we skim the <code>__data</code> section, we can also observe the following changes:</p><p><img src=data_dump.png alt="Data area after LIEF dump"></p><p>A practiced eye might notice<sup id=fnref:6><a href=#fn:6 class=footnote-ref role=doc-noteref>6</a></sup> that some strings of the section are actually
+</code></pre></div><p>In the end, the dumped file contains the decoded strings:</p><p><img src=strings.png alt="Data area after LIEF dump"></p><p>If we skim the <code>__data</code> section, we can also observe the following changes:</p><p><img src=data_dump.png alt="Data area after LIEF dump"></p><p>A practiced eye might notice<sup id=fnref:6><a href=#fn:6 class=footnote-ref role=doc-noteref>6</a></sup> that some strings of the section are actually
 embedded in protobuf structures. We can confirm this observation by trying to infer the data as protobuf
 types:</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=color:#f92672>from</span> . <span style=color:#f92672>import</span> proto_dump
 <span style=color:#f92672>import</span> lief
