@@ -1,78 +1,235 @@
-<!doctype html><html lang=en-us><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta http-equiv=x-ua-compatible content="IE=edge"><meta name=generator content="Source Themes Academic 4.8.0"><meta name=description content="We are open-sourcing LIEF, a library to parse and manipulate ELF, PE and Mach-O binary formats. This blog post explains the purpose of this project and some parts of its architecture."><link rel=alternate hreflang=en-us href=https://www.romainthomas.fr/post/lief-release/><meta name=theme-color content="#2962ff"><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css integrity="sha256-FMvZuGapsJLjouA6k7Eo2lusoAX9i0ShlWFG6qt7SLc=" crossorigin=anonymous><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin=anonymous><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.2/styles/atom-one-light.min.css crossorigin=anonymous title=hl-light><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.2/styles/atom-one-light.min.css crossorigin=anonymous title=hl-dark disabled><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet.css integrity="sha256-SHMGCYmST46SoyGgo4YR/9AlK1vf3ff84Aq9yK4hdqM=" crossorigin=anonymous><script src=https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.1.2/lazysizes.min.js integrity="sha256-Md1qLToewPeKjfAHU1zyPwOutccPAm5tahnaw7Osw0A=" crossorigin=anonymous async></script><link rel=stylesheet href="https://fonts.googleapis.com/css?family=Montserrat:400,700%7CRoboto:400,400italic,700%7CRoboto+Mono%7CFira+Code&display=swap"><link rel=stylesheet href=/css/academic.css><link rel=manifest href=/index.webmanifest><link rel=icon type=image/png href=/images/icon_hu2654a0fcc87c65a864822ac27b001d3b_698_32x32_fill_lanczos_center_2.png><link rel=apple-touch-icon type=image/png href=/images/icon_hu2654a0fcc87c65a864822ac27b001d3b_698_192x192_fill_lanczos_center_2.png><link rel=canonical href=https://www.romainthomas.fr/post/lief-release/><meta property="twitter:card" content="summary_large_image"><meta property="twitter:site" content="@rh0main"><meta property="twitter:creator" content="@rh0main"><meta property="og:site_name" content="Romain Thomas"><meta property="og:url" content="https://www.romainthomas.fr/post/lief-release/"><meta property="og:title" content="Open-sourcing LIEF | Romain Thomas"><meta property="og:description" content="We are open-sourcing LIEF, a library to parse and manipulate ELF, PE and Mach-O binary formats. This blog post explains the purpose of this project and some parts of its architecture."><meta property="og:image" content="https://www.romainthomas.fr/post/lief-release/featured.png"><meta property="twitter:image" content="https://www.romainthomas.fr/post/lief-release/featured.png"><meta property="og:locale" content="en-us"><meta property="article:published_time" content="2017-04-04T00:00:00+02:00"><meta property="article:modified_time" content="2017-04-04T00:00:00+02:00"><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"https://www.romainthomas.fr/post/lief-release/"},"headline":"Open-sourcing LIEF","image":["https://www.romainthomas.fr/post/lief-release/featured.png"],"datePublished":"2017-04-04T00:00:00+02:00","dateModified":"2017-04-04T00:00:00+02:00","author":{"@type":"Person","name":"Romain Thomas"},"publisher":{"@type":"Organization","name":"Romain Thomas","logo":{"@type":"ImageObject","url":"https://www.romainthomas.fr/images/icon_hu2654a0fcc87c65a864822ac27b001d3b_698_192x192_fill_lanczos_center_2.png"}},"description":"We are open-sourcing LIEF, a library to parse and manipulate ELF, PE and Mach-O binary formats. This blog post explains the purpose of this project and some parts of its architecture."}</script><title>Open-sourcing LIEF | Romain Thomas</title></head><body id=top data-spy=scroll data-offset=70 data-target=#TableOfContents><aside class=search-results id=search><div class=container><section class=search-header><div class="row no-gutters justify-content-between mb-3"><div class=col-6><h1>Search</h1></div><div class="col-6 col-search-close"><a class=js-search href=#><i class="fas fa-times-circle text-muted" aria-hidden=true></i></a></div></div><div id=search-box><input name=q id=search-query placeholder=Search... autocapitalize=off autocomplete=off autocorrect=off spellcheck=false type=search class=form-control></div></section><section class=section-search-results><div id=search-hits></div></section></div></aside><nav class="navbar navbar-expand-lg navbar-light compensate-for-scrollbar" id=navbar-main><div class=container><div class="d-none d-lg-inline-flex"><a class=navbar-brand href=/>Romain Thomas</a></div><button type=button class=navbar-toggler data-toggle=collapse data-target=#navbar-content aria-controls=navbar aria-expanded=false aria-label="Toggle navigation">
-<span><i class="fas fa-bars"></i></span></button><div class="navbar-brand-mobile-wrapper d-inline-flex d-lg-none"><a class=navbar-brand href=/>Romain Thomas</a></div><div class="navbar-collapse main-menu-item collapse justify-content-center" id=navbar-content><ul class="navbar-nav d-md-inline-flex"><li class=nav-item><a class=nav-link href=/#about><span>Home</span></a></li><li class=nav-item><a class=nav-link href=/#publications><span>Publications</span></a></li><li class=nav-item><a class=nav-link href=/#posts><span>Posts</span></a></li><li class=nav-item><a class=nav-link href=/#projects><span>Projects</span></a></li><li class=nav-item><a class=nav-link href=/#projects-images><span>Gallery</span></a></li><li class=nav-item><a class=nav-link href=/#work-experience><span>Work experience</span></a></li><li class=nav-item><a class=nav-link href=/#contact><span>Contact</span></a></li></ul></div><ul class="nav-icons navbar-nav flex-row ml-auto d-flex pl-md-2"><li class=nav-item><a class="nav-link js-search" href=# aria-label=Search><i class="fas fa-search" aria-hidden=true></i></a></li></ul></div></nav><article class=article><div class="article-container pt-3"><h1>Open-sourcing LIEF</h1><div class=article-metadata><div><span>Romain Thomas</span></div><span class=article-date>Apr 4, 2017</span>
-<span class=middot-divider></span><span class=article-reading-time>5 min read</span></div></div><div class="article-header article-container featured-image-wrapper mt-4 mb-4" style=max-width:512px;max-height:515px><div style=position:relative><img src=/post/lief-release/featured.png alt class=featured-image></div></div><div class=article-container><div class=article-style><div class="alert alert-note"><div>This post has been originally posted on the <a href=https://blog.quarkslab.com/lief-library-to-instrument-executable-formats.html>Quarkslab&rsquo;s blog</a></div></div><h1 id=executable-file-formats-in-a-nutshell>Executable File Formats in a Nutshell</h1><p>When dealing with executable files, the first layer of information is the format in which the code is wrapped. We can see an executable file format
+<!doctype html><html lang=en-us>
+<head>
+<meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<meta http-equiv=x-ua-compatible content="IE=edge">
+<meta name=generator content="Source Themes Academic 4.8.0">
+<meta name=description content="We are open-sourcing LIEF, a library to parse and manipulate ELF, PE and Mach-O binary formats. This blog post explains the purpose of this project and some parts of its architecture.">
+<link rel=alternate hreflang=en-us href=https://www.romainthomas.fr/post/lief-release/>
+<meta name=theme-color content="#2962ff">
+<link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css integrity="sha256-FMvZuGapsJLjouA6k7Eo2lusoAX9i0ShlWFG6qt7SLc=" crossorigin=anonymous>
+<link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin=anonymous>
+<link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.2/styles/atom-one-light.min.css crossorigin=anonymous title=hl-light>
+<link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.2/styles/atom-one-light.min.css crossorigin=anonymous title=hl-dark disabled>
+<link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet.css integrity="sha256-SHMGCYmST46SoyGgo4YR/9AlK1vf3ff84Aq9yK4hdqM=" crossorigin=anonymous>
+<script src=https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.1.2/lazysizes.min.js integrity="sha256-Md1qLToewPeKjfAHU1zyPwOutccPAm5tahnaw7Osw0A=" crossorigin=anonymous async></script>
+<link rel=stylesheet href="https://fonts.googleapis.com/css?family=Montserrat:400,700%7CRoboto:400,400italic,700%7CRoboto+Mono%7CFira+Code&display=swap">
+<link rel=stylesheet href=/css/academic.css>
+<link href=https://www.romainthomas.fr/post/index.xml rel=feed type=application/rss+xml title="Blog Posts | Romain Thomas">
+<link href=https://www.romainthomas.fr/post/index.xml rel=alternate type=application/rss+xml title="Blog Posts | Romain Thomas">
+<link rel=manifest href=/index.webmanifest>
+<link rel=icon type=image/png href=/images/icon_hu2654a0fcc87c65a864822ac27b001d3b_698_32x32_fill_lanczos_center_3.png>
+<link rel=apple-touch-icon type=image/png href=/images/icon_hu2654a0fcc87c65a864822ac27b001d3b_698_192x192_fill_lanczos_center_3.png>
+<link rel=canonical href=https://www.romainthomas.fr/post/lief-release/>
+<meta property="twitter:card" content="summary_large_image">
+<meta property="twitter:site" content="@rh0main">
+<meta property="twitter:creator" content="@rh0main">
+<meta property="og:site_name" content="Romain Thomas">
+<meta property="og:url" content="https://www.romainthomas.fr/post/lief-release/">
+<meta property="og:title" content="Open-sourcing LIEF | Romain Thomas">
+<meta property="og:description" content="We are open-sourcing LIEF, a library to parse and manipulate ELF, PE and Mach-O binary formats. This blog post explains the purpose of this project and some parts of its architecture."><meta property="og:image" content="https://www.romainthomas.fr/post/lief-release/featured.png">
+<meta property="twitter:image" content="https://www.romainthomas.fr/post/lief-release/featured.png"><meta property="og:locale" content="en-us">
+<meta property="article:published_time" content="2017-04-04T00:00:00+00:00">
+<meta property="article:modified_time" content="2017-04-04T00:00:00+00:00">
+<script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"https://www.romainthomas.fr/post/lief-release/"},"headline":"Open-sourcing LIEF","image":["https://www.romainthomas.fr/post/lief-release/featured.png"],"datePublished":"2017-04-04T00:00:00Z","dateModified":"2017-04-04T00:00:00Z","author":{"@type":"Person","name":"Romain Thomas"},"publisher":{"@type":"Organization","name":"Romain Thomas","logo":{"@type":"ImageObject","url":"https://www.romainthomas.fr/images/icon_hu2654a0fcc87c65a864822ac27b001d3b_698_192x192_fill_lanczos_center_3.png"}},"description":"We are open-sourcing LIEF, a library to parse and manipulate ELF, PE and Mach-O binary formats. This blog post explains the purpose of this project and some parts of its architecture."}</script>
+<title>Open-sourcing LIEF | Romain Thomas</title>
+</head>
+<body id=top data-spy=scroll data-offset=70 data-target=#TableOfContents>
+<aside class=search-results id=search>
+<div class=container>
+<section class=search-header>
+<div class="row no-gutters justify-content-between mb-3">
+<div class=col-6>
+<h1>Search</h1>
+</div>
+<div class="col-6 col-search-close">
+<a class=js-search href=#><i class="fas fa-times-circle text-muted" aria-hidden=true></i></a>
+</div>
+</div>
+<div id=search-box>
+<input name=q id=search-query placeholder=Search... autocapitalize=off autocomplete=off autocorrect=off spellcheck=false type=search class=form-control>
+</div>
+</section>
+<section class=section-search-results>
+<div id=search-hits>
+</div>
+</section>
+</div>
+</aside>
+<nav class="navbar navbar-expand-lg navbar-light compensate-for-scrollbar" id=navbar-main>
+<div class=container>
+<div class="d-none d-lg-inline-flex">
+<a class=navbar-brand href=/>Romain Thomas</a>
+</div>
+<button type=button class=navbar-toggler data-toggle=collapse data-target=#navbar-content aria-controls=navbar aria-expanded=false aria-label="Toggle navigation">
+<span><i class="fas fa-bars"></i></span>
+</button>
+<div class="navbar-brand-mobile-wrapper d-inline-flex d-lg-none">
+<a class=navbar-brand href=/>Romain Thomas</a>
+</div>
+<div class="navbar-collapse main-menu-item collapse justify-content-center" id=navbar-content>
+<ul class="navbar-nav d-md-inline-flex">
+<li class=nav-item>
+<a class=nav-link href=/#about><span>Home</span></a>
+</li>
+<li class=nav-item>
+<a class=nav-link href=/#publications><span>Publications</span></a>
+</li>
+<li class=nav-item>
+<a class=nav-link href=/#posts><span>Posts</span></a>
+</li>
+<li class=nav-item>
+<a class=nav-link href=/#projects><span>Projects</span></a>
+</li>
+<li class=nav-item>
+<a class=nav-link href=/#projects-images><span>Gallery</span></a>
+</li>
+<li class=nav-item>
+<a class=nav-link href=/#work-experience><span>Work experience</span></a>
+</li>
+<li class=nav-item>
+<a class=nav-link href=/#contact><span>Contact</span></a>
+</li>
+</ul>
+</div>
+<ul class="nav-icons navbar-nav flex-row ml-auto d-flex pl-md-2">
+<li class=nav-item>
+<a class="nav-link js-search" href=# aria-label=Search><i class="fas fa-search" aria-hidden=true></i></a>
+</li>
+</ul>
+</div>
+</nav>
+<article class=article>
+<div class="article-container pt-3">
+<h1>Open-sourcing LIEF</h1>
+<div class=article-metadata>
+<div>
+<span>Romain Thomas</span>
+</div>
+<span class=article-date>
+Apr 4, 2017
+</span>
+<span class=middot-divider></span>
+<span class=article-reading-time>
+5 min read
+</span>
+</div>
+</div>
+<div class="article-header article-container featured-image-wrapper mt-4 mb-4" style=max-width:512px;max-height:515px>
+<div style=position:relative>
+<img src=/post/lief-release/featured.png alt class=featured-image>
+</div>
+</div>
+<div class=article-container>
+<div class=article-style>
+<div class="alert alert-note">
+<div>
+This post has been originally posted on the <a href=https://blog.quarkslab.com/lief-library-to-instrument-executable-formats.html>Quarkslab&rsquo;s blog</a>
+</div>
+</div>
+<h1 id=executable-file-formats-in-a-nutshell>Executable File Formats in a Nutshell</h1>
+<p>When dealing with executable files, the first layer of information is the format in which the code is wrapped. We can see an executable file format
 as an envelope. It contains information so that the postman (i.e. Operating System) can handle and deliver (i.e. execute) it.
-The message wrapped by this envelope would be the machine code.</p><p>There are mainly three mainstream formats, one per OS:</p><ul><li><strong>P</strong>ortable <strong>E</strong>xecutable (<strong>PE</strong>) for Windows systems</li><li><strong>E</strong>xecutable and <strong>L</strong>inkable <strong>F</strong>ormat (<strong>ELF</strong>) for UN*X systems (Linux, Android&mldr;).</li><li>Mach-O for OS-X, iOS&mldr;</li></ul><p>Other executable file formats, such as <code>COFF</code>, exist but they are less relevant.</p><p>Usually each format has a header which describes at least the target architecture, the program&rsquo;s entry point and the type of the wrapped object (executable, library&mldr;)
-Then we have blocks of data that will be mapped by the OS&rsquo;s loader. These blocks of data could hold machine code (<code>.text</code>), read-only data (<code>.rodata</code>) or other OS specific information.</p><p>For PE there is only one kind of such block: <strong>Section</strong>. For ELF and Mach-O formats, a section has a different meaning. In these formats,
+The message wrapped by this envelope would be the machine code.</p>
+<p>There are mainly three mainstream formats, one per OS:</p>
+<ul>
+<li><strong>P</strong>ortable <strong>E</strong>xecutable (<strong>PE</strong>) for Windows systems</li>
+<li><strong>E</strong>xecutable and <strong>L</strong>inkable <strong>F</strong>ormat (<strong>ELF</strong>) for UN*X systems (Linux, Android&mldr;).</li>
+<li>Mach-O for OS-X, iOS&mldr;</li>
+</ul>
+<p>Other executable file formats, such as <code>COFF</code>, exist but they are less relevant.</p>
+<p>Usually each format has a header which describes at least the target architecture, the program&rsquo;s entry point and the type of the wrapped object (executable, library&mldr;)
+Then we have blocks of data that will be mapped by the OS&rsquo;s loader. These blocks of data could hold machine code (<code>.text</code>), read-only data (<code>.rodata</code>) or other OS specific information.</p>
+<p>For PE there is only one kind of such block: <strong>Section</strong>. For ELF and Mach-O formats, a section has a different meaning. In these formats,
 sections are used by the <strong>linker</strong> at the <strong>compilation</strong> step, whereas <strong>segments</strong> (second type of block) are used by the OS&rsquo;s loader at <strong>execution</strong> step. Thus
-sections are not mandatory for ELF and Mach-O formats and can be removed without affecting the execution.</p><h1 id=purpose-of-lief>Purpose of LIEF</h1><p>It turns out that many projects need to parse executable file formats but don&rsquo;t use a <em>standard</em> library and re-implement their own parser (and the wheel).
-Moreover, these parsers are usually bound to one language.</p><p>On Unix system one can find the <code>objdump</code> and <code>objcopy</code> utilities but they are limited to Unix and the API is not user-friendly.</p><p>The purpose of LIEF is to fill this void:</p><ul><li>Providing a cross platform library which can parse and modify (in a certain extent) ELF, PE and Mach-O formats using a common abstraction</li><li>Providing an API for different languages (Python, C++, C&mldr;)</li><li>Abstract common features from the different formats (Section, header, entry point, symbols&mldr;)</li></ul><p>The following snippets show how to obtain information about an executable using different API of LIEF:</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python>  <span style=color:#f92672>import</span> lief
-  <span style=color:#75715e># ELF</span>
-  binary <span style=color:#f92672>=</span> lief<span style=color:#f92672>.</span>parse(<span style=color:#e6db74>&#34;/usr/bin/ls&#34;</span>)
-  <span style=color:#66d9ef>print</span>(binary)
+sections are not mandatory for ELF and Mach-O formats and can be removed without affecting the execution.</p>
+<h1 id=purpose-of-lief>Purpose of LIEF</h1>
+<p>It turns out that many projects need to parse executable file formats but don&rsquo;t use a <em>standard</em> library and re-implement their own parser (and the wheel).
+Moreover, these parsers are usually bound to one language.</p>
+<p>On Unix system one can find the <code>objdump</code> and <code>objcopy</code> utilities but they are limited to Unix and the API is not user-friendly.</p>
+<p>The purpose of LIEF is to fill this void:</p>
+<ul>
+<li>Providing a cross platform library which can parse and modify (in a certain extent) ELF, PE and Mach-O formats using a common abstraction</li>
+<li>Providing an API for different languages (Python, C++, C&mldr;)</li>
+<li>Abstract common features from the different formats (Section, header, entry point, symbols&mldr;)</li>
+</ul>
+<p>The following snippets show how to obtain information about an executable using different API of LIEF:</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python>  <span class=kn>import</span> <span class=nn>lief</span>
+  <span class=c1># ELF</span>
+  <span class=n>binary</span> <span class=o>=</span> <span class=n>lief</span><span class=o>.</span><span class=n>parse</span><span class=p>(</span><span class=s2>&#34;/usr/bin/ls&#34;</span><span class=p>)</span>
+  <span class=nb>print</span><span class=p>(</span><span class=n>binary</span><span class=p>)</span>
 
-  <span style=color:#75715e># PE</span>
-  binary <span style=color:#f92672>=</span> lief<span style=color:#f92672>.</span>parse(<span style=color:#e6db74>&#34;C:</span><span style=color:#ae81ff>\\</span><span style=color:#e6db74>Windows</span><span style=color:#ae81ff>\\</span><span style=color:#e6db74>explorer.exe&#34;</span>)
-  <span style=color:#66d9ef>print</span>(binary)
+  <span class=c1># PE</span>
+  <span class=n>binary</span> <span class=o>=</span> <span class=n>lief</span><span class=o>.</span><span class=n>parse</span><span class=p>(</span><span class=s2>&#34;C:</span><span class=se>\\</span><span class=s2>Windows</span><span class=se>\\</span><span class=s2>explorer.exe&#34;</span><span class=p>)</span>
+  <span class=nb>print</span><span class=p>(</span><span class=n>binary</span><span class=p>)</span>
 
-  <span style=color:#75715e># Mach-O</span>
-  binary <span style=color:#f92672>=</span> lief<span style=color:#f92672>.</span>parse(<span style=color:#e6db74>&#34;/usr/bin/ls&#34;</span>)
-  <span style=color:#66d9ef>print</span>(binary)
-</code></pre></div><p>With the <code>C++</code> API:</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-cpp data-lang=cpp>
-  <span style=color:#75715e>#include</span> <span style=color:#75715e>&lt;LIEF/LIEF.hpp&gt;</span><span style=color:#75715e>
-</span><span style=color:#75715e></span>  <span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>(<span style=color:#66d9ef>int</span> argc, <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>char</span><span style=color:#f92672>**</span> argv) {
-    LIEF<span style=color:#f92672>::</span>ELF<span style=color:#f92672>::</span>Binary<span style=color:#f92672>*</span>   elf   <span style=color:#f92672>=</span> LIEF<span style=color:#f92672>::</span>ELF<span style=color:#f92672>::</span>Parser<span style=color:#f92672>::</span>parse(<span style=color:#e6db74>&#34;/usr/bin/ls&#34;</span>);
-    LIEF<span style=color:#f92672>::</span>PE<span style=color:#f92672>::</span>Binary<span style=color:#f92672>*</span>    pe    <span style=color:#f92672>=</span> LIEF<span style=color:#f92672>::</span>PE<span style=color:#f92672>::</span>Parser<span style=color:#f92672>::</span>parse(<span style=color:#e6db74>&#34;C:</span><span style=color:#ae81ff>\\</span><span style=color:#e6db74>Windows</span><span style=color:#ae81ff>\\</span><span style=color:#e6db74>explorer.exe&#34;</span>);
-    LIEF<span style=color:#f92672>::</span>MachO<span style=color:#f92672>::</span>Binary<span style=color:#f92672>*</span> macho <span style=color:#f92672>=</span> LIEF<span style=color:#f92672>::</span>MachO<span style=color:#f92672>::</span>Parser<span style=color:#f92672>::</span>parse(<span style=color:#e6db74>&#34;/usr/bin/ls&#34;</span>);
+  <span class=c1># Mach-O</span>
+  <span class=n>binary</span> <span class=o>=</span> <span class=n>lief</span><span class=o>.</span><span class=n>parse</span><span class=p>(</span><span class=s2>&#34;/usr/bin/ls&#34;</span><span class=p>)</span>
+  <span class=nb>print</span><span class=p>(</span><span class=n>binary</span><span class=p>)</span>
+</code></pre></div><p>With the <code>C++</code> API:</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp>
+  <span class=cp>#include</span> <span class=cpf>&lt;LIEF/LIEF.hpp&gt;</span><span class=cp>
+</span><span class=cp></span>  <span class=kt>int</span> <span class=nf>main</span><span class=p>(</span><span class=kt>int</span> <span class=n>argc</span><span class=p>,</span> <span class=k>const</span> <span class=kt>char</span><span class=o>**</span> <span class=n>argv</span><span class=p>)</span> <span class=p>{</span>
+    <span class=n>LIEF</span><span class=o>::</span><span class=n>ELF</span><span class=o>::</span><span class=n>Binary</span><span class=o>*</span>   <span class=n>elf</span>   <span class=o>=</span> <span class=n>LIEF</span><span class=o>::</span><span class=n>ELF</span><span class=o>::</span><span class=n>Parser</span><span class=o>::</span><span class=n>parse</span><span class=p>(</span><span class=s>&#34;/usr/bin/ls&#34;</span><span class=p>);</span>
+    <span class=n>LIEF</span><span class=o>::</span><span class=n>PE</span><span class=o>::</span><span class=n>Binary</span><span class=o>*</span>    <span class=n>pe</span>    <span class=o>=</span> <span class=n>LIEF</span><span class=o>::</span><span class=n>PE</span><span class=o>::</span><span class=n>Parser</span><span class=o>::</span><span class=n>parse</span><span class=p>(</span><span class=s>&#34;C:</span><span class=se>\\</span><span class=s>Windows</span><span class=se>\\</span><span class=s>explorer.exe&#34;</span><span class=p>);</span>
+    <span class=n>LIEF</span><span class=o>::</span><span class=n>MachO</span><span class=o>::</span><span class=n>Binary</span><span class=o>*</span> <span class=n>macho</span> <span class=o>=</span> <span class=n>LIEF</span><span class=o>::</span><span class=n>MachO</span><span class=o>::</span><span class=n>Parser</span><span class=o>::</span><span class=n>parse</span><span class=p>(</span><span class=s>&#34;/usr/bin/ls&#34;</span><span class=p>);</span>
 
-    std<span style=color:#f92672>::</span>cout <span style=color:#f92672>&lt;&lt;</span> <span style=color:#f92672>*</span>elf   <span style=color:#f92672>&lt;&lt;</span> std<span style=color:#f92672>::</span>endl;
-    std<span style=color:#f92672>::</span>cout <span style=color:#f92672>&lt;&lt;</span> <span style=color:#f92672>*</span>pe    <span style=color:#f92672>&lt;&lt;</span> std<span style=color:#f92672>::</span>endl;
-    std<span style=color:#f92672>::</span>cout <span style=color:#f92672>&lt;&lt;</span> <span style=color:#f92672>*</span>macho <span style=color:#f92672>&lt;&lt;</span> std<span style=color:#f92672>::</span>endl;
+    <span class=n>std</span><span class=o>::</span><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=o>*</span><span class=n>elf</span>   <span class=o>&lt;&lt;</span> <span class=n>std</span><span class=o>::</span><span class=n>endl</span><span class=p>;</span>
+    <span class=n>std</span><span class=o>::</span><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=o>*</span><span class=n>pe</span>    <span class=o>&lt;&lt;</span> <span class=n>std</span><span class=o>::</span><span class=n>endl</span><span class=p>;</span>
+    <span class=n>std</span><span class=o>::</span><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=o>*</span><span class=n>macho</span> <span class=o>&lt;&lt;</span> <span class=n>std</span><span class=o>::</span><span class=n>endl</span><span class=p>;</span>
 
-    <span style=color:#66d9ef>delete</span> elf;
-    <span style=color:#66d9ef>delete</span> pe;
-    <span style=color:#66d9ef>delete</span> macho;
-  }
-</code></pre></div><p>And finally with the <code>C</code> API:</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-C data-lang=C>
-  <span style=color:#75715e>#include</span> <span style=color:#75715e>&lt;LIEF/LIEF.h&gt;</span><span style=color:#75715e>
-</span><span style=color:#75715e></span>  <span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>(<span style=color:#66d9ef>int</span> argc, <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>char</span><span style=color:#f92672>**</span> argv) {
+    <span class=k>delete</span> <span class=n>elf</span><span class=p>;</span>
+    <span class=k>delete</span> <span class=n>pe</span><span class=p>;</span>
+    <span class=k>delete</span> <span class=n>macho</span><span class=p>;</span>
+  <span class=p>}</span>
+</code></pre></div><p>And finally with the <code>C</code> API:</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-C data-lang=C>
+  <span class=cp>#include</span> <span class=cpf>&lt;LIEF/LIEF.h&gt;</span><span class=cp>
+</span><span class=cp></span>  <span class=kt>int</span> <span class=nf>main</span><span class=p>(</span><span class=kt>int</span> <span class=n>argc</span><span class=p>,</span> <span class=k>const</span> <span class=kt>char</span><span class=o>**</span> <span class=n>argv</span><span class=p>)</span> <span class=p>{</span>
 
-    Elf_Binary_t<span style=color:#f92672>*</span>    elf_binary     <span style=color:#f92672>=</span> elf_parse(<span style=color:#e6db74>&#34;/usr/bin/ls&#34;</span>);
-    Pe_Binary_t<span style=color:#f92672>*</span>     pe_binary      <span style=color:#f92672>=</span> pe_parse(<span style=color:#e6db74>&#34;C:</span><span style=color:#ae81ff>\\</span><span style=color:#e6db74>Windows</span><span style=color:#ae81ff>\\</span><span style=color:#e6db74>explorer.exe&#34;</span>);
-    Macho_Binary_t<span style=color:#f92672>**</span> macho_binaries <span style=color:#f92672>=</span> macho_parse(<span style=color:#e6db74>&#34;/usr/bin/ls&#34;</span>);
+    <span class=n>Elf_Binary_t</span><span class=o>*</span>    <span class=n>elf_binary</span>     <span class=o>=</span> <span class=n>elf_parse</span><span class=p>(</span><span class=s>&#34;/usr/bin/ls&#34;</span><span class=p>);</span>
+    <span class=n>Pe_Binary_t</span><span class=o>*</span>     <span class=n>pe_binary</span>      <span class=o>=</span> <span class=n>pe_parse</span><span class=p>(</span><span class=s>&#34;C:</span><span class=se>\\</span><span class=s>Windows</span><span class=se>\\</span><span class=s>explorer.exe&#34;</span><span class=p>);</span>
+    <span class=n>Macho_Binary_t</span><span class=o>**</span> <span class=n>macho_binaries</span> <span class=o>=</span> <span class=n>macho_parse</span><span class=p>(</span><span class=s>&#34;/usr/bin/ls&#34;</span><span class=p>);</span>
 
-    Pe_Section_t<span style=color:#f92672>**</span>    pe_sections    <span style=color:#f92672>=</span> pe_binary<span style=color:#f92672>-&gt;</span>sections;
-    Elf_Section_t<span style=color:#f92672>**</span>   elf_sections   <span style=color:#f92672>=</span> elf_binary<span style=color:#f92672>-&gt;</span>sections;
-    Macho_Section_t<span style=color:#f92672>**</span> macho_sections <span style=color:#f92672>=</span> macho_binaries[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>-&gt;</span>sections;
+    <span class=n>Pe_Section_t</span><span class=o>**</span>    <span class=n>pe_sections</span>    <span class=o>=</span> <span class=n>pe_binary</span><span class=o>-&gt;</span><span class=n>sections</span><span class=p>;</span>
+    <span class=n>Elf_Section_t</span><span class=o>**</span>   <span class=n>elf_sections</span>   <span class=o>=</span> <span class=n>elf_binary</span><span class=o>-&gt;</span><span class=n>sections</span><span class=p>;</span>
+    <span class=n>Macho_Section_t</span><span class=o>**</span> <span class=n>macho_sections</span> <span class=o>=</span> <span class=n>macho_binaries</span><span class=p>[</span><span class=mi>0</span><span class=p>]</span><span class=o>-&gt;</span><span class=n>sections</span><span class=p>;</span>
 
-    <span style=color:#66d9ef>for</span> (size_t i <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; pe_sections[i] <span style=color:#f92672>!=</span> NULL; <span style=color:#f92672>++</span>i) {
-      printf(<span style=color:#e6db74>&#34;%s</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>, pe_sections[i]<span style=color:#f92672>-&gt;</span>name)
-    }
+    <span class=k>for</span> <span class=p>(</span><span class=n>size_t</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>pe_sections</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>!=</span> <span class=nb>NULL</span><span class=p>;</span> <span class=o>++</span><span class=n>i</span><span class=p>)</span> <span class=p>{</span>
+      <span class=n>printf</span><span class=p>(</span><span class=s>&#34;%s</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>,</span> <span class=n>pe_sections</span><span class=p>[</span><span class=n>i</span><span class=p>]</span><span class=o>-&gt;</span><span class=n>name</span><span class=p>)</span>
+    <span class=p>}</span>
 
-    <span style=color:#66d9ef>for</span> (size_t i <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; elf_sections[i] <span style=color:#f92672>!=</span> NULL; <span style=color:#f92672>++</span>i) {
-      printf(<span style=color:#e6db74>&#34;%s</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>, elf_sections[i]<span style=color:#f92672>-&gt;</span>name)
-    }
+    <span class=k>for</span> <span class=p>(</span><span class=n>size_t</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>elf_sections</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>!=</span> <span class=nb>NULL</span><span class=p>;</span> <span class=o>++</span><span class=n>i</span><span class=p>)</span> <span class=p>{</span>
+      <span class=n>printf</span><span class=p>(</span><span class=s>&#34;%s</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>,</span> <span class=n>elf_sections</span><span class=p>[</span><span class=n>i</span><span class=p>]</span><span class=o>-&gt;</span><span class=n>name</span><span class=p>)</span>
+    <span class=p>}</span>
 
-    <span style=color:#66d9ef>for</span> (size_t i <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; macho_sections[i] <span style=color:#f92672>!=</span> NULL; <span style=color:#f92672>++</span>i) {
-      printf(<span style=color:#e6db74>&#34;%s</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>, macho_sections[i]<span style=color:#f92672>-&gt;</span>name)
-    }
+    <span class=k>for</span> <span class=p>(</span><span class=n>size_t</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>macho_sections</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>!=</span> <span class=nb>NULL</span><span class=p>;</span> <span class=o>++</span><span class=n>i</span><span class=p>)</span> <span class=p>{</span>
+      <span class=n>printf</span><span class=p>(</span><span class=s>&#34;%s</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>,</span> <span class=n>macho_sections</span><span class=p>[</span><span class=n>i</span><span class=p>]</span><span class=o>-&gt;</span><span class=n>name</span><span class=p>)</span>
+    <span class=p>}</span>
 
-    elf_binary_destroy(elf_binary);
-    pe_binary_destroy(pe_binary);
-    macho_binaries_destroy(macho_binaries);
-  }
-</code></pre></div><p>LIEF supports FAT-MachO and one can iterate over binaries as follows:</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python>  <span style=color:#f92672>import</span> lief
-  binaries <span style=color:#f92672>=</span> lief<span style=color:#f92672>.</span>MachO<span style=color:#f92672>.</span>parse(<span style=color:#e6db74>&#34;/usr/lib/libc++abi.dylib&#34;</span>)
-  <span style=color:#66d9ef>for</span> binary <span style=color:#f92672>in</span> binaries:
-    <span style=color:#66d9ef>print</span>(binary)
-</code></pre></div><div class="alert alert-note"><div>The above script uses the <code>lief.MachO.parse</code> function instead of the <code>lief.parse</code> function because <code>lief.parse</code> returns a <strong>single</strong> <code>lief.MachO.binary</code> object
-whereas <code>lief.MachO.parse</code> returns a <strong>list</strong> of <code>lief.MachO.binary</code> (according to the FAT-MachO format).</div></div><p>Along with standard format components like headers, sections, import table, load commands, symbols, etc. LIEF is also able to parse PE Authenticode:</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python>
-  <span style=color:#f92672>import</span> lief
-  driver <span style=color:#f92672>=</span> lief<span style=color:#f92672>.</span>parse(<span style=color:#e6db74>&#34;driver.sys&#34;</span>)
+    <span class=n>elf_binary_destroy</span><span class=p>(</span><span class=n>elf_binary</span><span class=p>);</span>
+    <span class=n>pe_binary_destroy</span><span class=p>(</span><span class=n>pe_binary</span><span class=p>);</span>
+    <span class=n>macho_binaries_destroy</span><span class=p>(</span><span class=n>macho_binaries</span><span class=p>);</span>
+  <span class=p>}</span>
+</code></pre></div><p>LIEF supports FAT-MachO and one can iterate over binaries as follows:</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python>  <span class=kn>import</span> <span class=nn>lief</span>
+  <span class=n>binaries</span> <span class=o>=</span> <span class=n>lief</span><span class=o>.</span><span class=n>MachO</span><span class=o>.</span><span class=n>parse</span><span class=p>(</span><span class=s2>&#34;/usr/lib/libc++abi.dylib&#34;</span><span class=p>)</span>
+  <span class=k>for</span> <span class=n>binary</span> <span class=ow>in</span> <span class=n>binaries</span><span class=p>:</span>
+    <span class=nb>print</span><span class=p>(</span><span class=n>binary</span><span class=p>)</span>
+</code></pre></div><div class="alert alert-note">
+<div>
+The above script uses the <code>lief.MachO.parse</code> function instead of the <code>lief.parse</code> function because <code>lief.parse</code> returns a <strong>single</strong> <code>lief.MachO.binary</code> object
+whereas <code>lief.MachO.parse</code> returns a <strong>list</strong> of <code>lief.MachO.binary</code> (according to the FAT-MachO format).
+</div>
+</div>
+<p>Along with standard format components like headers, sections, import table, load commands, symbols, etc. LIEF is also able to parse PE Authenticode:</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python>
+  <span class=kn>import</span> <span class=nn>lief</span>
+  <span class=n>driver</span> <span class=o>=</span> <span class=n>lief</span><span class=o>.</span><span class=n>parse</span><span class=p>(</span><span class=s2>&#34;driver.sys&#34;</span><span class=p>)</span>
 
-  <span style=color:#66d9ef>for</span> crt <span style=color:#f92672>in</span> driver<span style=color:#f92672>.</span>signature<span style=color:#f92672>.</span>certificates:
-    <span style=color:#66d9ef>print</span>(crt)
-</code></pre></div><pre><code class=language-console data-lang=console>
+  <span class=k>for</span> <span class=n>crt</span> <span class=ow>in</span> <span class=n>driver</span><span class=o>.</span><span class=n>signature</span><span class=o>.</span><span class=n>certificates</span><span class=p>:</span>
+    <span class=nb>print</span><span class=p>(</span><span class=n>crt</span><span class=p>)</span>
+</code></pre></div><pre tabindex=0><code class=language-console data-lang=console>
   Version:             3
   Serial Number:       61:07:02:dc:00:00:00:00:00:0b
   Signature Algorithm: SHA1_WITH_RSA_ENCRYPTION
@@ -81,22 +238,96 @@ whereas <code>lief.MachO.parse</code> returns a <strong>list</strong> of <code>l
   Issuer:              DC=com, DC=microsoft, CN=Microsoft Root Certificate Authority
   Subject:             C=US, ST=Washington, L=Redmond, O=Microsoft Corporation, CN=Microsoft Windows Verification PCA
   ...
-</code></pre><p>Full API documentation is available here</p><ul><li><a href=https://lief-project.github.io/doc/latest/api/python/index.html target=_blank rel=noopener>Python API</a></li><li><a href=https://lief-project.github.io/doc/latest/api/cpp/index.html target=_blank rel=noopener>C++ API</a></li><li><a href=https://lief-project.github.io/doc/latest/api/c/index.html target=_blank rel=noopener>C API</a></li></ul><h1 id=architecture>Architecture</h1><p>In the <code>LIEF</code> architecture, each format implements at least the following classes:</p><ul><li>Parser: Parse the format and decompose it into a <code>Binary</code> class</li><li>Binary: Modelize the format and provide an API to modify and explore it.</li><li>Builder: Transform the binary object into a valid file.</li></ul><figure><a data-fancybox href=/post/lief-release/archi_hu024b005ec7f37fb1d2d0938672876ebf_142621_2000x2000_fit_lanczos_2.png><img data-src=/post/lief-release/archi_hu024b005ec7f37fb1d2d0938672876ebf_142621_2000x2000_fit_lanczos_2.png class=lazyload alt width=1080 height=437></a></figure><p>To factor common characteristics in formats we have an inheritance relationship between these characteristics.</p><p>For symbols it gives the following diagram:</p><figure><a data-fancybox href=/post/lief-release/symbol_inheritance_hua2c0eb4d7ecbdd62ff298ed98b99d1dc_6049_2000x2000_fit_lanczos_2.png><img data-src=/post/lief-release/symbol_inheritance_hua2c0eb4d7ecbdd62ff298ed98b99d1dc_6049_2000x2000_fit_lanczos_2.png class=lazyload alt width=511 height=133></a></figure><p>It enables to write cross-format utility like <code>nm</code>. <code>nm</code> is a Unix utility to list symbols in an executable. The source code is available here:
-<a href=https://github.com/gittup/binutils/blob/0af702d47a443acea853b84157c2e81f6c131e77/binutils/nm.c target=_blank rel=noopener>binutils</a></p><p>With the given inheritance relationship one can write this utility for the three formats in a single script:</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python>  <span style=color:#f92672>import</span> lief
-  <span style=color:#f92672>import</span> sys
+</code></pre><p>Full API documentation is available here</p>
+<ul>
+<li>
+<a href=https://lief-project.github.io/doc/latest/api/python/index.html target=_blank rel=noopener>Python API</a></li>
+<li>
+<a href=https://lief-project.github.io/doc/latest/api/cpp/index.html target=_blank rel=noopener>C++ API</a></li>
+<li>
+<a href=https://lief-project.github.io/doc/latest/api/c/index.html target=_blank rel=noopener>C API</a></li>
+</ul>
+<h1 id=architecture>Architecture</h1>
+<p>In the <code>LIEF</code> architecture, each format implements at least the following classes:</p>
+<ul>
+<li>Parser: Parse the format and decompose it into a <code>Binary</code> class</li>
+<li>Binary: Modelize the format and provide an API to modify and explore it.</li>
+<li>Builder: Transform the binary object into a valid file.</li>
+</ul>
+<figure>
+<a data-fancybox href=/post/lief-release/archi_hu024b005ec7f37fb1d2d0938672876ebf_142621_2000x2000_fit_lanczos_3.png>
+<img data-src=/post/lief-release/archi_hu024b005ec7f37fb1d2d0938672876ebf_142621_2000x2000_fit_lanczos_3.png class=lazyload alt width=1080 height=437>
+</a>
+</figure>
+<p>To factor common characteristics in formats we have an inheritance relationship between these characteristics.</p>
+<p>For symbols it gives the following diagram:</p>
+<figure>
+<a data-fancybox href=/post/lief-release/symbol_inheritance_hua2c0eb4d7ecbdd62ff298ed98b99d1dc_6049_2000x2000_fit_lanczos_3.png>
+<img data-src=/post/lief-release/symbol_inheritance_hua2c0eb4d7ecbdd62ff298ed98b99d1dc_6049_2000x2000_fit_lanczos_3.png class=lazyload alt width=511 height=133>
+</a>
+</figure>
+<p>It enables to write cross-format utility like <code>nm</code>. <code>nm</code> is a Unix utility to list symbols in an executable. The source code is available here:
+<a href=https://github.com/gittup/binutils/blob/0af702d47a443acea853b84157c2e81f6c131e77/binutils/nm.c target=_blank rel=noopener>binutils</a></p>
+<p>With the given inheritance relationship one can write this utility for the three formats in a single script:</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python>  <span class=kn>import</span> <span class=nn>lief</span>
+  <span class=kn>import</span> <span class=nn>sys</span>
 
-  <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>nm</span>(binary):
-    <span style=color:#66d9ef>for</span> symbol <span style=color:#f92672>in</span> binary<span style=color:#f92672>.</span>symbols:
-      <span style=color:#66d9ef>print</span>(symbol)
+  <span class=k>def</span> <span class=nf>nm</span><span class=p>(</span><span class=n>binary</span><span class=p>):</span>
+    <span class=k>for</span> <span class=n>symbol</span> <span class=ow>in</span> <span class=n>binary</span><span class=o>.</span><span class=n>symbols</span><span class=p>:</span>
+      <span class=nb>print</span><span class=p>(</span><span class=n>symbol</span><span class=p>)</span>
 
-    <span style=color:#66d9ef>return</span> <span style=color:#ae81ff>0</span>
+    <span class=k>return</span> <span class=mi>0</span>
 
-  <span style=color:#66d9ef>if</span> __name__ <span style=color:#f92672>==</span> <span style=color:#e6db74>&#34;__main__&#34;</span>:
-    r <span style=color:#f92672>=</span> nm(sys<span style=color:#f92672>.</span>argv[<span style=color:#ae81ff>1</span>])
-    sys<span style=color:#f92672>.</span>exit(r)
-</code></pre></div><h1 id=conclusion>Conclusion</h1><p>As LIEF is still a young project we hope to have feedback, ideas, suggestions and pull requests.</p><p>The source code is available here: <a href=https://github.com/lief-project>https://github.com/lief-project</a> (under Apache 2.0 license) and the associated website: <a href=http://lief.quarkslab.com>http://lief.quarkslab.com</a></p><p>If you are interested in use cases, you can take a look at these tutorials:</p><ul><li><a href=https://lief-project.github.io/doc/latest/tutorials/01_play_with_formats.html target=_blank rel=noopener>Parse and manipulate formats</a></li><li><a href=https://lief-project.github.io/doc/latest/tutorials/02_pe_from_scratch.html target=_blank rel=noopener>Create a PE from scratch</a></li><li><a href=https://lief-project.github.io/doc/latest/tutorials/03_elf_change_symbols.html target=_blank rel=noopener>Play with ELF symbols</a></li><li><a href=https://lief-project.github.io/doc/latest/tutorials/04_elf_hooking.html target=_blank rel=noopener>Hooking</a></li><li><a href=https://lief-project.github.io/doc/latest/tutorials/05_elf_infect_plt_got.html target=_blank rel=noopener>Infecting the PLT/GOT</a></li></ul><p>The project will be presented at the
-<a href=http://cyber.science-japon.org/ target=_blank rel=noopener>Third French Japanese Meeting on Cybersecurity</a></p><h1 id=contact>Contact</h1><ul><li>lief [at] quarkslab [dot] com</li><li>Gitter:
-<a href=https://gitter.im/lief-project target=_blank rel=noopener>lief-project</a></li></ul><h1 id=thanks>Thanks</h1><p>Thanks to Serge Guelton and Adrien Guinet for their advice about the design and their code review. Thanks to Quarkslab for making this project open-source.</p></div><div class=article-tags><a class="badge badge-light" href=/tags/lief/>lief</a></div></div></article><script src=https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin=anonymous></script><script src=https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/4.1.4/imagesloaded.pkgd.min.js integrity="sha256-lqvxZrPLtfffUl2G/e7szqSvPBILGbwmsGE1MKlOi0Q=" crossorigin=anonymous></script><script src=https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.6/isotope.pkgd.min.js integrity="sha256-CBrpuqrMhXwcLLUd5tvQ4euBHCdh7wGlDfNz8vbu/iI=" crossorigin=anonymous></script><script src=https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin=anonymous></script><script src=https://cdnjs.cloudflare.com/ajax/libs/instant.page/5.1.0/instantpage.min.js integrity="sha512-1+qUtKoh9XZW7j+6LhRMAyOrgSQKenQ4mluTR+cvxXjP1Z54RxZuzstR/H9kgPXQsVB8IW7DMDFUJpzLjvhGSQ==" crossorigin=anonymous></script><script src=https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.2/highlight.min.js integrity="sha512-7t8APmYpzEsZP7CYoA7RfMPV9Bb+PJHa9x2WiUnDXZx3XHveuyWUtvNOexhkierl5flZ3tr92dP1mMS+SGlD+A==" crossorigin=anonymous></script><script src=https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.2/languages/r.min.js></script><script src=https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.2/languages/armasm.min.js></script><script src=https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet.js integrity="sha256-EErZamuLefUnbMBQbsEqu1USa+btR2oIlCpBJbyD4/g=" crossorigin=anonymous></script><script>const code_highlighting=!0</script><script>const isSiteThemeDark=!1</script><script>const search_config={indexURI:"/index.json",minLength:1,threshold:.3},i18n={no_results:"No results found",placeholder:"Search...",results:"results found"},content_type={post:"Posts",project:"Projects",publication:"Publications",talk:"Talks",slides:"Slides"}</script><script id=search-hit-fuse-template type=text/x-template>
+  <span class=k>if</span> <span class=vm>__name__</span> <span class=o>==</span> <span class=s2>&#34;__main__&#34;</span><span class=p>:</span>
+    <span class=n>r</span> <span class=o>=</span> <span class=n>nm</span><span class=p>(</span><span class=n>sys</span><span class=o>.</span><span class=n>argv</span><span class=p>[</span><span class=mi>1</span><span class=p>])</span>
+    <span class=n>sys</span><span class=o>.</span><span class=n>exit</span><span class=p>(</span><span class=n>r</span><span class=p>)</span>
+</code></pre></div><h1 id=conclusion>Conclusion</h1>
+<p>As LIEF is still a young project we hope to have feedback, ideas, suggestions and pull requests.</p>
+<p>The source code is available here:
+<a href=https://github.com/lief-project target=_blank rel=noopener>https://github.com/lief-project</a> (under Apache 2.0 license) and the associated website:
+<a href=http://lief.quarkslab.com target=_blank rel=noopener>http://lief.quarkslab.com</a></p>
+<p>If you are interested in use cases, you can take a look at these tutorials:</p>
+<ul>
+<li>
+<a href=https://lief-project.github.io/doc/latest/tutorials/01_play_with_formats.html target=_blank rel=noopener>Parse and manipulate formats</a></li>
+<li>
+<a href=https://lief-project.github.io/doc/latest/tutorials/02_pe_from_scratch.html target=_blank rel=noopener>Create a PE from scratch</a></li>
+<li>
+<a href=https://lief-project.github.io/doc/latest/tutorials/03_elf_change_symbols.html target=_blank rel=noopener>Play with ELF symbols</a></li>
+<li>
+<a href=https://lief-project.github.io/doc/latest/tutorials/04_elf_hooking.html target=_blank rel=noopener>Hooking</a></li>
+<li>
+<a href=https://lief-project.github.io/doc/latest/tutorials/05_elf_infect_plt_got.html target=_blank rel=noopener>Infecting the PLT/GOT</a></li>
+</ul>
+<p>The project will be presented at the
+<a href=http://cyber.science-japon.org/ target=_blank rel=noopener>Third French Japanese Meeting on Cybersecurity</a></p>
+<h1 id=contact>Contact</h1>
+<ul>
+<li>lief [at] quarkslab [dot] com</li>
+<li>Gitter:
+<a href=https://gitter.im/lief-project target=_blank rel=noopener>lief-project</a></li>
+</ul>
+<h1 id=thanks>Thanks</h1>
+<p>Thanks to Serge Guelton and Adrien Guinet for their advice about the design and their code review. Thanks to Quarkslab for making this project open-source.</p>
+</div>
+<div class=article-tags>
+<a class="badge badge-light" href=/tags/lief/>lief</a>
+</div>
+</div>
+</article>
+<script src=https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin=anonymous></script>
+<script src=https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/4.1.4/imagesloaded.pkgd.min.js integrity="sha256-lqvxZrPLtfffUl2G/e7szqSvPBILGbwmsGE1MKlOi0Q=" crossorigin=anonymous></script>
+<script src=https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.6/isotope.pkgd.min.js integrity="sha256-CBrpuqrMhXwcLLUd5tvQ4euBHCdh7wGlDfNz8vbu/iI=" crossorigin=anonymous></script>
+<script src=https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin=anonymous></script>
+<script src=https://cdnjs.cloudflare.com/ajax/libs/instant.page/5.1.0/instantpage.min.js integrity="sha512-1+qUtKoh9XZW7j+6LhRMAyOrgSQKenQ4mluTR+cvxXjP1Z54RxZuzstR/H9kgPXQsVB8IW7DMDFUJpzLjvhGSQ==" crossorigin=anonymous></script>
+<script src=https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.2/highlight.min.js integrity="sha512-7t8APmYpzEsZP7CYoA7RfMPV9Bb+PJHa9x2WiUnDXZx3XHveuyWUtvNOexhkierl5flZ3tr92dP1mMS+SGlD+A==" crossorigin=anonymous></script>
+<script src=https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.2/languages/r.min.js></script>
+<script src=https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.2/languages/armasm.min.js></script>
+<script src=https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet.js integrity="sha256-EErZamuLefUnbMBQbsEqu1USa+btR2oIlCpBJbyD4/g=" crossorigin=anonymous></script>
+<script>const code_highlighting=!0</script>
+<script>const isSiteThemeDark=!1</script>
+<script>const search_config={indexURI:"/index.json",minLength:1,threshold:.3},i18n={no_results:"No results found",placeholder:"Search...",results:"results found"},content_type={post:"Posts",project:"Projects",publication:"Publications",talk:"Talks",slides:"Slides"}</script>
+<script id=search-hit-fuse-template type=text/x-template>
       <div class="search-hit" id="summary-{{key}}">
       <div class="search-hit-content">
         <div class="search-hit-name">
@@ -106,6 +337,49 @@ whereas <code>lief.MachO.parse</code> returns a <strong>list</strong> of <code>l
         </div>
       </div>
       </div>
-    </script><script src=https://cdnjs.cloudflare.com/ajax/libs/fuse.js/3.2.1/fuse.min.js integrity="sha256-VzgmKYmhsGNNN4Ph1kMW+BjoYJM2jV5i4IlFoeZA9XI=" crossorigin=anonymous></script><script src=https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin=anonymous></script><script src=/js/academic.min.f6ecf7692215f2bc4850b72c8176bfa2.js></script><div class=container><footer class=site-footer><p class=powered-by>Published with <a href=https://sourcethemes.com/academic/ target=_blank rel=noopener>Academic Website Builder</a> - Icons made by <a href=http://www.freepik.com/ title=Freepik>Freepik</a></p><p class=powered-by><span class=float-right aria-hidden=true><a href=# class=back-to-top><span class=button_icon><i class="fas fa-chevron-up fa-2x"></i></span></a></span></p></footer></div><div id=modal class="modal fade" role=dialog><div class=modal-dialog><div class=modal-content><div class=modal-header><h5 class=modal-title>Cite</h5><button type=button class=close data-dismiss=modal aria-label=Close>
-<span aria-hidden=true>&#215;</span></button></div><div class=modal-body><pre><code class="tex hljs"></code></pre></div><div class=modal-footer><a class="btn btn-outline-primary my-1 js-copy-cite" href=# target=_blank><i class="fas fa-copy"></i> Copy</a>
-<a class="btn btn-outline-primary my-1 js-download-cite" href=# target=_blank><i class="fas fa-download"></i> Download</a><div id=modal-error></div></div></div></div></div></body></html>
+    </script>
+<script src=https://cdnjs.cloudflare.com/ajax/libs/fuse.js/3.2.1/fuse.min.js integrity="sha256-VzgmKYmhsGNNN4Ph1kMW+BjoYJM2jV5i4IlFoeZA9XI=" crossorigin=anonymous></script>
+<script src=https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin=anonymous></script>
+<script src=/js/academic.min.f6ecf7692215f2bc4850b72c8176bfa2.js></script>
+<div class=container>
+<footer class=site-footer>
+<p class=powered-by>
+Published with <a href=https://sourcethemes.com/academic/ target=_blank rel=noopener>Academic Website Builder</a>
+</p>
+<p class=powered-by>
+<span class=float-right aria-hidden=true>
+<a href=# class=back-to-top>
+<span class=button_icon>
+<i class="fas fa-chevron-up fa-2x"></i>
+</span>
+</a>
+</span>
+</p>
+</footer>
+</div>
+<div id=modal class="modal fade" role=dialog>
+<div class=modal-dialog>
+<div class=modal-content>
+<div class=modal-header>
+<h5 class=modal-title>Cite</h5>
+<button type=button class=close data-dismiss=modal aria-label=Close>
+<span aria-hidden=true>&#215;</span>
+</button>
+</div>
+<div class=modal-body>
+<pre><code class="tex hljs"></code></pre>
+</div>
+<div class=modal-footer>
+<a class="btn btn-outline-primary my-1 js-copy-cite" href=# target=_blank>
+<i class="fas fa-copy"></i> Copy
+</a>
+<a class="btn btn-outline-primary my-1 js-download-cite" href=# target=_blank>
+<i class="fas fa-download"></i> Download
+</a>
+<div id=modal-error></div>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

@@ -1,4 +1,15 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Publications | Romain Thomas</title><link>https://www.romainthomas.fr/publication/</link><atom:link href="https://www.romainthomas.fr/publication/index.xml" rel="self" type="application/rss+xml"/><description>Publications</description><generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>Published with Academic Website Builder - Icons made by Freepik</copyright><lastBuildDate>Thu, 03 Jun 2021 00:00:00 +0000</lastBuildDate><image><url>https://www.romainthomas.fr/images/icon_hu2654a0fcc87c65a864822ac27b001d3b_698_512x512_fill_lanczos_center_2.png</url><title>Publications</title><link>https://www.romainthomas.fr/publication/</link></image><item><title>QBDL: QuarkslaB Dynamic Loader</title><link>https://www.romainthomas.fr/publication/21-sstic-qbdl/</link><pubDate>Thu, 03 Jun 2021 00:00:00 +0000</pubDate><guid>https://www.romainthomas.fr/publication/21-sstic-qbdl/</guid><description>&lt;h2 id="hahahugoshortcode-s0-hbhb-slides">
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>DEFAULT Publications | Romain Thomas</title><link>https://www.romainthomas.fr/publication/</link><atom:link href="https://www.romainthomas.fr/publication/index.xml" rel="self" type="application/rss+xml"/><description>Publications</description><generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>Published with Academic Website Builder</copyright><lastBuildDate>Fri, 05 Nov 2021 00:00:00 +0000</lastBuildDate><image><url>https://www.romainthomas.fr/images/icon_hu2654a0fcc87c65a864822ac27b001d3b_698_512x512_fill_lanczos_center_3.png</url><title>Publications</title><link>https://www.romainthomas.fr/publication/</link></image><item><title>PGSharp: Analysis of a Cheat Engine on Android</title><link>https://www.romainthomas.fr/publication/21-ekoparty-mobile-hacking-space-pgsharp/</link><pubDate>Fri, 05 Nov 2021 00:00:00 +0000</pubDate><guid>https://www.romainthomas.fr/publication/21-ekoparty-mobile-hacking-space-pgsharp/</guid><description>&lt;h2 id="hahahugoshortcode-s0-hbhb-slides">
+&lt;i class="fas fa-copy pr-1 fa-fw">&lt;/i> Slides&lt;/h2>
+&lt;div class="pdfpreview shortcode shortcode--pdfpreview">
+&lt;embed src="21-10-ekoparty-mobile-hacking-space-pgsharp.pdf" type="application/pdf" width="100%" height=450px />
+&lt;/div>
+&lt;h2 id="hahahugoshortcode-s2-hbhb-talk">
+&lt;i class="fas fa-laptop-code pr-1 fa-fw">&lt;/i> Talk&lt;/h2>
+&lt;p>&lt;em>to be published&lt;/em>&lt;/p>
+&lt;h2 id="hahahugoshortcode-s3-hbhb-blog-post">
+&lt;i class="fas fa-newspaper pr-1 fa-fw">&lt;/i> Blog Post&lt;/h2>
+&lt;p>
+&lt;a href="https://www.romainthomas.fr/post/21-09-pgsharp-analysis/">&lt;em>PGSharp: Analysis of a Cheating App for PokemonGO&lt;/em>&lt;/a>&lt;/p></description></item><item><title>QBDL: QuarkslaB Dynamic Loader</title><link>https://www.romainthomas.fr/publication/21-sstic-qbdl/</link><pubDate>Thu, 03 Jun 2021 00:00:00 +0000</pubDate><guid>https://www.romainthomas.fr/publication/21-sstic-qbdl/</guid><description>&lt;h2 id="hahahugoshortcode-s0-hbhb-slides">
 &lt;i class="fas fa-copy pr-1 fa-fw">&lt;/i> Slides&lt;/h2>
 &lt;div class="pdfpreview shortcode shortcode--pdfpreview">
 &lt;embed src="SSTIC2021-Slides-qbdl_quarkslab_dynamic_loader-guinet_thomas.pdf" type="application/pdf" width="100%" height=450px />
@@ -17,14 +28,19 @@
 &lt;div class="pdfpreview shortcode shortcode--pdfpreview">
 &lt;embed src="asia-20-Thomas-Dynamic-Binary-Instrumentation-Techniques-to-Address-Native-Code-Obfuscation-wp.pdf" type="application/pdf" width="100%" height=1060px />
 &lt;/div>
+&lt;h2 id="hahahugoshortcode-s4-hbhb-talk">
+&lt;i class="fas fa-laptop-code pr-1 fa-fw">&lt;/i> Talk&lt;/h2>
+&lt;div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;">
+&lt;iframe src="https://www.youtube.com/embed/MRku-2fW42w" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border:0;" allowfullscreen title="YouTube Video">&lt;/iframe>
+&lt;/div>
 &lt;div id="demo1">&lt;/div>
-&lt;h2 id="hahahugoshortcode-s4-hbhb-demo-1-snapchat">
+&lt;h2 id="hahahugoshortcode-s6-hbhb-demo-1-snapchat">
 &lt;i class="fas fa-laptop-code pr-1 fa-fw">&lt;/i> Demo #1: Snapchat&lt;/h2>
 &lt;video controls >
 &lt;source src="snapchat_demo.mp4" type="video/mp4">
 &lt;/video>
 &lt;div id="demo2">&lt;/div>
-&lt;h2 id="hahahugoshortcode-s6-hbhb-demo-2-legu-packer">
+&lt;h2 id="hahahugoshortcode-s8-hbhb-demo-2-legu-packer">
 &lt;i class="fas fa-laptop-code pr-1 fa-fw">&lt;/i> Demo #2: Legu Packer&lt;/h2>
 &lt;video controls >
 &lt;source src="qbdi-tencent-packer.mp4" type="video/mp4">

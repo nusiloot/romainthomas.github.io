@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>lief | Romain Thomas</title><link>https://www.romainthomas.fr/tags/lief/</link><atom:link href="https://www.romainthomas.fr/tags/lief/index.xml" rel="self" type="application/rss+xml"/><description>lief</description><generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>Published with Academic Website Builder - Icons made by Freepik</copyright><lastBuildDate>Thu, 03 Jun 2021 00:00:00 +0000</lastBuildDate><image><url>https://www.romainthomas.fr/images/icon_hu2654a0fcc87c65a864822ac27b001d3b_698_512x512_fill_lanczos_center_2.png</url><title>lief</title><link>https://www.romainthomas.fr/tags/lief/</link></image><item><title>QBDL</title><link>https://www.romainthomas.fr/project/qbdl/</link><pubDate>Thu, 03 Jun 2021 00:00:00 +0000</pubDate><guid>https://www.romainthomas.fr/project/qbdl/</guid><description>&lt;p>QBDL (&lt;strong>Q&lt;/strong>uarksla&lt;strong>B&lt;/strong> &lt;strong>D&lt;/strong>ynamic &lt;strong>L&lt;/strong>oader) is a cross-platform library that enables
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>DEFAULT lief | Romain Thomas</title><link>https://www.romainthomas.fr/tags/lief/</link><atom:link href="https://www.romainthomas.fr/tags/lief/index.xml" rel="self" type="application/rss+xml"/><description>lief</description><generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>Published with Academic Website Builder</copyright><lastBuildDate>Thu, 03 Jun 2021 00:00:00 +0000</lastBuildDate><image><url>https://www.romainthomas.fr/images/icon_hu2654a0fcc87c65a864822ac27b001d3b_698_512x512_fill_lanczos_center_3.png</url><title>lief</title><link>https://www.romainthomas.fr/tags/lief/</link></image><item><title>QBDL</title><link>https://www.romainthomas.fr/project/qbdl/</link><pubDate>Thu, 03 Jun 2021 00:00:00 +0000</pubDate><guid>https://www.romainthomas.fr/project/qbdl/</guid><description>&lt;p>QBDL (&lt;strong>Q&lt;/strong>uarksla&lt;strong>B&lt;/strong> &lt;strong>D&lt;/strong>ynamic &lt;strong>L&lt;/strong>oader) is a cross-platform library that enables
 to load ELF, PE and Mach-O binaries with an abstraction on the targeted system.
 It abstracts the memory model on which the binary is loaded
 and provides an enhanced API to the user to process symbols resolution.
@@ -6,41 +6,41 @@ In a nutshell, it enables to load binaries on foreign systems without reinventin
 &lt;p>Here is an
 &lt;a href="https://github.com/quarkslab/QBDL/blob/83a64211dae71e870495bc795dd065278f93993f/bindings/python/examples/triton_macho_x64.py" target="_blank" rel="noopener">example&lt;/a> to load a Mach-O in
 &lt;a href="https://github.com/JonathanSalwan/Triton" target="_blank" rel="noopener">Triton&lt;/a> with QBDL:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">&lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">TritonVM&lt;/span>(pyqbdl&lt;span style="color:#f92672">.&lt;/span>TargetMemory):
-&lt;span style="color:#66d9ef">def&lt;/span> __init__(self, ctx: TritonContext):
-super()&lt;span style="color:#f92672">.&lt;/span>__init__()
-self&lt;span style="color:#f92672">.&lt;/span>ctx &lt;span style="color:#f92672">=&lt;/span> ctx
-&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">mmap&lt;/span>(self, ptr, size):
-&lt;span style="color:#66d9ef">return&lt;/span> ptr
-&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">mprotect&lt;/span>(self, ptr, size, access):
-&lt;span style="color:#66d9ef">return&lt;/span> True
-&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">write&lt;/span>(self, ptr, data):
-self&lt;span style="color:#f92672">.&lt;/span>ctx&lt;span style="color:#f92672">.&lt;/span>setConcreteMemoryAreaValue(ptr, bytes(data))
-&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">read&lt;/span>(self, ptr, size):
-&lt;span style="color:#66d9ef">return&lt;/span> self&lt;span style="color:#f92672">.&lt;/span>ctx&lt;span style="color:#f92672">.&lt;/span>getConcreteMemoryAreaValue(ptr, size)
-&lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">TritonSystem&lt;/span>(pyqbdl&lt;span style="color:#f92672">.&lt;/span>TargetSystem):
-&lt;span style="color:#66d9ef">def&lt;/span> __init__(self, arch, ctx):
-super()&lt;span style="color:#f92672">.&lt;/span>__init__(TritonVM(ctx))
-self&lt;span style="color:#f92672">.&lt;/span>arch &lt;span style="color:#f92672">=&lt;/span> arch
-self&lt;span style="color:#f92672">.&lt;/span>ctx &lt;span style="color:#f92672">=&lt;/span> ctx
-&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">symlink&lt;/span>(self, loader, sym):
-&lt;span style="color:#66d9ef">for&lt;/span> name, impl, addr &lt;span style="color:#f92672">in&lt;/span> externalFunctions:
-&lt;span style="color:#66d9ef">if&lt;/span> sym&lt;span style="color:#f92672">.&lt;/span>name &lt;span style="color:#f92672">==&lt;/span> name:
-&lt;span style="color:#66d9ef">return&lt;/span> addr
-&lt;span style="color:#66d9ef">return&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>
-&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">supports&lt;/span>(self, bin_):
-&lt;span style="color:#66d9ef">return&lt;/span> pyqbdl&lt;span style="color:#f92672">.&lt;/span>Arch&lt;span style="color:#f92672">.&lt;/span>from_bin(bin_) &lt;span style="color:#f92672">==&lt;/span> self&lt;span style="color:#f92672">.&lt;/span>arch
-&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">base_address_hint&lt;/span>(self, bin_ba, vsize):
-&lt;span style="color:#66d9ef">return&lt;/span> bin_ba
-x86_64_arch &lt;span style="color:#f92672">=&lt;/span> pyqbdl&lt;span style="color:#f92672">.&lt;/span>Arch(lief&lt;span style="color:#f92672">.&lt;/span>ARCHITECTURES&lt;span style="color:#f92672">.&lt;/span>X86, lief&lt;span style="color:#f92672">.&lt;/span>ENDIANNESS&lt;span style="color:#f92672">.&lt;/span>LITTLE, True)
-loader &lt;span style="color:#f92672">=&lt;/span> pyqbdl&lt;span style="color:#f92672">.&lt;/span>loaders&lt;span style="color:#f92672">.&lt;/span>MachO&lt;span style="color:#f92672">.&lt;/span>from_file(args&lt;span style="color:#f92672">.&lt;/span>filename, x86_64_arch,
-TritonSystem(x86_64_arch, ctx), pyqbdl&lt;span style="color:#f92672">.&lt;/span>Loader&lt;span style="color:#f92672">.&lt;/span>BIND&lt;span style="color:#f92672">.&lt;/span>NOW)
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-python" data-lang="python">&lt;span class="k">class&lt;/span> &lt;span class="nc">TritonVM&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">pyqbdl&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">TargetMemory&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;span class="k">def&lt;/span> &lt;span class="fm">__init__&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">ctx&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">TritonContext&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;span class="nb">super&lt;/span>&lt;span class="p">()&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="fm">__init__&lt;/span>&lt;span class="p">()&lt;/span>
+&lt;span class="bp">self&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">ctx&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">ctx&lt;/span>
+&lt;span class="k">def&lt;/span> &lt;span class="nf">mmap&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">ptr&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">size&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;span class="k">return&lt;/span> &lt;span class="n">ptr&lt;/span>
+&lt;span class="k">def&lt;/span> &lt;span class="nf">mprotect&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">ptr&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">size&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">access&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;span class="k">return&lt;/span> &lt;span class="kc">True&lt;/span>
+&lt;span class="k">def&lt;/span> &lt;span class="nf">write&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">ptr&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">data&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;span class="bp">self&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">ctx&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">setConcreteMemoryAreaValue&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">ptr&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nb">bytes&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">data&lt;/span>&lt;span class="p">))&lt;/span>
+&lt;span class="k">def&lt;/span> &lt;span class="nf">read&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">ptr&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">size&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;span class="k">return&lt;/span> &lt;span class="bp">self&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">ctx&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">getConcreteMemoryAreaValue&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">ptr&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">size&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="k">class&lt;/span> &lt;span class="nc">TritonSystem&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">pyqbdl&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">TargetSystem&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;span class="k">def&lt;/span> &lt;span class="fm">__init__&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">arch&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">ctx&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;span class="nb">super&lt;/span>&lt;span class="p">()&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="fm">__init__&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">TritonVM&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">ctx&lt;/span>&lt;span class="p">))&lt;/span>
+&lt;span class="bp">self&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">arch&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">arch&lt;/span>
+&lt;span class="bp">self&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">ctx&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">ctx&lt;/span>
+&lt;span class="k">def&lt;/span> &lt;span class="nf">symlink&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">loader&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">sym&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;span class="k">for&lt;/span> &lt;span class="n">name&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">impl&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">addr&lt;/span> &lt;span class="ow">in&lt;/span> &lt;span class="n">externalFunctions&lt;/span>&lt;span class="p">:&lt;/span>
+&lt;span class="k">if&lt;/span> &lt;span class="n">sym&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">name&lt;/span> &lt;span class="o">==&lt;/span> &lt;span class="n">name&lt;/span>&lt;span class="p">:&lt;/span>
+&lt;span class="k">return&lt;/span> &lt;span class="n">addr&lt;/span>
+&lt;span class="k">return&lt;/span> &lt;span class="mi">0&lt;/span>
+&lt;span class="k">def&lt;/span> &lt;span class="nf">supports&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">bin_&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;span class="k">return&lt;/span> &lt;span class="n">pyqbdl&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Arch&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">from_bin&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">bin_&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="o">==&lt;/span> &lt;span class="bp">self&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">arch&lt;/span>
+&lt;span class="k">def&lt;/span> &lt;span class="nf">base_address_hint&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">bin_ba&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">vsize&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;span class="k">return&lt;/span> &lt;span class="n">bin_ba&lt;/span>
+&lt;span class="n">x86_64_arch&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">pyqbdl&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Arch&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">lief&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">ARCHITECTURES&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">X86&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">lief&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">ENDIANNESS&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">LITTLE&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="kc">True&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="n">loader&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">pyqbdl&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">loaders&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">MachO&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">from_file&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">args&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">filename&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">x86_64_arch&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;span class="n">TritonSystem&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">x86_64_arch&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">ctx&lt;/span>&lt;span class="p">),&lt;/span> &lt;span class="n">pyqbdl&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Loader&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">BIND&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">NOW&lt;/span>&lt;span class="p">)&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div></description></item><item><title>When SideChannelMarvels meet LIEF</title><link>https://www.romainthomas.fr/post/when-sidechannelmarvels-meet-lief/</link><pubDate>Thu, 03 May 2018 00:00:00 +0000</pubDate><guid>https://www.romainthomas.fr/post/when-sidechannelmarvels-meet-lief/</guid><description/></item><item><title>How to use frida on a non-rooted device</title><link>https://www.romainthomas.fr/post/how-to-use-frida-on-a-non-rooted-device/</link><pubDate>Sat, 03 Mar 2018 00:00:00 +0000</pubDate><guid>https://www.romainthomas.fr/post/how-to-use-frida-on-a-non-rooted-device/</guid><description>&lt;p>This post is a part of LIEF tutorials. It explains how to combine
 &lt;a href="https://www.frida.re/" target="_blank" rel="noopener">Frida&lt;/a> and
 &lt;a href="https://lief-project.github.io/" target="_blank" rel="noopener">LIEF&lt;/a> to
 run &lt;code>frida-gadget&lt;/code> on a non rooted device.&lt;/p>
 &lt;p>
-&lt;a href="https://lief-project.github.io/doc/latest/tutorials/09_frida_lief.html" target="_blank" rel="noopener">See more&lt;/a>&lt;/p></description></item><item><title>Transforming an ELF executable into a library</title><link>https://www.romainthomas.fr/post/transforming-an-elf-executable-into-a-library/</link><pubDate>Sat, 03 Feb 2018 00:00:00 +0000</pubDate><guid>https://www.romainthomas.fr/post/transforming-an-elf-executable-into-a-library/</guid><description/></item><item><title>Have fun with LIEF and Executable Formats</title><link>https://www.romainthomas.fr/post/have-fun-with-lief-and-executable-formats/</link><pubDate>Thu, 02 Nov 2017 00:00:00 +0100</pubDate><guid>https://www.romainthomas.fr/post/have-fun-with-lief-and-executable-formats/</guid><description/></item><item><title>Open-sourcing LIEF</title><link>https://www.romainthomas.fr/post/lief-release/</link><pubDate>Tue, 04 Apr 2017 00:00:00 +0200</pubDate><guid>https://www.romainthomas.fr/post/lief-release/</guid><description>&lt;div class="alert alert-note">
+&lt;a href="https://lief-project.github.io/doc/latest/tutorials/09_frida_lief.html" target="_blank" rel="noopener">See more&lt;/a>&lt;/p></description></item><item><title>Transforming an ELF executable into a library</title><link>https://www.romainthomas.fr/post/transforming-an-elf-executable-into-a-library/</link><pubDate>Sat, 03 Feb 2018 00:00:00 +0000</pubDate><guid>https://www.romainthomas.fr/post/transforming-an-elf-executable-into-a-library/</guid><description/></item><item><title>Have fun with LIEF and Executable Formats</title><link>https://www.romainthomas.fr/post/have-fun-with-lief-and-executable-formats/</link><pubDate>Thu, 02 Nov 2017 00:00:00 +0000</pubDate><guid>https://www.romainthomas.fr/post/have-fun-with-lief-and-executable-formats/</guid><description/></item><item><title>Open-sourcing LIEF</title><link>https://www.romainthomas.fr/post/lief-release/</link><pubDate>Tue, 04 Apr 2017 00:00:00 +0000</pubDate><guid>https://www.romainthomas.fr/post/lief-release/</guid><description>&lt;div class="alert alert-note">
 &lt;div>
 This post has been originally posted on the &lt;a href=https://blog.quarkslab.com/lief-library-to-instrument-executable-formats.html>Quarkslab&amp;rsquo;s blog&lt;/a>
 &lt;/div>
@@ -72,58 +72,58 @@ Moreover, these parsers are usually bound to one language.&lt;/p>
 &lt;li>Abstract common features from the different formats (Section, header, entry point, symbols&amp;hellip;)&lt;/li>
 &lt;/ul>
 &lt;p>The following snippets show how to obtain information about an executable using different API of LIEF:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python"> &lt;span style="color:#f92672">import&lt;/span> lief
-&lt;span style="color:#75715e"># ELF&lt;/span>
-binary &lt;span style="color:#f92672">=&lt;/span> lief&lt;span style="color:#f92672">.&lt;/span>parse(&lt;span style="color:#e6db74">&amp;#34;/usr/bin/ls&amp;#34;&lt;/span>)
-&lt;span style="color:#66d9ef">print&lt;/span>(binary)
-&lt;span style="color:#75715e"># PE&lt;/span>
-binary &lt;span style="color:#f92672">=&lt;/span> lief&lt;span style="color:#f92672">.&lt;/span>parse(&lt;span style="color:#e6db74">&amp;#34;C:&lt;/span>&lt;span style="color:#ae81ff">\\&lt;/span>&lt;span style="color:#e6db74">Windows&lt;/span>&lt;span style="color:#ae81ff">\\&lt;/span>&lt;span style="color:#e6db74">explorer.exe&amp;#34;&lt;/span>)
-&lt;span style="color:#66d9ef">print&lt;/span>(binary)
-&lt;span style="color:#75715e"># Mach-O&lt;/span>
-binary &lt;span style="color:#f92672">=&lt;/span> lief&lt;span style="color:#f92672">.&lt;/span>parse(&lt;span style="color:#e6db74">&amp;#34;/usr/bin/ls&amp;#34;&lt;/span>)
-&lt;span style="color:#66d9ef">print&lt;/span>(binary)
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-python" data-lang="python"> &lt;span class="kn">import&lt;/span> &lt;span class="nn">lief&lt;/span>
+&lt;span class="c1"># ELF&lt;/span>
+&lt;span class="n">binary&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">lief&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">parse&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;/usr/bin/ls&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="nb">print&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">binary&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="c1"># PE&lt;/span>
+&lt;span class="n">binary&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">lief&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">parse&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;C:&lt;/span>&lt;span class="se">\\&lt;/span>&lt;span class="s2">Windows&lt;/span>&lt;span class="se">\\&lt;/span>&lt;span class="s2">explorer.exe&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="nb">print&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">binary&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="c1"># Mach-O&lt;/span>
+&lt;span class="n">binary&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">lief&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">parse&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;/usr/bin/ls&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="nb">print&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">binary&lt;/span>&lt;span class="p">)&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>With the &lt;code>C++&lt;/code> API:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">
-&lt;span style="color:#75715e">#include&lt;/span> &lt;span style="color:#75715e">&amp;lt;LIEF/LIEF.hpp&amp;gt;&lt;/span>&lt;span style="color:#75715e">
-&lt;/span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">int&lt;/span> &lt;span style="color:#a6e22e">main&lt;/span>(&lt;span style="color:#66d9ef">int&lt;/span> argc, &lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#66d9ef">char&lt;/span>&lt;span style="color:#f92672">**&lt;/span> argv) {
-LIEF&lt;span style="color:#f92672">::&lt;/span>ELF&lt;span style="color:#f92672">::&lt;/span>Binary&lt;span style="color:#f92672">*&lt;/span> elf &lt;span style="color:#f92672">=&lt;/span> LIEF&lt;span style="color:#f92672">::&lt;/span>ELF&lt;span style="color:#f92672">::&lt;/span>Parser&lt;span style="color:#f92672">::&lt;/span>parse(&lt;span style="color:#e6db74">&amp;#34;/usr/bin/ls&amp;#34;&lt;/span>);
-LIEF&lt;span style="color:#f92672">::&lt;/span>PE&lt;span style="color:#f92672">::&lt;/span>Binary&lt;span style="color:#f92672">*&lt;/span> pe &lt;span style="color:#f92672">=&lt;/span> LIEF&lt;span style="color:#f92672">::&lt;/span>PE&lt;span style="color:#f92672">::&lt;/span>Parser&lt;span style="color:#f92672">::&lt;/span>parse(&lt;span style="color:#e6db74">&amp;#34;C:&lt;/span>&lt;span style="color:#ae81ff">\\&lt;/span>&lt;span style="color:#e6db74">Windows&lt;/span>&lt;span style="color:#ae81ff">\\&lt;/span>&lt;span style="color:#e6db74">explorer.exe&amp;#34;&lt;/span>);
-LIEF&lt;span style="color:#f92672">::&lt;/span>MachO&lt;span style="color:#f92672">::&lt;/span>Binary&lt;span style="color:#f92672">*&lt;/span> macho &lt;span style="color:#f92672">=&lt;/span> LIEF&lt;span style="color:#f92672">::&lt;/span>MachO&lt;span style="color:#f92672">::&lt;/span>Parser&lt;span style="color:#f92672">::&lt;/span>parse(&lt;span style="color:#e6db74">&amp;#34;/usr/bin/ls&amp;#34;&lt;/span>);
-std&lt;span style="color:#f92672">::&lt;/span>cout &lt;span style="color:#f92672">&amp;lt;&amp;lt;&lt;/span> &lt;span style="color:#f92672">*&lt;/span>elf &lt;span style="color:#f92672">&amp;lt;&amp;lt;&lt;/span> std&lt;span style="color:#f92672">::&lt;/span>endl;
-std&lt;span style="color:#f92672">::&lt;/span>cout &lt;span style="color:#f92672">&amp;lt;&amp;lt;&lt;/span> &lt;span style="color:#f92672">*&lt;/span>pe &lt;span style="color:#f92672">&amp;lt;&amp;lt;&lt;/span> std&lt;span style="color:#f92672">::&lt;/span>endl;
-std&lt;span style="color:#f92672">::&lt;/span>cout &lt;span style="color:#f92672">&amp;lt;&amp;lt;&lt;/span> &lt;span style="color:#f92672">*&lt;/span>macho &lt;span style="color:#f92672">&amp;lt;&amp;lt;&lt;/span> std&lt;span style="color:#f92672">::&lt;/span>endl;
-&lt;span style="color:#66d9ef">delete&lt;/span> elf;
-&lt;span style="color:#66d9ef">delete&lt;/span> pe;
-&lt;span style="color:#66d9ef">delete&lt;/span> macho;
-}
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-cpp" data-lang="cpp">
+&lt;span class="cp">#include&lt;/span> &lt;span class="cpf">&amp;lt;LIEF/LIEF.hpp&amp;gt;&lt;/span>&lt;span class="cp">
+&lt;/span>&lt;span class="cp">&lt;/span> &lt;span class="kt">int&lt;/span> &lt;span class="nf">main&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="kt">int&lt;/span> &lt;span class="n">argc&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="k">const&lt;/span> &lt;span class="kt">char&lt;/span>&lt;span class="o">**&lt;/span> &lt;span class="n">argv&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;span class="n">LIEF&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">ELF&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">Binary&lt;/span>&lt;span class="o">*&lt;/span> &lt;span class="n">elf&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">LIEF&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">ELF&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">Parser&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">parse&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;/usr/bin/ls&amp;#34;&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;span class="n">LIEF&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">PE&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">Binary&lt;/span>&lt;span class="o">*&lt;/span> &lt;span class="n">pe&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">LIEF&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">PE&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">Parser&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">parse&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;C:&lt;/span>&lt;span class="se">\\&lt;/span>&lt;span class="s">Windows&lt;/span>&lt;span class="se">\\&lt;/span>&lt;span class="s">explorer.exe&amp;#34;&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;span class="n">LIEF&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">MachO&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">Binary&lt;/span>&lt;span class="o">*&lt;/span> &lt;span class="n">macho&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">LIEF&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">MachO&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">Parser&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">parse&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;/usr/bin/ls&amp;#34;&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;span class="n">std&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">cout&lt;/span> &lt;span class="o">&amp;lt;&amp;lt;&lt;/span> &lt;span class="o">*&lt;/span>&lt;span class="n">elf&lt;/span> &lt;span class="o">&amp;lt;&amp;lt;&lt;/span> &lt;span class="n">std&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">endl&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;span class="n">std&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">cout&lt;/span> &lt;span class="o">&amp;lt;&amp;lt;&lt;/span> &lt;span class="o">*&lt;/span>&lt;span class="n">pe&lt;/span> &lt;span class="o">&amp;lt;&amp;lt;&lt;/span> &lt;span class="n">std&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">endl&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;span class="n">std&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">cout&lt;/span> &lt;span class="o">&amp;lt;&amp;lt;&lt;/span> &lt;span class="o">*&lt;/span>&lt;span class="n">macho&lt;/span> &lt;span class="o">&amp;lt;&amp;lt;&lt;/span> &lt;span class="n">std&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">endl&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;span class="k">delete&lt;/span> &lt;span class="n">elf&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;span class="k">delete&lt;/span> &lt;span class="n">pe&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;span class="k">delete&lt;/span> &lt;span class="n">macho&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;span class="p">}&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>And finally with the &lt;code>C&lt;/code> API:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-C" data-lang="C">
-&lt;span style="color:#75715e">#include&lt;/span> &lt;span style="color:#75715e">&amp;lt;LIEF/LIEF.h&amp;gt;&lt;/span>&lt;span style="color:#75715e">
-&lt;/span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">int&lt;/span> &lt;span style="color:#a6e22e">main&lt;/span>(&lt;span style="color:#66d9ef">int&lt;/span> argc, &lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#66d9ef">char&lt;/span>&lt;span style="color:#f92672">**&lt;/span> argv) {
-Elf_Binary_t&lt;span style="color:#f92672">*&lt;/span> elf_binary &lt;span style="color:#f92672">=&lt;/span> elf_parse(&lt;span style="color:#e6db74">&amp;#34;/usr/bin/ls&amp;#34;&lt;/span>);
-Pe_Binary_t&lt;span style="color:#f92672">*&lt;/span> pe_binary &lt;span style="color:#f92672">=&lt;/span> pe_parse(&lt;span style="color:#e6db74">&amp;#34;C:&lt;/span>&lt;span style="color:#ae81ff">\\&lt;/span>&lt;span style="color:#e6db74">Windows&lt;/span>&lt;span style="color:#ae81ff">\\&lt;/span>&lt;span style="color:#e6db74">explorer.exe&amp;#34;&lt;/span>);
-Macho_Binary_t&lt;span style="color:#f92672">**&lt;/span> macho_binaries &lt;span style="color:#f92672">=&lt;/span> macho_parse(&lt;span style="color:#e6db74">&amp;#34;/usr/bin/ls&amp;#34;&lt;/span>);
-Pe_Section_t&lt;span style="color:#f92672">**&lt;/span> pe_sections &lt;span style="color:#f92672">=&lt;/span> pe_binary&lt;span style="color:#f92672">-&amp;gt;&lt;/span>sections;
-Elf_Section_t&lt;span style="color:#f92672">**&lt;/span> elf_sections &lt;span style="color:#f92672">=&lt;/span> elf_binary&lt;span style="color:#f92672">-&amp;gt;&lt;/span>sections;
-Macho_Section_t&lt;span style="color:#f92672">**&lt;/span> macho_sections &lt;span style="color:#f92672">=&lt;/span> macho_binaries[&lt;span style="color:#ae81ff">0&lt;/span>]&lt;span style="color:#f92672">-&amp;gt;&lt;/span>sections;
-&lt;span style="color:#66d9ef">for&lt;/span> (size_t i &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>; pe_sections[i] &lt;span style="color:#f92672">!=&lt;/span> NULL; &lt;span style="color:#f92672">++&lt;/span>i) {
-printf(&lt;span style="color:#e6db74">&amp;#34;%s&lt;/span>&lt;span style="color:#ae81ff">\n&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>, pe_sections[i]&lt;span style="color:#f92672">-&amp;gt;&lt;/span>name)
-}
-&lt;span style="color:#66d9ef">for&lt;/span> (size_t i &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>; elf_sections[i] &lt;span style="color:#f92672">!=&lt;/span> NULL; &lt;span style="color:#f92672">++&lt;/span>i) {
-printf(&lt;span style="color:#e6db74">&amp;#34;%s&lt;/span>&lt;span style="color:#ae81ff">\n&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>, elf_sections[i]&lt;span style="color:#f92672">-&amp;gt;&lt;/span>name)
-}
-&lt;span style="color:#66d9ef">for&lt;/span> (size_t i &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>; macho_sections[i] &lt;span style="color:#f92672">!=&lt;/span> NULL; &lt;span style="color:#f92672">++&lt;/span>i) {
-printf(&lt;span style="color:#e6db74">&amp;#34;%s&lt;/span>&lt;span style="color:#ae81ff">\n&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>, macho_sections[i]&lt;span style="color:#f92672">-&amp;gt;&lt;/span>name)
-}
-elf_binary_destroy(elf_binary);
-pe_binary_destroy(pe_binary);
-macho_binaries_destroy(macho_binaries);
-}
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-C" data-lang="C">
+&lt;span class="cp">#include&lt;/span> &lt;span class="cpf">&amp;lt;LIEF/LIEF.h&amp;gt;&lt;/span>&lt;span class="cp">
+&lt;/span>&lt;span class="cp">&lt;/span> &lt;span class="kt">int&lt;/span> &lt;span class="nf">main&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="kt">int&lt;/span> &lt;span class="n">argc&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="k">const&lt;/span> &lt;span class="kt">char&lt;/span>&lt;span class="o">**&lt;/span> &lt;span class="n">argv&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;span class="n">Elf_Binary_t&lt;/span>&lt;span class="o">*&lt;/span> &lt;span class="n">elf_binary&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">elf_parse&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;/usr/bin/ls&amp;#34;&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;span class="n">Pe_Binary_t&lt;/span>&lt;span class="o">*&lt;/span> &lt;span class="n">pe_binary&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">pe_parse&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;C:&lt;/span>&lt;span class="se">\\&lt;/span>&lt;span class="s">Windows&lt;/span>&lt;span class="se">\\&lt;/span>&lt;span class="s">explorer.exe&amp;#34;&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;span class="n">Macho_Binary_t&lt;/span>&lt;span class="o">**&lt;/span> &lt;span class="n">macho_binaries&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">macho_parse&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;/usr/bin/ls&amp;#34;&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;span class="n">Pe_Section_t&lt;/span>&lt;span class="o">**&lt;/span> &lt;span class="n">pe_sections&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">pe_binary&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">sections&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;span class="n">Elf_Section_t&lt;/span>&lt;span class="o">**&lt;/span> &lt;span class="n">elf_sections&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">elf_binary&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">sections&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;span class="n">Macho_Section_t&lt;/span>&lt;span class="o">**&lt;/span> &lt;span class="n">macho_sections&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">macho_binaries&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="mi">0&lt;/span>&lt;span class="p">]&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">sections&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;span class="k">for&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">size_t&lt;/span> &lt;span class="n">i&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="mi">0&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="n">pe_sections&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="n">i&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="o">!=&lt;/span> &lt;span class="nb">NULL&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="o">++&lt;/span>&lt;span class="n">i&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;span class="n">printf&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;%s&lt;/span>&lt;span class="se">\n&lt;/span>&lt;span class="s">&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">pe_sections&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="n">i&lt;/span>&lt;span class="p">]&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">name&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="p">}&lt;/span>
+&lt;span class="k">for&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">size_t&lt;/span> &lt;span class="n">i&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="mi">0&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="n">elf_sections&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="n">i&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="o">!=&lt;/span> &lt;span class="nb">NULL&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="o">++&lt;/span>&lt;span class="n">i&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;span class="n">printf&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;%s&lt;/span>&lt;span class="se">\n&lt;/span>&lt;span class="s">&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">elf_sections&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="n">i&lt;/span>&lt;span class="p">]&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">name&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="p">}&lt;/span>
+&lt;span class="k">for&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">size_t&lt;/span> &lt;span class="n">i&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="mi">0&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="n">macho_sections&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="n">i&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="o">!=&lt;/span> &lt;span class="nb">NULL&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="o">++&lt;/span>&lt;span class="n">i&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;span class="n">printf&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;%s&lt;/span>&lt;span class="se">\n&lt;/span>&lt;span class="s">&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">macho_sections&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="n">i&lt;/span>&lt;span class="p">]&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">name&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="p">}&lt;/span>
+&lt;span class="n">elf_binary_destroy&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">elf_binary&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;span class="n">pe_binary_destroy&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">pe_binary&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;span class="n">macho_binaries_destroy&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">macho_binaries&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;span class="p">}&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>LIEF supports FAT-MachO and one can iterate over binaries as follows:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python"> &lt;span style="color:#f92672">import&lt;/span> lief
-binaries &lt;span style="color:#f92672">=&lt;/span> lief&lt;span style="color:#f92672">.&lt;/span>MachO&lt;span style="color:#f92672">.&lt;/span>parse(&lt;span style="color:#e6db74">&amp;#34;/usr/lib/libc++abi.dylib&amp;#34;&lt;/span>)
-&lt;span style="color:#66d9ef">for&lt;/span> binary &lt;span style="color:#f92672">in&lt;/span> binaries:
-&lt;span style="color:#66d9ef">print&lt;/span>(binary)
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-python" data-lang="python"> &lt;span class="kn">import&lt;/span> &lt;span class="nn">lief&lt;/span>
+&lt;span class="n">binaries&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">lief&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">MachO&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">parse&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;/usr/lib/libc++abi.dylib&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="k">for&lt;/span> &lt;span class="n">binary&lt;/span> &lt;span class="ow">in&lt;/span> &lt;span class="n">binaries&lt;/span>&lt;span class="p">:&lt;/span>
+&lt;span class="nb">print&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">binary&lt;/span>&lt;span class="p">)&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;div class="alert alert-note">
 &lt;div>
 The above script uses the &lt;code>lief.MachO.parse&lt;/code> function instead of the &lt;code>lief.parse&lt;/code> function because &lt;code>lief.parse&lt;/code> returns a &lt;strong>single&lt;/strong> &lt;code>lief.MachO.binary&lt;/code> object
@@ -131,12 +131,12 @@ whereas &lt;code>lief.MachO.parse&lt;/code> returns a &lt;strong>list&lt;/strong
 &lt;/div>
 &lt;/div>
 &lt;p>Along with standard format components like headers, sections, import table, load commands, symbols, etc. LIEF is also able to parse PE Authenticode:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">
-&lt;span style="color:#f92672">import&lt;/span> lief
-driver &lt;span style="color:#f92672">=&lt;/span> lief&lt;span style="color:#f92672">.&lt;/span>parse(&lt;span style="color:#e6db74">&amp;#34;driver.sys&amp;#34;&lt;/span>)
-&lt;span style="color:#66d9ef">for&lt;/span> crt &lt;span style="color:#f92672">in&lt;/span> driver&lt;span style="color:#f92672">.&lt;/span>signature&lt;span style="color:#f92672">.&lt;/span>certificates:
-&lt;span style="color:#66d9ef">print&lt;/span>(crt)
-&lt;/code>&lt;/pre>&lt;/div>&lt;pre>&lt;code class="language-console" data-lang="console">
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-python" data-lang="python">
+&lt;span class="kn">import&lt;/span> &lt;span class="nn">lief&lt;/span>
+&lt;span class="n">driver&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">lief&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">parse&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;driver.sys&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="k">for&lt;/span> &lt;span class="n">crt&lt;/span> &lt;span class="ow">in&lt;/span> &lt;span class="n">driver&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">signature&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">certificates&lt;/span>&lt;span class="p">:&lt;/span>
+&lt;span class="nb">print&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">crt&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;pre tabindex="0">&lt;code class="language-console" data-lang="console">
 Version: 3
 Serial Number: 61:07:02:dc:00:00:00:00:00:0b
 Signature Algorithm: SHA1_WITH_RSA_ENCRYPTION
@@ -162,32 +162,34 @@ Subject: C=US, ST=Washington, L=Redmond, O=Microsoft Corporation, CN=Microsoft W
 &lt;li>Builder: Transform the binary object into a valid file.&lt;/li>
 &lt;/ul>
 &lt;figure >
-&lt;a data-fancybox="" href="https://www.romainthomas.fr/post/lief-release/archi_hu024b005ec7f37fb1d2d0938672876ebf_142621_2000x2000_fit_lanczos_2.png" >
-&lt;img data-src="https://www.romainthomas.fr/post/lief-release/archi_hu024b005ec7f37fb1d2d0938672876ebf_142621_2000x2000_fit_lanczos_2.png" class="lazyload" alt="" width="1080" height="437">
+&lt;a data-fancybox="" href="https://www.romainthomas.fr/post/lief-release/archi_hu024b005ec7f37fb1d2d0938672876ebf_142621_2000x2000_fit_lanczos_3.png" >
+&lt;img data-src="https://www.romainthomas.fr/post/lief-release/archi_hu024b005ec7f37fb1d2d0938672876ebf_142621_2000x2000_fit_lanczos_3.png" class="lazyload" alt="" width="1080" height="437">
 &lt;/a>
 &lt;/figure>
 &lt;p>To factor common characteristics in formats we have an inheritance relationship between these characteristics.&lt;/p>
 &lt;p>For symbols it gives the following diagram:&lt;/p>
 &lt;figure >
-&lt;a data-fancybox="" href="https://www.romainthomas.fr/post/lief-release/symbol_inheritance_hua2c0eb4d7ecbdd62ff298ed98b99d1dc_6049_2000x2000_fit_lanczos_2.png" >
-&lt;img data-src="https://www.romainthomas.fr/post/lief-release/symbol_inheritance_hua2c0eb4d7ecbdd62ff298ed98b99d1dc_6049_2000x2000_fit_lanczos_2.png" class="lazyload" alt="" width="511" height="133">
+&lt;a data-fancybox="" href="https://www.romainthomas.fr/post/lief-release/symbol_inheritance_hua2c0eb4d7ecbdd62ff298ed98b99d1dc_6049_2000x2000_fit_lanczos_3.png" >
+&lt;img data-src="https://www.romainthomas.fr/post/lief-release/symbol_inheritance_hua2c0eb4d7ecbdd62ff298ed98b99d1dc_6049_2000x2000_fit_lanczos_3.png" class="lazyload" alt="" width="511" height="133">
 &lt;/a>
 &lt;/figure>
 &lt;p>It enables to write cross-format utility like &lt;code>nm&lt;/code>. &lt;code>nm&lt;/code> is a Unix utility to list symbols in an executable. The source code is available here:
 &lt;a href="https://github.com/gittup/binutils/blob/0af702d47a443acea853b84157c2e81f6c131e77/binutils/nm.c" target="_blank" rel="noopener">binutils&lt;/a>&lt;/p>
 &lt;p>With the given inheritance relationship one can write this utility for the three formats in a single script:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python"> &lt;span style="color:#f92672">import&lt;/span> lief
-&lt;span style="color:#f92672">import&lt;/span> sys
-&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">nm&lt;/span>(binary):
-&lt;span style="color:#66d9ef">for&lt;/span> symbol &lt;span style="color:#f92672">in&lt;/span> binary&lt;span style="color:#f92672">.&lt;/span>symbols:
-&lt;span style="color:#66d9ef">print&lt;/span>(symbol)
-&lt;span style="color:#66d9ef">return&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>
-&lt;span style="color:#66d9ef">if&lt;/span> __name__ &lt;span style="color:#f92672">==&lt;/span> &lt;span style="color:#e6db74">&amp;#34;__main__&amp;#34;&lt;/span>:
-r &lt;span style="color:#f92672">=&lt;/span> nm(sys&lt;span style="color:#f92672">.&lt;/span>argv[&lt;span style="color:#ae81ff">1&lt;/span>])
-sys&lt;span style="color:#f92672">.&lt;/span>exit(r)
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-python" data-lang="python"> &lt;span class="kn">import&lt;/span> &lt;span class="nn">lief&lt;/span>
+&lt;span class="kn">import&lt;/span> &lt;span class="nn">sys&lt;/span>
+&lt;span class="k">def&lt;/span> &lt;span class="nf">nm&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">binary&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;span class="k">for&lt;/span> &lt;span class="n">symbol&lt;/span> &lt;span class="ow">in&lt;/span> &lt;span class="n">binary&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">symbols&lt;/span>&lt;span class="p">:&lt;/span>
+&lt;span class="nb">print&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">symbol&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="k">return&lt;/span> &lt;span class="mi">0&lt;/span>
+&lt;span class="k">if&lt;/span> &lt;span class="vm">__name__&lt;/span> &lt;span class="o">==&lt;/span> &lt;span class="s2">&amp;#34;__main__&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span>
+&lt;span class="n">r&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">nm&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">sys&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">argv&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="mi">1&lt;/span>&lt;span class="p">])&lt;/span>
+&lt;span class="n">sys&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">exit&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">r&lt;/span>&lt;span class="p">)&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;h1 id="conclusion">Conclusion&lt;/h1>
 &lt;p>As LIEF is still a young project we hope to have feedback, ideas, suggestions and pull requests.&lt;/p>
-&lt;p>The source code is available here: &lt;a href="https://github.com/lief-project">https://github.com/lief-project&lt;/a> (under Apache 2.0 license) and the associated website: &lt;a href="http://lief.quarkslab.com">http://lief.quarkslab.com&lt;/a>&lt;/p>
+&lt;p>The source code is available here:
+&lt;a href="https://github.com/lief-project" target="_blank" rel="noopener">https://github.com/lief-project&lt;/a> (under Apache 2.0 license) and the associated website:
+&lt;a href="http://lief.quarkslab.com" target="_blank" rel="noopener">http://lief.quarkslab.com&lt;/a>&lt;/p>
 &lt;p>If you are interested in use cases, you can take a look at these tutorials:&lt;/p>
 &lt;ul>
 &lt;li>

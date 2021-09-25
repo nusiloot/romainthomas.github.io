@@ -1,71 +1,285 @@
-<!doctype html><html lang=en-us><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta http-equiv=x-ua-compatible content="IE=edge"><meta name=generator content="Source Themes Academic 4.8.0"><meta name=description content="Analysis of Tencent Legu: a packer for Android applications."><link rel=alternate hreflang=en-us href=https://www.romainthomas.fr/post/a-glimpse-into-tencents-legu-packer/><meta name=theme-color content="#2962ff"><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css integrity="sha256-FMvZuGapsJLjouA6k7Eo2lusoAX9i0ShlWFG6qt7SLc=" crossorigin=anonymous><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin=anonymous><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.2/styles/atom-one-light.min.css crossorigin=anonymous title=hl-light><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.2/styles/atom-one-light.min.css crossorigin=anonymous title=hl-dark disabled><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet.css integrity="sha256-SHMGCYmST46SoyGgo4YR/9AlK1vf3ff84Aq9yK4hdqM=" crossorigin=anonymous><script src=https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.1.2/lazysizes.min.js integrity="sha256-Md1qLToewPeKjfAHU1zyPwOutccPAm5tahnaw7Osw0A=" crossorigin=anonymous async></script><link rel=stylesheet href="https://fonts.googleapis.com/css?family=Montserrat:400,700%7CRoboto:400,400italic,700%7CRoboto+Mono%7CFira+Code&display=swap"><link rel=stylesheet href=/css/academic.css><link rel=manifest href=/index.webmanifest><link rel=icon type=image/png href=/images/icon_hu2654a0fcc87c65a864822ac27b001d3b_698_32x32_fill_lanczos_center_2.png><link rel=apple-touch-icon type=image/png href=/images/icon_hu2654a0fcc87c65a864822ac27b001d3b_698_192x192_fill_lanczos_center_2.png><link rel=canonical href=https://www.romainthomas.fr/post/a-glimpse-into-tencents-legu-packer/><meta property="twitter:card" content="summary_large_image"><meta property="twitter:site" content="@rh0main"><meta property="twitter:creator" content="@rh0main"><meta property="og:site_name" content="Romain Thomas"><meta property="og:url" content="https://www.romainthomas.fr/post/a-glimpse-into-tencents-legu-packer/"><meta property="og:title" content="A Glimpse Into Tencent's Legu Packer | Romain Thomas"><meta property="og:description" content="Analysis of Tencent Legu: a packer for Android applications."><meta property="og:image" content="https://www.romainthomas.fr/post/a-glimpse-into-tencents-legu-packer/featured.png"><meta property="twitter:image" content="https://www.romainthomas.fr/post/a-glimpse-into-tencents-legu-packer/featured.png"><meta property="og:locale" content="en-us"><meta property="article:published_time" content="2019-11-26T00:00:00+00:00"><meta property="article:modified_time" content="2019-11-26T00:00:00+00:00"><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"https://www.romainthomas.fr/post/a-glimpse-into-tencents-legu-packer/"},"headline":"A Glimpse Into Tencent's Legu Packer","image":["https://www.romainthomas.fr/post/a-glimpse-into-tencents-legu-packer/featured.png"],"datePublished":"2019-11-26T00:00:00Z","dateModified":"2019-11-26T00:00:00Z","author":{"@type":"Person","name":"Romain Thomas"},"publisher":{"@type":"Organization","name":"Romain Thomas","logo":{"@type":"ImageObject","url":"https://www.romainthomas.fr/images/icon_hu2654a0fcc87c65a864822ac27b001d3b_698_192x192_fill_lanczos_center_2.png"}},"description":"Analysis of Tencent Legu: a packer for Android applications."}</script><title>A Glimpse Into Tencent's Legu Packer | Romain Thomas</title></head><body id=top data-spy=scroll data-offset=70 data-target=#TableOfContents><aside class=search-results id=search><div class=container><section class=search-header><div class="row no-gutters justify-content-between mb-3"><div class=col-6><h1>Search</h1></div><div class="col-6 col-search-close"><a class=js-search href=#><i class="fas fa-times-circle text-muted" aria-hidden=true></i></a></div></div><div id=search-box><input name=q id=search-query placeholder=Search... autocapitalize=off autocomplete=off autocorrect=off spellcheck=false type=search class=form-control></div></section><section class=section-search-results><div id=search-hits></div></section></div></aside><nav class="navbar navbar-expand-lg navbar-light compensate-for-scrollbar" id=navbar-main><div class=container><div class="d-none d-lg-inline-flex"><a class=navbar-brand href=/>Romain Thomas</a></div><button type=button class=navbar-toggler data-toggle=collapse data-target=#navbar-content aria-controls=navbar aria-expanded=false aria-label="Toggle navigation">
-<span><i class="fas fa-bars"></i></span></button><div class="navbar-brand-mobile-wrapper d-inline-flex d-lg-none"><a class=navbar-brand href=/>Romain Thomas</a></div><div class="navbar-collapse main-menu-item collapse justify-content-center" id=navbar-content><ul class="navbar-nav d-md-inline-flex"><li class=nav-item><a class=nav-link href=/#about><span>Home</span></a></li><li class=nav-item><a class=nav-link href=/#publications><span>Publications</span></a></li><li class=nav-item><a class=nav-link href=/#posts><span>Posts</span></a></li><li class=nav-item><a class=nav-link href=/#projects><span>Projects</span></a></li><li class=nav-item><a class=nav-link href=/#projects-images><span>Gallery</span></a></li><li class=nav-item><a class=nav-link href=/#work-experience><span>Work experience</span></a></li><li class=nav-item><a class=nav-link href=/#contact><span>Contact</span></a></li></ul></div><ul class="nav-icons navbar-nav flex-row ml-auto d-flex pl-md-2"><li class=nav-item><a class="nav-link js-search" href=# aria-label=Search><i class="fas fa-search" aria-hidden=true></i></a></li></ul></div></nav><article class=article><div class="article-container pt-3"><h1>A Glimpse Into Tencent's Legu Packer</h1><div class=article-metadata><div><span>Romain Thomas</span></div><span class=article-date>Nov 26, 2019</span>
-<span class=middot-divider></span><span class=article-reading-time>5 min read</span>
-<span class=middot-divider></span><span class=article-categories><i class="fas fa-folder mr-1"></i><a href=/categories/android/>Android</a>, <a href=/categories/reverse-engineering/>Reverse Engineering</a></span></div><div class="btn-links mb-3"><a class="btn btn-outline-primary my-1 mr-1" href=/project/legu_unpacker/>Project</a></div></div><div class="article-header article-container featured-image-wrapper mt-4 mb-4" style=max-width:720px;max-height:405px><div style=position:relative><img src=/post/a-glimpse-into-tencents-legu-packer/featured_hubba2d34d8bf1aa702a2ea053bdff644a_502398_720x0_resize_lanczos_2.png alt class=featured-image></div></div><div class=article-container><div class=article-style><style>.packedfile{color:green;font-family:lucida console,monospace}.keyfile{color:blue;font-family:lucida console,monospace}.libshell{color:tomato;font-family:lucida console,monospace}.tencentclass{color:#df2b04;font-family:lucida console,monospace}</style><div class="alert alert-note"><div>This post has been originally posted on the <a href=https://blog.quarkslab.com/a-glimpse-into-tencents-legu-packer.html>Quarkslab&rsquo;s Blog</a></div></div><h2 id=introduction>Introduction</h2><p>This blog post deals with the Legu packer, an Android protector developed by Tencent that is currently one of the
+<!doctype html><html lang=en-us>
+<head>
+<meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<meta http-equiv=x-ua-compatible content="IE=edge">
+<meta name=generator content="Source Themes Academic 4.8.0">
+<meta name=description content="Analysis of Tencent Legu: a packer for Android applications.">
+<link rel=alternate hreflang=en-us href=https://www.romainthomas.fr/post/a-glimpse-into-tencents-legu-packer/>
+<meta name=theme-color content="#2962ff">
+<link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css integrity="sha256-FMvZuGapsJLjouA6k7Eo2lusoAX9i0ShlWFG6qt7SLc=" crossorigin=anonymous>
+<link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin=anonymous>
+<link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.2/styles/atom-one-light.min.css crossorigin=anonymous title=hl-light>
+<link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.2/styles/atom-one-light.min.css crossorigin=anonymous title=hl-dark disabled>
+<link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet.css integrity="sha256-SHMGCYmST46SoyGgo4YR/9AlK1vf3ff84Aq9yK4hdqM=" crossorigin=anonymous>
+<script src=https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.1.2/lazysizes.min.js integrity="sha256-Md1qLToewPeKjfAHU1zyPwOutccPAm5tahnaw7Osw0A=" crossorigin=anonymous async></script>
+<link rel=stylesheet href="https://fonts.googleapis.com/css?family=Montserrat:400,700%7CRoboto:400,400italic,700%7CRoboto+Mono%7CFira+Code&display=swap">
+<link rel=stylesheet href=/css/academic.css>
+<link href=https://www.romainthomas.fr/post/index.xml rel=feed type=application/rss+xml title="Blog Posts | Romain Thomas">
+<link href=https://www.romainthomas.fr/post/index.xml rel=alternate type=application/rss+xml title="Blog Posts | Romain Thomas">
+<link rel=manifest href=/index.webmanifest>
+<link rel=icon type=image/png href=/images/icon_hu2654a0fcc87c65a864822ac27b001d3b_698_32x32_fill_lanczos_center_3.png>
+<link rel=apple-touch-icon type=image/png href=/images/icon_hu2654a0fcc87c65a864822ac27b001d3b_698_192x192_fill_lanczos_center_3.png>
+<link rel=canonical href=https://www.romainthomas.fr/post/a-glimpse-into-tencents-legu-packer/>
+<meta property="twitter:card" content="summary_large_image">
+<meta property="twitter:site" content="@rh0main">
+<meta property="twitter:creator" content="@rh0main">
+<meta property="og:site_name" content="Romain Thomas">
+<meta property="og:url" content="https://www.romainthomas.fr/post/a-glimpse-into-tencents-legu-packer/">
+<meta property="og:title" content="A Glimpse Into Tencent's Legu Packer | Romain Thomas">
+<meta property="og:description" content="Analysis of Tencent Legu: a packer for Android applications."><meta property="og:image" content="https://www.romainthomas.fr/post/a-glimpse-into-tencents-legu-packer/featured.png">
+<meta property="twitter:image" content="https://www.romainthomas.fr/post/a-glimpse-into-tencents-legu-packer/featured.png"><meta property="og:locale" content="en-us">
+<meta property="article:published_time" content="2019-11-26T00:00:00+00:00">
+<meta property="article:modified_time" content="2019-11-26T00:00:00+00:00">
+<script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"https://www.romainthomas.fr/post/a-glimpse-into-tencents-legu-packer/"},"headline":"A Glimpse Into Tencent's Legu Packer","image":["https://www.romainthomas.fr/post/a-glimpse-into-tencents-legu-packer/featured.png"],"datePublished":"2019-11-26T00:00:00Z","dateModified":"2019-11-26T00:00:00Z","author":{"@type":"Person","name":"Romain Thomas"},"publisher":{"@type":"Organization","name":"Romain Thomas","logo":{"@type":"ImageObject","url":"https://www.romainthomas.fr/images/icon_hu2654a0fcc87c65a864822ac27b001d3b_698_192x192_fill_lanczos_center_3.png"}},"description":"Analysis of Tencent Legu: a packer for Android applications."}</script>
+<title>A Glimpse Into Tencent's Legu Packer | Romain Thomas</title>
+</head>
+<body id=top data-spy=scroll data-offset=70 data-target=#TableOfContents>
+<aside class=search-results id=search>
+<div class=container>
+<section class=search-header>
+<div class="row no-gutters justify-content-between mb-3">
+<div class=col-6>
+<h1>Search</h1>
+</div>
+<div class="col-6 col-search-close">
+<a class=js-search href=#><i class="fas fa-times-circle text-muted" aria-hidden=true></i></a>
+</div>
+</div>
+<div id=search-box>
+<input name=q id=search-query placeholder=Search... autocapitalize=off autocomplete=off autocorrect=off spellcheck=false type=search class=form-control>
+</div>
+</section>
+<section class=section-search-results>
+<div id=search-hits>
+</div>
+</section>
+</div>
+</aside>
+<nav class="navbar navbar-expand-lg navbar-light compensate-for-scrollbar" id=navbar-main>
+<div class=container>
+<div class="d-none d-lg-inline-flex">
+<a class=navbar-brand href=/>Romain Thomas</a>
+</div>
+<button type=button class=navbar-toggler data-toggle=collapse data-target=#navbar-content aria-controls=navbar aria-expanded=false aria-label="Toggle navigation">
+<span><i class="fas fa-bars"></i></span>
+</button>
+<div class="navbar-brand-mobile-wrapper d-inline-flex d-lg-none">
+<a class=navbar-brand href=/>Romain Thomas</a>
+</div>
+<div class="navbar-collapse main-menu-item collapse justify-content-center" id=navbar-content>
+<ul class="navbar-nav d-md-inline-flex">
+<li class=nav-item>
+<a class=nav-link href=/#about><span>Home</span></a>
+</li>
+<li class=nav-item>
+<a class=nav-link href=/#publications><span>Publications</span></a>
+</li>
+<li class=nav-item>
+<a class=nav-link href=/#posts><span>Posts</span></a>
+</li>
+<li class=nav-item>
+<a class=nav-link href=/#projects><span>Projects</span></a>
+</li>
+<li class=nav-item>
+<a class=nav-link href=/#projects-images><span>Gallery</span></a>
+</li>
+<li class=nav-item>
+<a class=nav-link href=/#work-experience><span>Work experience</span></a>
+</li>
+<li class=nav-item>
+<a class=nav-link href=/#contact><span>Contact</span></a>
+</li>
+</ul>
+</div>
+<ul class="nav-icons navbar-nav flex-row ml-auto d-flex pl-md-2">
+<li class=nav-item>
+<a class="nav-link js-search" href=# aria-label=Search><i class="fas fa-search" aria-hidden=true></i></a>
+</li>
+</ul>
+</div>
+</nav>
+<article class=article>
+<div class="article-container pt-3">
+<h1>A Glimpse Into Tencent's Legu Packer</h1>
+<div class=article-metadata>
+<div>
+<span>Romain Thomas</span>
+</div>
+<span class=article-date>
+Nov 26, 2019
+</span>
+<span class=middot-divider></span>
+<span class=article-reading-time>
+5 min read
+</span>
+<span class=middot-divider></span>
+<span class=article-categories>
+<i class="fas fa-folder mr-1"></i><a href=/categories/android/>Android</a>, <a href=/categories/reverse-engineering/>Reverse Engineering</a></span>
+</div>
+<div class="btn-links mb-3">
+<a class="btn btn-outline-primary my-1 mr-1" href=/project/legu_unpacker/>
+Project
+</a>
+</div>
+</div>
+<div class="article-header article-container featured-image-wrapper mt-4 mb-4" style=max-width:720px;max-height:405px>
+<div style=position:relative>
+<img src=/post/a-glimpse-into-tencents-legu-packer/featured_hubba2d34d8bf1aa702a2ea053bdff644a_502398_720x0_resize_lanczos_3.png alt class=featured-image>
+</div>
+</div>
+<div class=article-container>
+<div class=article-style>
+<style>.packedfile{color:green;font-family:lucida console,monospace}.keyfile{color:blue;font-family:lucida console,monospace}.libshell{color:tomato;font-family:lucida console,monospace}.tencentclass{color:#df2b04;font-family:lucida console,monospace}</style>
+<div class="alert alert-note">
+<div>
+This post has been originally posted on the <a href=https://blog.quarkslab.com/a-glimpse-into-tencents-legu-packer.html>Quarkslab&rsquo;s Blog</a>
+</div>
+</div>
+<h2 id=introduction>Introduction</h2>
+<p>This blog post deals with the Legu packer, an Android protector developed by Tencent that is currently one of the
 state-of-the-art solutions to protect APK DEX files. The packer is updated frequently and this blog post focuses on
-versions <code>4.1.0.15</code> and <code>4.1.0.18</code>.</p><h2 id=overview>Overview</h2><p>An application protected with Legu is composed of two native libraries: <span class=libshell>libshell-super.2019.so</span>
-and <code>libshella-4.1.0.XY.so</code> as well as raw binary files embedded in the resources of the APK:</p><ul><li><span class=keyfile>tosversion</span></li><li><span class=packedfile>0OO00l111l1l</span></li><li><code>0OO00oo01l1l</code></li><li><code>o0oooOO0ooOo.dat</code></li></ul><p>The main logic of the packer is located in the native library <span class=libshell>libshell-super.2019.so</span> which basically
-unpacks and loads the protected DEX files from the resources.</p><p>Some functions of the library are obfuscated but thanks to Frida/QBDI their analysis is not a big deal.</p><h2 id=internals>Internals</h2><p>Basically, the original DEX files are located in the <span class=packedfile>assets/0OO00l111l1l</span> file along with the information required to
-unpack them.</p><p>The following figure lays out the structure of this file.</p><p><img src=packed_file.png alt></p><p>In the <span class=packedfile>assets/0OO00l111l1l</span> file, the first part contains the original DEX files with the same number of <code>classes&lt;N>.dex</code> according to the multi-DEX feature of the original APK. These
+versions <code>4.1.0.15</code> and <code>4.1.0.18</code>.</p>
+<h2 id=overview>Overview</h2>
+<p>An application protected with Legu is composed of two native libraries: <span class=libshell>libshell-super.2019.so</span>
+and <code>libshella-4.1.0.XY.so</code> as well as raw binary files embedded in the resources of the APK:</p>
+<ul>
+<li><span class=keyfile>tosversion</span></li>
+<li><span class=packedfile>0OO00l111l1l</span></li>
+<li><code>0OO00oo01l1l</code></li>
+<li><code>o0oooOO0ooOo.dat</code></li>
+</ul>
+<p>The main logic of the packer is located in the native library <span class=libshell>libshell-super.2019.so</span> which basically
+unpacks and loads the protected DEX files from the resources.</p>
+<p>Some functions of the library are obfuscated but thanks to Frida/QBDI their analysis is not a big deal.</p>
+<h2 id=internals>Internals</h2>
+<p>Basically, the original DEX files are located in the <span class=packedfile>assets/0OO00l111l1l</span> file along with the information required to
+unpack them.</p>
+<p>The following figure lays out the structure of this file.</p>
+<p><img src=packed_file.png alt></p>
+<p>In the <span class=packedfile>assets/0OO00l111l1l</span> file, the first part contains the original DEX files with the same number of <code>classes&lt;N>.dex</code> according to the multi-DEX feature of the original APK. These
 DEX files are not exactly the original ones, as their Dalvik bytecode have been <em>NOP-ed</em> by Legu.
-Therefore, a dump of these files only gives information about the classes' names, not the code logic:</p><p><img src=noped.png alt></p><p>Then follows what we called a <em>hashmap</em> that is used to link a class name (e.g. <span class=tencentclass>Lcom/tencent/mmkv/MMKV;</span>) to an offset in
+Therefore, a dump of these files only gives information about the classes' names, not the code logic:</p>
+<p><img src=noped.png alt></p>
+<p>Then follows what we called a <em>hashmap</em> that is used to link a class name (e.g. <span class=tencentclass>Lcom/tencent/mmkv/MMKV;</span>) to an offset in
 the data block located in the third part of the file.
-This data block contains the original Dalvik bytecode of the methods.</p><p>Actually, the first part that contains the altered DEX files, is compressed with <strong>NRV</strong> <sup id=fnref:1><a href=#fn:1 class=footnote-ref role=doc-noteref>1</a></sup>.
+This data block contains the original Dalvik bytecode of the methods.</p>
+<p>Actually, the first part that contains the altered DEX files, is compressed with <strong>NRV</strong> <sup id=fnref:1><a href=#fn:1 class=footnote-ref role=doc-noteref>1</a></sup>.
 The second part — the hashmap — is also compressed with NRV but the packer adds a layer of
 encryption through a slightly modified version of <strong>XTEA</strong> <sup id=fnref:2><a href=#fn:2 class=footnote-ref role=doc-noteref>2</a></sup>. Finally, the last part is compressed and encrypted with the
-same algorithms as the previous one.</p><p>Regarding the <em>hashmap</em>, it uses a custom structure that has been reversed and lead to a Kaitai structure available
+same algorithms as the previous one.</p>
+<p>Regarding the <em>hashmap</em>, it uses a custom structure that has been reversed and lead to a Kaitai structure available
 here:
 <a href=https://github.com/quarkslab/legu_unpacker_2019/blob/master/legu_packed_file.ksy target=_blank rel=noopener>legu_packed_file.ksy</a>,
-<a href=https://github.com/quarkslab/legu_unpacker_2019/blob/master/legu_hashmap.ksy target=_blank rel=noopener>legu_hashmap.ksy</a></p><p>Its overall layout is exposed in the next figure:</p><p><img src=hashmap.png alt></p><h2 id=unpacking-process>Unpacking process</h2><p>Let&rsquo;s say that the application needs to use the packed Java class <span class=tencentclass>Lcom/tencent/mmkv/MMKV;</span>.</p><p>First, the packer&rsquo;s runtime transforms the class name into an integer with the <code>dvmComputeUtf8Hash()</code> hash function <sup id=fnref:3><a href=#fn:3 class=footnote-ref role=doc-noteref>3</a></sup>. This integer is then used
+<a href=https://github.com/quarkslab/legu_unpacker_2019/blob/master/legu_hashmap.ksy target=_blank rel=noopener>legu_hashmap.ksy</a></p>
+<p>Its overall layout is exposed in the next figure:</p>
+<p><img src=hashmap.png alt></p>
+<h2 id=unpacking-process>Unpacking process</h2>
+<p>Let&rsquo;s say that the application needs to use the packed Java class <span class=tencentclass>Lcom/tencent/mmkv/MMKV;</span>.</p>
+<p>First, the packer&rsquo;s runtime transforms the class name into an integer with the <code>dvmComputeUtf8Hash()</code> hash function <sup id=fnref:3><a href=#fn:3 class=footnote-ref role=doc-noteref>3</a></sup>. This integer is then used
 as an index into the <em>hashmap</em> whose value is a structure that contains information about the class in the packed data (blue area in
-the figure). The first attribute of this structure — <code>utf8_hash</code> — is a copy of the hash value which is used to check that it is the right key/value association.</p><p>The <code>class_info</code> structure (blue block in the figure) next contains the packed method information (yellow area in the figure) whose size is the same as the original number of
+the figure). The first attribute of this structure — <code>utf8_hash</code> — is a copy of the hash value which is used to check that it is the right key/value association.</p>
+<p>The <code>class_info</code> structure (blue block in the figure) next contains the packed method information (yellow area in the figure) whose size is the same as the original number of
 methods in the class. This structure makes the relationship between the NOP-ed bytecode offset in the altered DEX
 files and the offset in the original bytecode (red block).
-Finally, the packer copies the original bytecode into the altered DEX files.</p><p>To summarize, the first part contains the original DEX files with the Dalvik bytecode removed (<em>NOP-ed</em>).
+Finally, the packer copies the original bytecode into the altered DEX files.</p>
+<p>To summarize, the first part contains the original DEX files with the Dalvik bytecode removed (<em>NOP-ed</em>).
 The last part contains the missing Dalvik bytecode and the second part makes the
-bridge between the altered DEX files and the Dalvik bytecode.</p><h1 id=compression--encryption>Compression & Encryption</h1><p>To decrypt the hashmap and the Dalvik bytecode, the packer uses the first 16 bytes of <span class=keyfile>assets/tosversion</span>
-xored with a hard-coded key: <code>^hHc7Ql]N9Z4:+1m~nTcA&3a7|?GB1z@</code>.</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python>LIB_KEY <span style=color:#f92672>=</span> <span style=color:#e6db74>b</span><span style=color:#e6db74>&#34;^hHc7Ql]N9Z4:+1m~nTcA&amp;3a7|?GB1z@&#34;</span>
+bridge between the altered DEX files and the Dalvik bytecode.</p>
+<h1 id=compression--encryption>Compression & Encryption</h1>
+<p>To decrypt the hashmap and the Dalvik bytecode, the packer uses the first 16 bytes of <span class=keyfile>assets/tosversion</span>
+xored with a hard-coded key: <code>^hHc7Ql]N9Z4:+1m~nTcA&3a7|?GB1z@</code>.</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=n>LIB_KEY</span> <span class=o>=</span> <span class=sa>b</span><span class=s2>&#34;^hHc7Ql]N9Z4:+1m~nTcA&amp;3a7|?GB1z@&#34;</span>
 
-<span style=color:#66d9ef>def</span> <span style=color:#a6e22e>key_derivation</span>(key: bytes) <span style=color:#f92672>-&gt;</span> bytes:
-  <span style=color:#66d9ef>return</span> bytes(x1 <span style=color:#f92672>^</span> x2 <span style=color:#66d9ef>for</span> x1, x2 <span style=color:#f92672>in</span> zip(LIB_KEY, cycle(key)))
-</code></pre></div><p>Then, it uses a slightly modified version of XTEA that is given in the next listing:</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-cpp data-lang=cpp><span style=color:#66d9ef>int</span> <span style=color:#a6e22e>xtea_decrypt</span>(<span style=color:#66d9ef>uint32_t</span><span style=color:#f92672>*</span> key, <span style=color:#66d9ef>uint32_t</span><span style=color:#f92672>*</span> buf, size_t ilen, size_t nb_round) {
-  <span style=color:#66d9ef>const</span> size_t count <span style=color:#f92672>=</span> ilen <span style=color:#f92672>/</span> <span style=color:#ae81ff>8</span>;
-  <span style=color:#66d9ef>const</span> size_t key_off <span style=color:#f92672>=</span> (ilen <span style=color:#f92672>&amp;</span> <span style=color:#ae81ff>8</span>) <span style=color:#f92672>/</span> <span style=color:#ae81ff>4</span>;
-  <span style=color:#66d9ef>static</span> <span style=color:#66d9ef>constexpr</span> <span style=color:#66d9ef>uint32_t</span> DELTA <span style=color:#f92672>=</span> <span style=color:#ae81ff>0x9e3779b9</span>;
+<span class=k>def</span> <span class=nf>key_derivation</span><span class=p>(</span><span class=n>key</span><span class=p>:</span> <span class=nb>bytes</span><span class=p>)</span> <span class=o>-&gt;</span> <span class=nb>bytes</span><span class=p>:</span>
+  <span class=k>return</span> <span class=nb>bytes</span><span class=p>(</span><span class=n>x1</span> <span class=o>^</span> <span class=n>x2</span> <span class=k>for</span> <span class=n>x1</span><span class=p>,</span> <span class=n>x2</span> <span class=ow>in</span> <span class=nb>zip</span><span class=p>(</span><span class=n>LIB_KEY</span><span class=p>,</span> <span class=n>cycle</span><span class=p>(</span><span class=n>key</span><span class=p>)))</span>
+</code></pre></div><p>Then, it uses a slightly modified version of XTEA that is given in the next listing:</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=kt>int</span> <span class=nf>xtea_decrypt</span><span class=p>(</span><span class=kt>uint32_t</span><span class=o>*</span> <span class=n>key</span><span class=p>,</span> <span class=kt>uint32_t</span><span class=o>*</span> <span class=n>buf</span><span class=p>,</span> <span class=n>size_t</span> <span class=n>ilen</span><span class=p>,</span> <span class=n>size_t</span> <span class=n>nb_round</span><span class=p>)</span> <span class=p>{</span>
+  <span class=k>const</span> <span class=n>size_t</span> <span class=n>count</span> <span class=o>=</span> <span class=n>ilen</span> <span class=o>/</span> <span class=mi>8</span><span class=p>;</span>
+  <span class=k>const</span> <span class=n>size_t</span> <span class=n>key_off</span> <span class=o>=</span> <span class=p>(</span><span class=n>ilen</span> <span class=o>&amp;</span> <span class=mi>8</span><span class=p>)</span> <span class=o>/</span> <span class=mi>4</span><span class=p>;</span>
+  <span class=k>static</span> <span class=k>constexpr</span> <span class=kt>uint32_t</span> <span class=n>DELTA</span> <span class=o>=</span> <span class=mh>0x9e3779b9</span><span class=p>;</span>
 
-  <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>uint32_t</span> key_0 <span style=color:#f92672>=</span> key[key_off <span style=color:#f92672>+</span> <span style=color:#ae81ff>0</span>];
-  <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>uint32_t</span> key_1 <span style=color:#f92672>=</span> key[key_off <span style=color:#f92672>+</span> <span style=color:#ae81ff>1</span>];
+  <span class=k>const</span> <span class=kt>uint32_t</span> <span class=n>key_0</span> <span class=o>=</span> <span class=n>key</span><span class=p>[</span><span class=n>key_off</span> <span class=o>+</span> <span class=mi>0</span><span class=p>];</span>
+  <span class=k>const</span> <span class=kt>uint32_t</span> <span class=n>key_1</span> <span class=o>=</span> <span class=n>key</span><span class=p>[</span><span class=n>key_off</span> <span class=o>+</span> <span class=mi>1</span><span class=p>];</span>
 
-  <span style=color:#66d9ef>for</span> (size_t i <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; i <span style=color:#f92672>&lt;</span> count <span style=color:#f92672>*</span> <span style=color:#ae81ff>2</span>; i <span style=color:#f92672>+=</span> <span style=color:#ae81ff>2</span>) {
-    buf[i <span style=color:#f92672>+</span> <span style=color:#ae81ff>0</span>] <span style=color:#f92672>^=</span> key_0;
-    buf[i <span style=color:#f92672>+</span> <span style=color:#ae81ff>1</span>] <span style=color:#f92672>^=</span> key_1;
+  <span class=k>for</span> <span class=p>(</span><span class=n>size_t</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>i</span> <span class=o>&lt;</span> <span class=n>count</span> <span class=o>*</span> <span class=mi>2</span><span class=p>;</span> <span class=n>i</span> <span class=o>+=</span> <span class=mi>2</span><span class=p>)</span> <span class=p>{</span>
+    <span class=n>buf</span><span class=p>[</span><span class=n>i</span> <span class=o>+</span> <span class=mi>0</span><span class=p>]</span> <span class=o>^=</span> <span class=n>key_0</span><span class=p>;</span>
+    <span class=n>buf</span><span class=p>[</span><span class=n>i</span> <span class=o>+</span> <span class=mi>1</span><span class=p>]</span> <span class=o>^=</span> <span class=n>key_1</span><span class=p>;</span>
 
-    <span style=color:#66d9ef>uint32_t</span> sum <span style=color:#f92672>=</span> DELTA <span style=color:#f92672>*</span> nb_round;
-    <span style=color:#66d9ef>uint32_t</span> temp0 <span style=color:#f92672>=</span> buf[i <span style=color:#f92672>+</span> <span style=color:#ae81ff>0</span>];
-    <span style=color:#66d9ef>uint32_t</span> temp1 <span style=color:#f92672>=</span> buf[i <span style=color:#f92672>+</span> <span style=color:#ae81ff>1</span>];
+    <span class=kt>uint32_t</span> <span class=n>sum</span> <span class=o>=</span> <span class=n>DELTA</span> <span class=o>*</span> <span class=n>nb_round</span><span class=p>;</span>
+    <span class=kt>uint32_t</span> <span class=n>temp0</span> <span class=o>=</span> <span class=n>buf</span><span class=p>[</span><span class=n>i</span> <span class=o>+</span> <span class=mi>0</span><span class=p>];</span>
+    <span class=kt>uint32_t</span> <span class=n>temp1</span> <span class=o>=</span> <span class=n>buf</span><span class=p>[</span><span class=n>i</span> <span class=o>+</span> <span class=mi>1</span><span class=p>];</span>
 
-    <span style=color:#66d9ef>for</span> (size_t j <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; j <span style=color:#f92672>&lt;</span> nb_round; <span style=color:#f92672>++</span>j) {
-      temp1 <span style=color:#f92672>-=</span> (key[<span style=color:#ae81ff>2</span>] <span style=color:#f92672>+</span> (temp0 <span style=color:#f92672>&lt;&lt;</span> <span style=color:#ae81ff>4</span>)) <span style=color:#f92672>^</span> (key[<span style=color:#ae81ff>3</span>] <span style=color:#f92672>+</span> (temp0 <span style=color:#f92672>&gt;&gt;</span> <span style=color:#ae81ff>5</span>)) <span style=color:#f92672>^</span> (temp0 <span style=color:#f92672>+</span> sum);
-      temp0 <span style=color:#f92672>-=</span> (key[<span style=color:#ae81ff>0</span>] <span style=color:#f92672>+</span> (temp1 <span style=color:#f92672>&lt;&lt;</span> <span style=color:#ae81ff>4</span>)) <span style=color:#f92672>^</span> (key[<span style=color:#ae81ff>1</span>] <span style=color:#f92672>+</span> (temp1 <span style=color:#f92672>&gt;&gt;</span> <span style=color:#ae81ff>5</span>)) <span style=color:#f92672>^</span> (temp1 <span style=color:#f92672>+</span> sum);
-      sum <span style=color:#f92672>-=</span> DELTA;
-    }
-    buf[i <span style=color:#f92672>+</span> <span style=color:#ae81ff>0</span>] <span style=color:#f92672>=</span> temp0;
-    buf[i <span style=color:#f92672>+</span> <span style=color:#ae81ff>1</span>] <span style=color:#f92672>=</span> temp1;
-  }
-  <span style=color:#66d9ef>return</span> <span style=color:#ae81ff>0</span>;
-}
+    <span class=k>for</span> <span class=p>(</span><span class=n>size_t</span> <span class=n>j</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>j</span> <span class=o>&lt;</span> <span class=n>nb_round</span><span class=p>;</span> <span class=o>++</span><span class=n>j</span><span class=p>)</span> <span class=p>{</span>
+      <span class=n>temp1</span> <span class=o>-=</span> <span class=p>(</span><span class=n>key</span><span class=p>[</span><span class=mi>2</span><span class=p>]</span> <span class=o>+</span> <span class=p>(</span><span class=n>temp0</span> <span class=o>&lt;&lt;</span> <span class=mi>4</span><span class=p>))</span> <span class=o>^</span> <span class=p>(</span><span class=n>key</span><span class=p>[</span><span class=mi>3</span><span class=p>]</span> <span class=o>+</span> <span class=p>(</span><span class=n>temp0</span> <span class=o>&gt;&gt;</span> <span class=mi>5</span><span class=p>))</span> <span class=o>^</span> <span class=p>(</span><span class=n>temp0</span> <span class=o>+</span> <span class=n>sum</span><span class=p>);</span>
+      <span class=n>temp0</span> <span class=o>-=</span> <span class=p>(</span><span class=n>key</span><span class=p>[</span><span class=mi>0</span><span class=p>]</span> <span class=o>+</span> <span class=p>(</span><span class=n>temp1</span> <span class=o>&lt;&lt;</span> <span class=mi>4</span><span class=p>))</span> <span class=o>^</span> <span class=p>(</span><span class=n>key</span><span class=p>[</span><span class=mi>1</span><span class=p>]</span> <span class=o>+</span> <span class=p>(</span><span class=n>temp1</span> <span class=o>&gt;&gt;</span> <span class=mi>5</span><span class=p>))</span> <span class=o>^</span> <span class=p>(</span><span class=n>temp1</span> <span class=o>+</span> <span class=n>sum</span><span class=p>);</span>
+      <span class=n>sum</span> <span class=o>-=</span> <span class=n>DELTA</span><span class=p>;</span>
+    <span class=p>}</span>
+    <span class=n>buf</span><span class=p>[</span><span class=n>i</span> <span class=o>+</span> <span class=mi>0</span><span class=p>]</span> <span class=o>=</span> <span class=n>temp0</span><span class=p>;</span>
+    <span class=n>buf</span><span class=p>[</span><span class=n>i</span> <span class=o>+</span> <span class=mi>1</span><span class=p>]</span> <span class=o>=</span> <span class=n>temp1</span><span class=p>;</span>
+  <span class=p>}</span>
+  <span class=k>return</span> <span class=mi>0</span><span class=p>;</span>
+<span class=p>}</span>
 </code></pre></div><p>After the decryption routine, the packer decompresses the data with <code>NRV</code>, the same algorithm used to compress the altered DEX
-files:</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python>key <span style=color:#f92672>=</span> key_derivation(open(<span style=color:#e6db74>&#34;assets/tosversion&#34;</span>, <span style=color:#e6db74>&#34;rb&#34;</span>)<span style=color:#f92672>.</span>read()[:<span style=color:#ae81ff>16</span>])
-<span style=color:#66d9ef>for</span> i <span style=color:#f92672>in</span> range(nb_dex_files):
-  hashmap[i]          <span style=color:#f92672>=</span> nrv_decompress(xtea_decrypt(blob1, key))
-  dalvik_bytecodes[i] <span style=color:#f92672>=</span> nrv_decompress(xtea_decrypt(blob2, key))
-</code></pre></div><h2 id=unpacking>Unpacking</h2><p>Putting all the pieces together, we can <strong>statically</strong> unpack protected APKs and recover the original bytecode:</p><p><img src=unpacked.png alt></p><p>Hence, as we can automatically unpack such APKs, the unpacking process could be integrated into an automatic analysis pipeline.</p><p>The script and the Kaitai structures are available on the Quarkslab&rsquo;s repository:
+files:</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=n>key</span> <span class=o>=</span> <span class=n>key_derivation</span><span class=p>(</span><span class=nb>open</span><span class=p>(</span><span class=s2>&#34;assets/tosversion&#34;</span><span class=p>,</span> <span class=s2>&#34;rb&#34;</span><span class=p>)</span><span class=o>.</span><span class=n>read</span><span class=p>()[:</span><span class=mi>16</span><span class=p>])</span>
+<span class=k>for</span> <span class=n>i</span> <span class=ow>in</span> <span class=nb>range</span><span class=p>(</span><span class=n>nb_dex_files</span><span class=p>):</span>
+  <span class=n>hashmap</span><span class=p>[</span><span class=n>i</span><span class=p>]</span>          <span class=o>=</span> <span class=n>nrv_decompress</span><span class=p>(</span><span class=n>xtea_decrypt</span><span class=p>(</span><span class=n>blob1</span><span class=p>,</span> <span class=n>key</span><span class=p>))</span>
+  <span class=n>dalvik_bytecodes</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>=</span> <span class=n>nrv_decompress</span><span class=p>(</span><span class=n>xtea_decrypt</span><span class=p>(</span><span class=n>blob2</span><span class=p>,</span> <span class=n>key</span><span class=p>))</span>
+</code></pre></div><h2 id=unpacking>Unpacking</h2>
+<p>Putting all the pieces together, we can <strong>statically</strong> unpack protected APKs and recover the original bytecode:</p>
+<p><img src=unpacked.png alt></p>
+<p>Hence, as we can automatically unpack such APKs, the unpacking process could be integrated into an automatic analysis pipeline.</p>
+<p>The script and the Kaitai structures are available on the Quarkslab&rsquo;s repository:
 <a href=https://github.com/quarkslab/legu_unpacker_2019 target=_blank rel=noopener>legu_unpacker_2019</a>,
 along with a suspicious application <sup id=fnref:4><a href=#fn:4 class=footnote-ref role=doc-noteref>4</a></sup>,
 <a href=https://github.com/quarkslab/legu_unpacker_2019/blob/master/samples/com.intotherain.voicechange.apk target=_blank rel=noopener>packed</a> and
-<a href=https://github.com/quarkslab/legu_unpacker_2019/blob/master/samples/com.intotherain.voicechange_unpacked.apk target=_blank rel=noopener>unpacked</a>.</p><h2 id=acknowledgments>Acknowledgments</h2><p>Thanks to my colleagues who proofread this article.</p><h3 id=references>References</h3><section class=footnotes role=doc-endnotes><hr><ol><li id=fn:1 role=doc-endnote><p><a href=http://www.oberhumer.com/opensource/ucl/>http://www.oberhumer.com/opensource/ucl/</a>&#160;<a href=#fnref:1 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></p></li><li id=fn:2 role=doc-endnote><p><a href=https://en.wikipedia.org/wiki/XTEA>https://en.wikipedia.org/wiki/XTEA</a>&#160;<a href=#fnref:2 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></p></li><li id=fn:3 role=doc-endnote><p><a href=http://androidxref.com/4.4.4_r1/xref/dalvik/vm/UtfString.cpp#88>http://androidxref.com/4.4.4_r1/xref/dalvik/vm/UtfString.cpp#88</a>&#160;<a href=#fnref:3 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></p></li><li id=fn:4 role=doc-endnote><p><a href=https://www.virustotal.com/gui/file/708e6967920dcf2789b7183d714e73ab79a2f8b3ca71929b12aadeb2c58c2867/detection>https://www.virustotal.com/gui/file/708e6967920dcf2789b7183d714e73ab79a2f8b3ca71929b12aadeb2c58c2867/detection</a>&#160;<a href=#fnref:4 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></p></li></ol></section></div><div class=article-tags><a class="badge badge-light" href=/tags/android/>android</a>
+<a href=https://github.com/quarkslab/legu_unpacker_2019/blob/master/samples/com.intotherain.voicechange_unpacked.apk target=_blank rel=noopener>unpacked</a>.</p>
+<h2 id=acknowledgments>Acknowledgments</h2>
+<p>Thanks to my colleagues who proofread this article.</p>
+<h3 id=references>References</h3>
+<section class=footnotes role=doc-endnotes>
+<hr>
+<ol>
+<li id=fn:1 role=doc-endnote>
+<p>
+<a href=http://www.oberhumer.com/opensource/ucl/ target=_blank rel=noopener>http://www.oberhumer.com/opensource/ucl/</a>&#160;<a href=#fnref:1 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></p>
+</li>
+<li id=fn:2 role=doc-endnote>
+<p>
+<a href=https://en.wikipedia.org/wiki/XTEA target=_blank rel=noopener>https://en.wikipedia.org/wiki/XTEA</a>&#160;<a href=#fnref:2 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></p>
+</li>
+<li id=fn:3 role=doc-endnote>
+<p>
+<a href=http://androidxref.com/4.4.4_r1/xref/dalvik/vm/UtfString.cpp#88 target=_blank rel=noopener>http://androidxref.com/4.4.4_r1/xref/dalvik/vm/UtfString.cpp#88</a>&#160;<a href=#fnref:3 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></p>
+</li>
+<li id=fn:4 role=doc-endnote>
+<p>
+<a href=https://www.virustotal.com/gui/file/708e6967920dcf2789b7183d714e73ab79a2f8b3ca71929b12aadeb2c58c2867/detection target=_blank rel=noopener>https://www.virustotal.com/gui/file/708e6967920dcf2789b7183d714e73ab79a2f8b3ca71929b12aadeb2c58c2867/detection</a>&#160;<a href=#fnref:4 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></p>
+</li>
+</ol>
+</section>
+</div>
+<div class=article-tags>
+<a class="badge badge-light" href=/tags/android/>android</a>
 <a class="badge badge-light" href=/tags/reverse-engineering/>reverse engineering</a>
-<a class="badge badge-light" href=/tags/packer/>packer</a></div></div></article><script src=https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin=anonymous></script><script src=https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/4.1.4/imagesloaded.pkgd.min.js integrity="sha256-lqvxZrPLtfffUl2G/e7szqSvPBILGbwmsGE1MKlOi0Q=" crossorigin=anonymous></script><script src=https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.6/isotope.pkgd.min.js integrity="sha256-CBrpuqrMhXwcLLUd5tvQ4euBHCdh7wGlDfNz8vbu/iI=" crossorigin=anonymous></script><script src=https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin=anonymous></script><script src=https://cdnjs.cloudflare.com/ajax/libs/instant.page/5.1.0/instantpage.min.js integrity="sha512-1+qUtKoh9XZW7j+6LhRMAyOrgSQKenQ4mluTR+cvxXjP1Z54RxZuzstR/H9kgPXQsVB8IW7DMDFUJpzLjvhGSQ==" crossorigin=anonymous></script><script src=https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.2/highlight.min.js integrity="sha512-7t8APmYpzEsZP7CYoA7RfMPV9Bb+PJHa9x2WiUnDXZx3XHveuyWUtvNOexhkierl5flZ3tr92dP1mMS+SGlD+A==" crossorigin=anonymous></script><script src=https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.2/languages/r.min.js></script><script src=https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.2/languages/armasm.min.js></script><script src=https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet.js integrity="sha256-EErZamuLefUnbMBQbsEqu1USa+btR2oIlCpBJbyD4/g=" crossorigin=anonymous></script><script>const code_highlighting=!0</script><script>const isSiteThemeDark=!1</script><script>const search_config={indexURI:"/index.json",minLength:1,threshold:.3},i18n={no_results:"No results found",placeholder:"Search...",results:"results found"},content_type={post:"Posts",project:"Projects",publication:"Publications",talk:"Talks",slides:"Slides"}</script><script id=search-hit-fuse-template type=text/x-template>
+<a class="badge badge-light" href=/tags/packer/>packer</a>
+</div>
+</div>
+</article>
+<script src=https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin=anonymous></script>
+<script src=https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/4.1.4/imagesloaded.pkgd.min.js integrity="sha256-lqvxZrPLtfffUl2G/e7szqSvPBILGbwmsGE1MKlOi0Q=" crossorigin=anonymous></script>
+<script src=https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.6/isotope.pkgd.min.js integrity="sha256-CBrpuqrMhXwcLLUd5tvQ4euBHCdh7wGlDfNz8vbu/iI=" crossorigin=anonymous></script>
+<script src=https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin=anonymous></script>
+<script src=https://cdnjs.cloudflare.com/ajax/libs/instant.page/5.1.0/instantpage.min.js integrity="sha512-1+qUtKoh9XZW7j+6LhRMAyOrgSQKenQ4mluTR+cvxXjP1Z54RxZuzstR/H9kgPXQsVB8IW7DMDFUJpzLjvhGSQ==" crossorigin=anonymous></script>
+<script src=https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.2/highlight.min.js integrity="sha512-7t8APmYpzEsZP7CYoA7RfMPV9Bb+PJHa9x2WiUnDXZx3XHveuyWUtvNOexhkierl5flZ3tr92dP1mMS+SGlD+A==" crossorigin=anonymous></script>
+<script src=https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.2/languages/r.min.js></script>
+<script src=https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.2/languages/armasm.min.js></script>
+<script src=https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet.js integrity="sha256-EErZamuLefUnbMBQbsEqu1USa+btR2oIlCpBJbyD4/g=" crossorigin=anonymous></script>
+<script>const code_highlighting=!0</script>
+<script>const isSiteThemeDark=!1</script>
+<script>const search_config={indexURI:"/index.json",minLength:1,threshold:.3},i18n={no_results:"No results found",placeholder:"Search...",results:"results found"},content_type={post:"Posts",project:"Projects",publication:"Publications",talk:"Talks",slides:"Slides"}</script>
+<script id=search-hit-fuse-template type=text/x-template>
       <div class="search-hit" id="summary-{{key}}">
       <div class="search-hit-content">
         <div class="search-hit-name">
@@ -75,6 +289,49 @@ along with a suspicious application <sup id=fnref:4><a href=#fn:4 class=footnote
         </div>
       </div>
       </div>
-    </script><script src=https://cdnjs.cloudflare.com/ajax/libs/fuse.js/3.2.1/fuse.min.js integrity="sha256-VzgmKYmhsGNNN4Ph1kMW+BjoYJM2jV5i4IlFoeZA9XI=" crossorigin=anonymous></script><script src=https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin=anonymous></script><script src=/js/academic.min.f6ecf7692215f2bc4850b72c8176bfa2.js></script><div class=container><footer class=site-footer><p class=powered-by>Published with <a href=https://sourcethemes.com/academic/ target=_blank rel=noopener>Academic Website Builder</a> - Icons made by <a href=http://www.freepik.com/ title=Freepik>Freepik</a></p><p class=powered-by><span class=float-right aria-hidden=true><a href=# class=back-to-top><span class=button_icon><i class="fas fa-chevron-up fa-2x"></i></span></a></span></p></footer></div><div id=modal class="modal fade" role=dialog><div class=modal-dialog><div class=modal-content><div class=modal-header><h5 class=modal-title>Cite</h5><button type=button class=close data-dismiss=modal aria-label=Close>
-<span aria-hidden=true>&#215;</span></button></div><div class=modal-body><pre><code class="tex hljs"></code></pre></div><div class=modal-footer><a class="btn btn-outline-primary my-1 js-copy-cite" href=# target=_blank><i class="fas fa-copy"></i> Copy</a>
-<a class="btn btn-outline-primary my-1 js-download-cite" href=# target=_blank><i class="fas fa-download"></i> Download</a><div id=modal-error></div></div></div></div></div></body></html>
+    </script>
+<script src=https://cdnjs.cloudflare.com/ajax/libs/fuse.js/3.2.1/fuse.min.js integrity="sha256-VzgmKYmhsGNNN4Ph1kMW+BjoYJM2jV5i4IlFoeZA9XI=" crossorigin=anonymous></script>
+<script src=https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin=anonymous></script>
+<script src=/js/academic.min.f6ecf7692215f2bc4850b72c8176bfa2.js></script>
+<div class=container>
+<footer class=site-footer>
+<p class=powered-by>
+Published with <a href=https://sourcethemes.com/academic/ target=_blank rel=noopener>Academic Website Builder</a>
+</p>
+<p class=powered-by>
+<span class=float-right aria-hidden=true>
+<a href=# class=back-to-top>
+<span class=button_icon>
+<i class="fas fa-chevron-up fa-2x"></i>
+</span>
+</a>
+</span>
+</p>
+</footer>
+</div>
+<div id=modal class="modal fade" role=dialog>
+<div class=modal-dialog>
+<div class=modal-content>
+<div class=modal-header>
+<h5 class=modal-title>Cite</h5>
+<button type=button class=close data-dismiss=modal aria-label=Close>
+<span aria-hidden=true>&#215;</span>
+</button>
+</div>
+<div class=modal-body>
+<pre><code class="tex hljs"></code></pre>
+</div>
+<div class=modal-footer>
+<a class="btn btn-outline-primary my-1 js-copy-cite" href=# target=_blank>
+<i class="fas fa-copy"></i> Copy
+</a>
+<a class="btn btn-outline-primary my-1 js-download-cite" href=# target=_blank>
+<i class="fas fa-download"></i> Download
+</a>
+<div id=modal-error></div>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

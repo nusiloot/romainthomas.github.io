@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Projects | Romain Thomas</title><link>https://www.romainthomas.fr/project/</link><atom:link href="https://www.romainthomas.fr/project/index.xml" rel="self" type="application/rss+xml"/><description>Projects</description><generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>Published with Academic Website Builder - Icons made by Freepik</copyright><lastBuildDate>Thu, 03 Jun 2021 00:00:00 +0000</lastBuildDate><image><url>https://www.romainthomas.fr/images/icon_hu2654a0fcc87c65a864822ac27b001d3b_698_512x512_fill_lanczos_center_2.png</url><title>Projects</title><link>https://www.romainthomas.fr/project/</link></image><item><title>QBDL</title><link>https://www.romainthomas.fr/project/qbdl/</link><pubDate>Thu, 03 Jun 2021 00:00:00 +0000</pubDate><guid>https://www.romainthomas.fr/project/qbdl/</guid><description>&lt;p>QBDL (&lt;strong>Q&lt;/strong>uarksla&lt;strong>B&lt;/strong> &lt;strong>D&lt;/strong>ynamic &lt;strong>L&lt;/strong>oader) is a cross-platform library that enables
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>DEFAULT Projects | Romain Thomas</title><link>https://www.romainthomas.fr/project/</link><atom:link href="https://www.romainthomas.fr/project/index.xml" rel="self" type="application/rss+xml"/><description>Projects</description><generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>Published with Academic Website Builder</copyright><lastBuildDate>Thu, 03 Jun 2021 00:00:00 +0000</lastBuildDate><image><url>https://www.romainthomas.fr/images/icon_hu2654a0fcc87c65a864822ac27b001d3b_698_512x512_fill_lanczos_center_3.png</url><title>Projects</title><link>https://www.romainthomas.fr/project/</link></image><item><title>QBDL</title><link>https://www.romainthomas.fr/project/qbdl/</link><pubDate>Thu, 03 Jun 2021 00:00:00 +0000</pubDate><guid>https://www.romainthomas.fr/project/qbdl/</guid><description>&lt;p>QBDL (&lt;strong>Q&lt;/strong>uarksla&lt;strong>B&lt;/strong> &lt;strong>D&lt;/strong>ynamic &lt;strong>L&lt;/strong>oader) is a cross-platform library that enables
 to load ELF, PE and Mach-O binaries with an abstraction on the targeted system.
 It abstracts the memory model on which the binary is loaded
 and provides an enhanced API to the user to process symbols resolution.
@@ -6,39 +6,40 @@ In a nutshell, it enables to load binaries on foreign systems without reinventin
 &lt;p>Here is an
 &lt;a href="https://github.com/quarkslab/QBDL/blob/83a64211dae71e870495bc795dd065278f93993f/bindings/python/examples/triton_macho_x64.py" target="_blank" rel="noopener">example&lt;/a> to load a Mach-O in
 &lt;a href="https://github.com/JonathanSalwan/Triton" target="_blank" rel="noopener">Triton&lt;/a> with QBDL:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">&lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">TritonVM&lt;/span>(pyqbdl&lt;span style="color:#f92672">.&lt;/span>TargetMemory):
-&lt;span style="color:#66d9ef">def&lt;/span> __init__(self, ctx: TritonContext):
-super()&lt;span style="color:#f92672">.&lt;/span>__init__()
-self&lt;span style="color:#f92672">.&lt;/span>ctx &lt;span style="color:#f92672">=&lt;/span> ctx
-&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">mmap&lt;/span>(self, ptr, size):
-&lt;span style="color:#66d9ef">return&lt;/span> ptr
-&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">mprotect&lt;/span>(self, ptr, size, access):
-&lt;span style="color:#66d9ef">return&lt;/span> True
-&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">write&lt;/span>(self, ptr, data):
-self&lt;span style="color:#f92672">.&lt;/span>ctx&lt;span style="color:#f92672">.&lt;/span>setConcreteMemoryAreaValue(ptr, bytes(data))
-&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">read&lt;/span>(self, ptr, size):
-&lt;span style="color:#66d9ef">return&lt;/span> self&lt;span style="color:#f92672">.&lt;/span>ctx&lt;span style="color:#f92672">.&lt;/span>getConcreteMemoryAreaValue(ptr, size)
-&lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">TritonSystem&lt;/span>(pyqbdl&lt;span style="color:#f92672">.&lt;/span>TargetSystem):
-&lt;span style="color:#66d9ef">def&lt;/span> __init__(self, arch, ctx):
-super()&lt;span style="color:#f92672">.&lt;/span>__init__(TritonVM(ctx))
-self&lt;span style="color:#f92672">.&lt;/span>arch &lt;span style="color:#f92672">=&lt;/span> arch
-self&lt;span style="color:#f92672">.&lt;/span>ctx &lt;span style="color:#f92672">=&lt;/span> ctx
-&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">symlink&lt;/span>(self, loader, sym):
-&lt;span style="color:#66d9ef">for&lt;/span> name, impl, addr &lt;span style="color:#f92672">in&lt;/span> externalFunctions:
-&lt;span style="color:#66d9ef">if&lt;/span> sym&lt;span style="color:#f92672">.&lt;/span>name &lt;span style="color:#f92672">==&lt;/span> name:
-&lt;span style="color:#66d9ef">return&lt;/span> addr
-&lt;span style="color:#66d9ef">return&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>
-&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">supports&lt;/span>(self, bin_):
-&lt;span style="color:#66d9ef">return&lt;/span> pyqbdl&lt;span style="color:#f92672">.&lt;/span>Arch&lt;span style="color:#f92672">.&lt;/span>from_bin(bin_) &lt;span style="color:#f92672">==&lt;/span> self&lt;span style="color:#f92672">.&lt;/span>arch
-&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">base_address_hint&lt;/span>(self, bin_ba, vsize):
-&lt;span style="color:#66d9ef">return&lt;/span> bin_ba
-x86_64_arch &lt;span style="color:#f92672">=&lt;/span> pyqbdl&lt;span style="color:#f92672">.&lt;/span>Arch(lief&lt;span style="color:#f92672">.&lt;/span>ARCHITECTURES&lt;span style="color:#f92672">.&lt;/span>X86, lief&lt;span style="color:#f92672">.&lt;/span>ENDIANNESS&lt;span style="color:#f92672">.&lt;/span>LITTLE, True)
-loader &lt;span style="color:#f92672">=&lt;/span> pyqbdl&lt;span style="color:#f92672">.&lt;/span>loaders&lt;span style="color:#f92672">.&lt;/span>MachO&lt;span style="color:#f92672">.&lt;/span>from_file(args&lt;span style="color:#f92672">.&lt;/span>filename, x86_64_arch,
-TritonSystem(x86_64_arch, ctx), pyqbdl&lt;span style="color:#f92672">.&lt;/span>Loader&lt;span style="color:#f92672">.&lt;/span>BIND&lt;span style="color:#f92672">.&lt;/span>NOW)
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-python" data-lang="python">&lt;span class="k">class&lt;/span> &lt;span class="nc">TritonVM&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">pyqbdl&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">TargetMemory&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;span class="k">def&lt;/span> &lt;span class="fm">__init__&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">ctx&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">TritonContext&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;span class="nb">super&lt;/span>&lt;span class="p">()&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="fm">__init__&lt;/span>&lt;span class="p">()&lt;/span>
+&lt;span class="bp">self&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">ctx&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">ctx&lt;/span>
+&lt;span class="k">def&lt;/span> &lt;span class="nf">mmap&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">ptr&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">size&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;span class="k">return&lt;/span> &lt;span class="n">ptr&lt;/span>
+&lt;span class="k">def&lt;/span> &lt;span class="nf">mprotect&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">ptr&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">size&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">access&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;span class="k">return&lt;/span> &lt;span class="kc">True&lt;/span>
+&lt;span class="k">def&lt;/span> &lt;span class="nf">write&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">ptr&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">data&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;span class="bp">self&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">ctx&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">setConcreteMemoryAreaValue&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">ptr&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nb">bytes&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">data&lt;/span>&lt;span class="p">))&lt;/span>
+&lt;span class="k">def&lt;/span> &lt;span class="nf">read&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">ptr&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">size&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;span class="k">return&lt;/span> &lt;span class="bp">self&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">ctx&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">getConcreteMemoryAreaValue&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">ptr&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">size&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="k">class&lt;/span> &lt;span class="nc">TritonSystem&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">pyqbdl&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">TargetSystem&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;span class="k">def&lt;/span> &lt;span class="fm">__init__&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">arch&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">ctx&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;span class="nb">super&lt;/span>&lt;span class="p">()&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="fm">__init__&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">TritonVM&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">ctx&lt;/span>&lt;span class="p">))&lt;/span>
+&lt;span class="bp">self&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">arch&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">arch&lt;/span>
+&lt;span class="bp">self&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">ctx&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">ctx&lt;/span>
+&lt;span class="k">def&lt;/span> &lt;span class="nf">symlink&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">loader&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">sym&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;span class="k">for&lt;/span> &lt;span class="n">name&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">impl&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">addr&lt;/span> &lt;span class="ow">in&lt;/span> &lt;span class="n">externalFunctions&lt;/span>&lt;span class="p">:&lt;/span>
+&lt;span class="k">if&lt;/span> &lt;span class="n">sym&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">name&lt;/span> &lt;span class="o">==&lt;/span> &lt;span class="n">name&lt;/span>&lt;span class="p">:&lt;/span>
+&lt;span class="k">return&lt;/span> &lt;span class="n">addr&lt;/span>
+&lt;span class="k">return&lt;/span> &lt;span class="mi">0&lt;/span>
+&lt;span class="k">def&lt;/span> &lt;span class="nf">supports&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">bin_&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;span class="k">return&lt;/span> &lt;span class="n">pyqbdl&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Arch&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">from_bin&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">bin_&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="o">==&lt;/span> &lt;span class="bp">self&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">arch&lt;/span>
+&lt;span class="k">def&lt;/span> &lt;span class="nf">base_address_hint&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">bin_ba&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">vsize&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;span class="k">return&lt;/span> &lt;span class="n">bin_ba&lt;/span>
+&lt;span class="n">x86_64_arch&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">pyqbdl&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Arch&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">lief&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">ARCHITECTURES&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">X86&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">lief&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">ENDIANNESS&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">LITTLE&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="kc">True&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="n">loader&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">pyqbdl&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">loaders&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">MachO&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">from_file&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">args&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">filename&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">x86_64_arch&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;span class="n">TritonSystem&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">x86_64_arch&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">ctx&lt;/span>&lt;span class="p">),&lt;/span> &lt;span class="n">pyqbdl&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Loader&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">BIND&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">NOW&lt;/span>&lt;span class="p">)&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Tencent Legu Unpacker</title><link>https://www.romainthomas.fr/project/legu_unpacker/</link><pubDate>Thu, 23 Jan 2020 00:00:00 +0000</pubDate><guid>https://www.romainthomas.fr/project/legu_unpacker/</guid><description>&lt;h1 id="legu-unpacker">Legu Unpacker&lt;/h1>
 &lt;p>Scripts to unpack Android applications protected by Tencent Legu. It only works with versions
 &lt;strong>4.1.0.15&lt;/strong> and &lt;strong>4.1.0.18&lt;/strong> of Legu.&lt;/p>
-&lt;p>Blog post: &lt;a href="https://blog.quarkslab.com/a-glimpse-into-tencents-legu-packer.html">https://blog.quarkslab.com/a-glimpse-into-tencents-legu-packer.html&lt;/a>&lt;/p>
+&lt;p>Blog post:
+&lt;a href="https://blog.quarkslab.com/a-glimpse-into-tencents-legu-packer.html" target="_blank" rel="noopener">https://blog.quarkslab.com/a-glimpse-into-tencents-legu-packer.html&lt;/a>&lt;/p>
 &lt;h2 id="overview">Overview&lt;/h2>
 &lt;p>The original DEX files are located in &lt;code>assets/0OO00l111l1l&lt;/code> with the following layout:&lt;/p>
 &lt;p align="center" >
@@ -55,9 +56,9 @@ TritonSystem(x86_64_arch, ctx), pyqbdl&lt;span style="color:#f92672">.&lt;/span>
 &lt;p>
 &lt;a href="https://github.com/quarkslab/legu_unpacker_2019/tree/7b4aec6d223dfb24a60bb99151b15d0df76ea6fa/pylegu" target="_blank" rel="noopener">pylegu&lt;/a> contains the Python bindings to decrypt and uncompress the data embedded in &lt;code>assets/0OO00l111l1l&lt;/code>.&lt;/p>
 &lt;p>To compile and install &lt;code>pylegu&lt;/code>:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">$ cd pylegu
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">$ &lt;span class="nb">cd&lt;/span> pylegu
 $ python3.7 ./setup.py build -j4 install --user
-$ python -c &lt;span style="color:#e6db74">&amp;#34;import pylegu&amp;#34;&lt;/span>
+$ python -c &lt;span class="s2">&amp;#34;import pylegu&amp;#34;&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>One could also use
 &lt;a href="https://github.com/jap/pyucl" target="_blank" rel="noopener">jap/pyucl&lt;/a> to decompress the data and
 &lt;a href="https://github.com/aguinet/dragonffi" target="_blank" rel="noopener">aguinet/dragonffi&lt;/a> to bind the custom implementation of XTEA.&lt;/p>
@@ -66,21 +67,21 @@ $ python -c &lt;span style="color:#e6db74">&amp;#34;import pylegu&amp;#34;&lt;/s
 &lt;a href="./samples/com.intotherain.voicechange.apk">com.intotherain.voicechange.apk&lt;/a> is a
 &lt;a href="https://www.virustotal.com/gui/file/708e6967920dcf2789b7183d714e73ab79a2f8b3ca71929b12aadeb2c58c2867/detection" target="_blank" rel="noopener">suspicious application&lt;/a>
 that can be unpacked as follows:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">$ python ./unpack.py ./samples/com.intotherain.voicechange.apk
-&lt;span style="color:#f92672">[&lt;/span>+&lt;span style="color:#f92672">]&lt;/span> Legu version: 4.1.0.15
-&lt;span style="color:#f92672">[&lt;/span>+&lt;span style="color:#f92672">]&lt;/span> Password is &lt;span style="color:#e6db74">&amp;#39;IPk2Hw7AKTuIQBlc&amp;#39;&lt;/span>
-&lt;span style="color:#f92672">[&lt;/span>+&lt;span style="color:#f92672">]&lt;/span> Number of dex files: &lt;span style="color:#ae81ff">1&lt;/span>
-&lt;span style="color:#f92672">[&lt;/span>+&lt;span style="color:#f92672">]&lt;/span> Unpacking &lt;span style="color:#75715e">#1 DEX files ...&lt;/span>
-&lt;span style="color:#f92672">[&lt;/span>+&lt;span style="color:#f92672">]&lt;/span> dex &lt;span style="color:#ae81ff">0&lt;/span> compressed size: 0x1619a3
-&lt;span style="color:#f92672">[&lt;/span>+&lt;span style="color:#f92672">]&lt;/span> dex &lt;span style="color:#ae81ff">0&lt;/span> uncompressed size: 0x5671f8
-&lt;span style="color:#f92672">[&lt;/span>+&lt;span style="color:#f92672">]&lt;/span> Unpacking &lt;span style="color:#75715e">#1 hashmap ...&lt;/span>
-&lt;span style="color:#f92672">[&lt;/span>+&lt;span style="color:#f92672">]&lt;/span> hashmap &lt;span style="color:#ae81ff">0&lt;/span> compressed size: 0x4399c
-&lt;span style="color:#f92672">[&lt;/span>+&lt;span style="color:#f92672">]&lt;/span> hashmap &lt;span style="color:#ae81ff">0&lt;/span> uncompressed size: 0x95558
-&lt;span style="color:#f92672">[&lt;/span>+&lt;span style="color:#f92672">]&lt;/span> Unpacking &lt;span style="color:#75715e">#1 packed methods ...&lt;/span>
-&lt;span style="color:#f92672">[&lt;/span>+&lt;span style="color:#f92672">]&lt;/span> packed methods &lt;span style="color:#ae81ff">0&lt;/span> compressed_size: 0xf4636
-&lt;span style="color:#f92672">[&lt;/span>+&lt;span style="color:#f92672">]&lt;/span> packed methods &lt;span style="color:#ae81ff">0&lt;/span> uncompressed_size: 0x1e3072
-&lt;span style="color:#f92672">[&lt;/span>+&lt;span style="color:#f92672">]&lt;/span> Stage 2: Patching DEX files
-&lt;span style="color:#f92672">[&lt;/span>+&lt;span style="color:#f92672">]&lt;/span> Unpacked APK: unpacked.apk
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">$ python ./unpack.py ./samples/com.intotherain.voicechange.apk
+&lt;span class="o">[&lt;/span>+&lt;span class="o">]&lt;/span> Legu version: 4.1.0.15
+&lt;span class="o">[&lt;/span>+&lt;span class="o">]&lt;/span> Password is &lt;span class="s1">&amp;#39;IPk2Hw7AKTuIQBlc&amp;#39;&lt;/span>
+&lt;span class="o">[&lt;/span>+&lt;span class="o">]&lt;/span> Number of dex files: &lt;span class="m">1&lt;/span>
+&lt;span class="o">[&lt;/span>+&lt;span class="o">]&lt;/span> Unpacking &lt;span class="c1">#1 DEX files ...&lt;/span>
+&lt;span class="o">[&lt;/span>+&lt;span class="o">]&lt;/span> dex &lt;span class="m">0&lt;/span> compressed size: 0x1619a3
+&lt;span class="o">[&lt;/span>+&lt;span class="o">]&lt;/span> dex &lt;span class="m">0&lt;/span> uncompressed size: 0x5671f8
+&lt;span class="o">[&lt;/span>+&lt;span class="o">]&lt;/span> Unpacking &lt;span class="c1">#1 hashmap ...&lt;/span>
+&lt;span class="o">[&lt;/span>+&lt;span class="o">]&lt;/span> hashmap &lt;span class="m">0&lt;/span> compressed size: 0x4399c
+&lt;span class="o">[&lt;/span>+&lt;span class="o">]&lt;/span> hashmap &lt;span class="m">0&lt;/span> uncompressed size: 0x95558
+&lt;span class="o">[&lt;/span>+&lt;span class="o">]&lt;/span> Unpacking &lt;span class="c1">#1 packed methods ...&lt;/span>
+&lt;span class="o">[&lt;/span>+&lt;span class="o">]&lt;/span> packed methods &lt;span class="m">0&lt;/span> compressed_size: 0xf4636
+&lt;span class="o">[&lt;/span>+&lt;span class="o">]&lt;/span> packed methods &lt;span class="m">0&lt;/span> uncompressed_size: 0x1e3072
+&lt;span class="o">[&lt;/span>+&lt;span class="o">]&lt;/span> Stage 2: Patching DEX files
+&lt;span class="o">[&lt;/span>+&lt;span class="o">]&lt;/span> Unpacked APK: unpacked.apk
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>The unpacked DEX files are located in the &lt;code>unpacked.apk&lt;/code> file.&lt;/p>
 &lt;h2 id="requirements">Requirements&lt;/h2>
 &lt;ul>

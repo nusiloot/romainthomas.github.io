@@ -1,26 +1,449 @@
-<!doctype html><html lang=en-us><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta http-equiv=x-ua-compatible content="IE=edge"><meta name=generator content="Source Themes Academic 4.8.0"><meta name=description content="Security Engineer working on Android, obfuscation, reverse engineering and software protections"><link rel=alternate hreflang=en-us href=https://www.romainthomas.fr/publication/><meta name=theme-color content="#2962ff"><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css integrity="sha256-FMvZuGapsJLjouA6k7Eo2lusoAX9i0ShlWFG6qt7SLc=" crossorigin=anonymous><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin=anonymous><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.2/styles/atom-one-light.min.css crossorigin=anonymous title=hl-light><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.2/styles/atom-one-light.min.css crossorigin=anonymous title=hl-dark disabled><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet.css integrity="sha256-SHMGCYmST46SoyGgo4YR/9AlK1vf3ff84Aq9yK4hdqM=" crossorigin=anonymous><script src=https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.1.2/lazysizes.min.js integrity="sha256-Md1qLToewPeKjfAHU1zyPwOutccPAm5tahnaw7Osw0A=" crossorigin=anonymous async></script><link rel=stylesheet href="https://fonts.googleapis.com/css?family=Montserrat:400,700%7CRoboto:400,400italic,700%7CRoboto+Mono%7CFira+Code&display=swap"><link rel=stylesheet href=/css/academic.css><link rel=alternate href=/publication/index.xml type=application/rss+xml title="Romain Thomas"><link rel=manifest href=/index.webmanifest><link rel=icon type=image/png href=/images/icon_hu2654a0fcc87c65a864822ac27b001d3b_698_32x32_fill_lanczos_center_2.png><link rel=apple-touch-icon type=image/png href=/images/icon_hu2654a0fcc87c65a864822ac27b001d3b_698_192x192_fill_lanczos_center_2.png><link rel=canonical href=https://www.romainthomas.fr/publication/><meta property="twitter:card" content="summary"><meta property="twitter:site" content="@rh0main"><meta property="twitter:creator" content="@rh0main"><meta property="og:site_name" content="Romain Thomas"><meta property="og:url" content="https://www.romainthomas.fr/publication/"><meta property="og:title" content="Publications | Romain Thomas"><meta property="og:description" content="Security Engineer working on Android, obfuscation, reverse engineering and software protections"><meta property="og:image" content="https://www.romainthomas.fr/images/icon_hu2654a0fcc87c65a864822ac27b001d3b_698_512x512_fill_lanczos_center_2.png"><meta property="twitter:image" content="https://www.romainthomas.fr/images/icon_hu2654a0fcc87c65a864822ac27b001d3b_698_512x512_fill_lanczos_center_2.png"><meta property="og:locale" content="en-us"><meta property="og:updated_time" content="2021-06-03T00:00:00+00:00"><title>Publications | Romain Thomas</title></head><body id=top data-spy=scroll data-offset=70 data-target=#TableOfContents><aside class=search-results id=search><div class=container><section class=search-header><div class="row no-gutters justify-content-between mb-3"><div class=col-6><h1>Search</h1></div><div class="col-6 col-search-close"><a class=js-search href=#><i class="fas fa-times-circle text-muted" aria-hidden=true></i></a></div></div><div id=search-box><input name=q id=search-query placeholder=Search... autocapitalize=off autocomplete=off autocorrect=off spellcheck=false type=search class=form-control></div></section><section class=section-search-results><div id=search-hits></div></section></div></aside><nav class="navbar navbar-expand-lg navbar-light compensate-for-scrollbar" id=navbar-main><div class=container><div class="d-none d-lg-inline-flex"><a class=navbar-brand href=/>Romain Thomas</a></div><button type=button class=navbar-toggler data-toggle=collapse data-target=#navbar-content aria-controls=navbar aria-expanded=false aria-label="Toggle navigation">
-<span><i class="fas fa-bars"></i></span></button><div class="navbar-brand-mobile-wrapper d-inline-flex d-lg-none"><a class=navbar-brand href=/>Romain Thomas</a></div><div class="navbar-collapse main-menu-item collapse justify-content-center" id=navbar-content><ul class="navbar-nav d-md-inline-flex"><li class=nav-item><a class=nav-link href=/#about><span>Home</span></a></li><li class=nav-item><a class=nav-link href=/#publications><span>Publications</span></a></li><li class=nav-item><a class=nav-link href=/#posts><span>Posts</span></a></li><li class=nav-item><a class=nav-link href=/#projects><span>Projects</span></a></li><li class=nav-item><a class=nav-link href=/#projects-images><span>Gallery</span></a></li><li class=nav-item><a class=nav-link href=/#work-experience><span>Work experience</span></a></li><li class=nav-item><a class=nav-link href=/#contact><span>Contact</span></a></li></ul></div><ul class="nav-icons navbar-nav flex-row ml-auto d-flex pl-md-2"><li class=nav-item><a class="nav-link js-search" href=# aria-label=Search><i class="fas fa-search" aria-hidden=true></i></a></li></ul></div></nav><div class="universal-wrapper pt-3"><h1>Publications</h1></div><div class=universal-wrapper><div class=row><div class=col-lg-12><div class="form-row mb-4"><div class=col-auto><input type=search class=filter-search placeholder=Search... autocapitalize=off autocomplete=off autocorrect=off role=textbox spellcheck=false></div><div class=col-auto><select class="pub-filters pubtype-select form-control form-control-sm" data-filter-group=pubtype><option value=*>Type</option><option value=.pubtype-0>
-Uncategorized</option><option value=.pubtype-1>
-Conference paper</option><option value=.pubtype-2>
-Journal article</option></select></div><div class=col-auto><select class="pub-filters form-control form-control-sm" data-filter-group=year><option value=*>Date</option><option value=.year-2021>
-2021</option><option value=.year-2020>
-2020</option><option value=.year-2019>
-2019</option><option value=.year-2018>
-2018</option><option value=.year-2017>
-2017</option><option value=.year-2016>
-2016</option><option value=.year-2015>
-2015</option></select></div></div><div id=container-publications><div class="grid-sizer col-lg-12 isotope-item pubtype-0 year-2021"><div class="media stream-item"><div class=media-body><h3 class="article-title mb-0 mt-0"><a href=/publication/21-sstic-qbdl/>QBDL: QuarkslaB Dynamic Loader</a></h3><a href=/publication/21-sstic-qbdl/ class=summary-link><div class=article-style>The QuarkslaB Dynamic Loader (QBDL) library aims at providing a modular and portable way to dynamically load and link binaries</div></a><div class="stream-meta article-metadata"><div><span>Adrien Guinet</span>, <span>Romain Thomas</span></div></div><div class=btn-links><a class="btn btn-outline-primary my-1 mr-1 btn-sm" href=https://github.com/quarkslab/QBDL target=_blank rel=noopener>Project</a>
-<a class="btn btn-outline-primary my-1 mr-1 btn-sm" href=https://www.sstic.org/2021/presentation/qbdl_quarkslab_dynamic_loader/ target=_blank rel=noopener>Source Document</a></div></div><div class=ml-3><a href=/publication/21-sstic-qbdl/><img src=/publication/21-sstic-qbdl/featured_hu439a674e583524e612e0b908b1e6cae1_739908_150x0_resize_lanczos_2.png alt="QBDL: QuarkslaB Dynamic Loader"></a></div></div></div><div class="grid-sizer col-lg-12 isotope-item pubtype-1 year-2020"><div class="media stream-item"><div class=media-body><h3 class="article-title mb-0 mt-0"><a href=/publication/20-bh-asia-dbi/>Dynamic Binary Instrumentation Techniques to Address Native Code Obfuscation</a></h3><a href=/publication/20-bh-asia-dbi/ class=summary-link><div class=article-style>Android applications are becoming more and more obfuscated to prevent reverse engineering. While obfuscation can be applied on both, …</div></a><div class="stream-meta article-metadata"><div><span>Romain Thomas</span></div></div><div class=btn-links><a class="btn btn-outline-primary my-1 mr-1 btn-sm" href=https://www.blackhat.com/asia-20/briefings/schedule/#dynamic-binary-instrumentation-techniques-to-address-native-code-obfuscation-18309 target=_blank rel=noopener>Source Document</a></div></div><div class=ml-3><a href=/publication/20-bh-asia-dbi/><img src=/publication/20-bh-asia-dbi/featured_hu03eb62ed690537a0636629fd2e3c7bad_101151_150x0_resize_lanczos_2.png alt="Dynamic Binary Instrumentation Techniques to Address Native Code Obfuscation"></a></div></div></div><div class="grid-sizer col-lg-12 isotope-item pubtype-0 year-2019"><div class="media stream-item"><div class=media-body><h3 class="article-title mb-0 mt-0"><a href=/publication/android-restrictions-bypass/>Android Runtime Restrictions Bypass</a></h3><a href=/publication/android-restrictions-bypass/ class=summary-link><div class=article-style>This paper explains how to disable runtime restrictions without root privileges</div></a><div class="stream-meta article-metadata"><div><span>Romain Thomas</span></div></div><div class=btn-links><a class="btn btn-outline-primary my-1 mr-1 btn-sm" href=/publication/android-restrictions-bypass/report.pdf target=_blank rel=noopener>PDF</a>
-<a class="btn btn-outline-primary my-1 mr-1 btn-sm" href=https://github.com/quarkslab/android-restriction-bypass target=_blank rel=noopener>Code</a>
-<a class="btn btn-outline-primary my-1 mr-1 btn-sm" href=/project/android-runtime-restrictions-bypass/>Project</a>
-<a class="btn btn-outline-primary my-1 mr-1 btn-sm" href=https://blog.quarkslab.com/android-runtime-restrictions-bypass.html target=_blank rel=noopener>Source Document</a></div></div><div class=ml-3><a href=/publication/android-restrictions-bypass/><img src=/publication/android-restrictions-bypass/featured_huef3c54059263e27541758e1c2867e3f8_13393_150x0_resize_lanczos_2.png alt="Android Runtime Restrictions Bypass"></a></div></div></div><div class="grid-sizer col-lg-12 isotope-item pubtype-1 year-2018"><div class="media stream-item"><div class=media-body><h3 class="article-title mb-0 mt-0"><a href=/publication/static-instrumentation/>Static Instrumentation Based on Executable Formats</a></h3><a href=/publication/static-instrumentation/ class=summary-link><div class=article-style>Talk given at <a href=https://recon.cx/2018/montreal/>Recon Montréal</a> and <a href=https://2018.pass-the-salt.org/schedule/#instrumentation>PassTheSalt18</a> about static instrumentation and its use cases.</div></a><div class="stream-meta article-metadata"><div><span>Romain Thomas</span></div></div><div class=btn-links><a class="btn btn-outline-primary my-1 mr-1 btn-sm" href=/project/lief/>Project</a>
-<a class="btn btn-outline-primary my-1 mr-1 btn-sm" href=/publication/static-instrumentation/18-06-Recon18-Formats-Instrumentation.pdf target=_blank rel=noopener>Slides</a></div></div><div class=ml-3><a href=/publication/static-instrumentation/><img src=/publication/static-instrumentation/featured_hu86f5b8f055b7d46433c179b4401beb30_221184_150x0_resize_lanczos_2.png alt="Static Instrumentation Based on Executable Formats"></a></div></div></div><div class="grid-sizer col-lg-12 isotope-item pubtype-0 year-2017"><div class="media stream-item"><div class=media-body><h3 class="article-title mb-0 mt-0"><a href=/publication/lief/>LIEF: Library to Instrument Executable Formats</a></h3><a href=/publication/lief/ class=summary-link><div class=article-style>When analyzing executable, the first layer of information is the format in which the executable is wrapped. It turns out that a lot of tools and libraries exist to analyze and instrument machine code wrapped by the format, but there is not such library to handle the three mainstream executable formats and to both read and modify these formats. LIEF has been developed to that end.
-In the talk we will explain the rationale behind LIEF architecture choices, what LIEF allows to do and have a look at use cases.</div></a><div class="stream-meta article-metadata"><div><span>Romain Thomas</span></div></div><div class=btn-links><a class="btn btn-outline-primary my-1 mr-1 btn-sm" href=/project/lief/>Project</a>
-<a class="btn btn-outline-primary my-1 mr-1 btn-sm" href=/publication/slides/17-07-RMLL-LIEF.pdf target=_blank rel=noopener>Slides</a>
-<a class="btn btn-outline-primary my-1 mr-1 btn-sm" href="https://prog2017.rmll.info/programme/securite-entre-transparence-et-opacite/lief-bibliotheque-d-instrumentation-de-formats-executables-mais-ca-fait-bife-c?lang=en" target=_blank rel=noopener>Source Document</a></div></div><div class=ml-3><a href=/publication/lief/><img src=/publication/lief/featured_huf2fa3c33c93249ff583a2b3ee1ee4858_59450_150x0_resize_lanczos_2.png alt="LIEF: Library to Instrument Executable Formats"></a></div></div></div><div class="grid-sizer col-lg-12 isotope-item pubtype-0 year-2016"><div class="media stream-item"><div class=media-body><h3 class="article-title mb-0 mt-0"><a href=/publication/triton-vm-protection/>How Triton can help to reverse virtual machine based software protections</a></h3><a href=/publication/triton-vm-protection/ class=summary-link><div class=article-style>The first part of the talk is going to be an introduction to the Triton framework to expose its components and to explain how they work …</div></a><div class="stream-meta article-metadata"><div><span>Jonathan Salwan</span>, <span>Romain Thomas</span></div></div><div class=btn-links><a class="btn btn-outline-primary my-1 mr-1 btn-sm" href=https://triton.quarkslab.com/ target=_blank rel=noopener>Project</a>
-<a class="btn btn-outline-primary my-1 mr-1 btn-sm" href=https://triton.quarkslab.com/files/csaw2016-sos-rthomas-jsalwan.pdf target=_blank rel=noopener>Slides</a></div></div><div class=ml-3><a href=/publication/triton-vm-protection/><img src=/publication/triton-vm-protection/featured_hu50701c9015490488935fbd6adaea7063_193044_150x0_resize_lanczos_2.png alt="How Triton can help to reverse virtual machine based software protections"></a></div></div></div><div class="grid-sizer col-lg-12 isotope-item pubtype-1 year-2016"><div class="media stream-item"><div class=media-body><h3 class="article-title mb-0 mt-0"><a href=/publication/dynamic-binary-analysis-and-obfuscation/>Dynamic Binary Analysis and Obfuscated Codes</a></h3><a href=/publication/dynamic-binary-analysis-and-obfuscation/ class=summary-link><div class=article-style>At this presentation we will talk about how a DBA (Dynamic Binary Analysis) may help a reverse engineer to reverse obfuscated code. We …</div></a><div class="stream-meta article-metadata"><div><span>Jonathan Salwan</span>, <span>Romain Thomas</span></div></div><div class=btn-links><a class="btn btn-outline-primary my-1 mr-1 btn-sm" href=https://triton.quarkslab.com/ target=_blank rel=noopener>Project</a>
-<a class="btn btn-outline-primary my-1 mr-1 btn-sm" href=/publication/dynamic-binary-analysis-and-obfuscation/sthack2016-rthomas-jsalwan.pdf target=_blank rel=noopener>Slides</a></div></div><div class=ml-3><a href=/publication/dynamic-binary-analysis-and-obfuscation/><img src=/publication/dynamic-binary-analysis-and-obfuscation/featured_hu7df653c919f153b4e47877ea20711b26_39360_150x0_resize_lanczos_2.png alt="Dynamic Binary Analysis and Obfuscated Codes"></a></div></div></div><div class="grid-sizer col-lg-12 isotope-item pubtype-2 year-2015"><div class="media stream-item"><div class=media-body><h3 class="article-title mb-0 mt-0"><a href=/publication/triton/>How Triton may help to analyse obfuscated binaries</a></h3><a href=/publication/triton/ class=summary-link><div class=article-style>Binary obfuscation is used to protect software&rsquo;s intellectual property. There exist different kinds of obfucation but roughly, it …</div></a><div class="stream-meta article-metadata"><div><span>Jonathan Salwan</span>, <span>Romain Thomas</span></div></div><div class=btn-links><a class="btn btn-outline-primary my-1 mr-1 btn-sm" href=/publication/triton/misc82-triton.pdf target=_blank rel=noopener>PDF</a>
-<a class="btn btn-outline-primary my-1 mr-1 btn-sm" href=https://triton.quarkslab.com/ target=_blank rel=noopener>Project</a></div></div><div class=ml-3><a href=/publication/triton/><img src=/publication/triton/featured_hu74b06b6607b595c1ca69e663a1b4612c_130470_150x0_resize_lanczos_2.png alt="How Triton may help to analyse obfuscated binaries"></a></div></div></div></div></div></div></div><script src=https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin=anonymous></script><script src=https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/4.1.4/imagesloaded.pkgd.min.js integrity="sha256-lqvxZrPLtfffUl2G/e7szqSvPBILGbwmsGE1MKlOi0Q=" crossorigin=anonymous></script><script src=https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.6/isotope.pkgd.min.js integrity="sha256-CBrpuqrMhXwcLLUd5tvQ4euBHCdh7wGlDfNz8vbu/iI=" crossorigin=anonymous></script><script src=https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin=anonymous></script><script src=https://cdnjs.cloudflare.com/ajax/libs/instant.page/5.1.0/instantpage.min.js integrity="sha512-1+qUtKoh9XZW7j+6LhRMAyOrgSQKenQ4mluTR+cvxXjP1Z54RxZuzstR/H9kgPXQsVB8IW7DMDFUJpzLjvhGSQ==" crossorigin=anonymous></script><script src=https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.2/highlight.min.js integrity="sha512-7t8APmYpzEsZP7CYoA7RfMPV9Bb+PJHa9x2WiUnDXZx3XHveuyWUtvNOexhkierl5flZ3tr92dP1mMS+SGlD+A==" crossorigin=anonymous></script><script src=https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.2/languages/r.min.js></script><script src=https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.2/languages/armasm.min.js></script><script src=https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet.js integrity="sha256-EErZamuLefUnbMBQbsEqu1USa+btR2oIlCpBJbyD4/g=" crossorigin=anonymous></script><script>const code_highlighting=!0</script><script>const isSiteThemeDark=!1</script><script>const search_config={indexURI:"/index.json",minLength:1,threshold:.3},i18n={no_results:"No results found",placeholder:"Search...",results:"results found"},content_type={post:"Posts",project:"Projects",publication:"Publications",talk:"Talks",slides:"Slides"}</script><script id=search-hit-fuse-template type=text/x-template>
+<!doctype html><html lang=en-us>
+<head>
+<meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<meta http-equiv=x-ua-compatible content="IE=edge">
+<meta name=generator content="Source Themes Academic 4.8.0">
+<meta name=description content="Security Engineer working on Android, obfuscation, reverse engineering and software protections">
+<link rel=alternate hreflang=en-us href=https://www.romainthomas.fr/publication/>
+<meta name=theme-color content="#2962ff">
+<link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css integrity="sha256-FMvZuGapsJLjouA6k7Eo2lusoAX9i0ShlWFG6qt7SLc=" crossorigin=anonymous>
+<link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin=anonymous>
+<link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.2/styles/atom-one-light.min.css crossorigin=anonymous title=hl-light>
+<link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.2/styles/atom-one-light.min.css crossorigin=anonymous title=hl-dark disabled>
+<link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet.css integrity="sha256-SHMGCYmST46SoyGgo4YR/9AlK1vf3ff84Aq9yK4hdqM=" crossorigin=anonymous>
+<script src=https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.1.2/lazysizes.min.js integrity="sha256-Md1qLToewPeKjfAHU1zyPwOutccPAm5tahnaw7Osw0A=" crossorigin=anonymous async></script>
+<link rel=stylesheet href="https://fonts.googleapis.com/css?family=Montserrat:400,700%7CRoboto:400,400italic,700%7CRoboto+Mono%7CFira+Code&display=swap">
+<link rel=stylesheet href=/css/academic.css>
+<link href=https://www.romainthomas.fr/post/index.xml rel=feed type=application/rss+xml title="Blog Posts | Romain Thomas">
+<link href=https://www.romainthomas.fr/post/index.xml rel=alternate type=application/rss+xml title="Blog Posts | Romain Thomas">
+<link rel=manifest href=/index.webmanifest>
+<link rel=icon type=image/png href=/images/icon_hu2654a0fcc87c65a864822ac27b001d3b_698_32x32_fill_lanczos_center_3.png>
+<link rel=apple-touch-icon type=image/png href=/images/icon_hu2654a0fcc87c65a864822ac27b001d3b_698_192x192_fill_lanczos_center_3.png>
+<link rel=canonical href=https://www.romainthomas.fr/publication/>
+<meta property="twitter:card" content="summary">
+<meta property="twitter:site" content="@rh0main">
+<meta property="twitter:creator" content="@rh0main">
+<meta property="og:site_name" content="Romain Thomas">
+<meta property="og:url" content="https://www.romainthomas.fr/publication/">
+<meta property="og:title" content="Publications | Romain Thomas">
+<meta property="og:description" content="Security Engineer working on Android, obfuscation, reverse engineering and software protections"><meta property="og:image" content="https://www.romainthomas.fr/images/icon_hu2654a0fcc87c65a864822ac27b001d3b_698_512x512_fill_lanczos_center_3.png">
+<meta property="twitter:image" content="https://www.romainthomas.fr/images/icon_hu2654a0fcc87c65a864822ac27b001d3b_698_512x512_fill_lanczos_center_3.png"><meta property="og:locale" content="en-us">
+<meta property="og:updated_time" content="2021-11-05T00:00:00+00:00">
+<title>Publications | Romain Thomas</title>
+</head>
+<body id=top data-spy=scroll data-offset=70 data-target=#TableOfContents>
+<aside class=search-results id=search>
+<div class=container>
+<section class=search-header>
+<div class="row no-gutters justify-content-between mb-3">
+<div class=col-6>
+<h1>Search</h1>
+</div>
+<div class="col-6 col-search-close">
+<a class=js-search href=#><i class="fas fa-times-circle text-muted" aria-hidden=true></i></a>
+</div>
+</div>
+<div id=search-box>
+<input name=q id=search-query placeholder=Search... autocapitalize=off autocomplete=off autocorrect=off spellcheck=false type=search class=form-control>
+</div>
+</section>
+<section class=section-search-results>
+<div id=search-hits>
+</div>
+</section>
+</div>
+</aside>
+<nav class="navbar navbar-expand-lg navbar-light compensate-for-scrollbar" id=navbar-main>
+<div class=container>
+<div class="d-none d-lg-inline-flex">
+<a class=navbar-brand href=/>Romain Thomas</a>
+</div>
+<button type=button class=navbar-toggler data-toggle=collapse data-target=#navbar-content aria-controls=navbar aria-expanded=false aria-label="Toggle navigation">
+<span><i class="fas fa-bars"></i></span>
+</button>
+<div class="navbar-brand-mobile-wrapper d-inline-flex d-lg-none">
+<a class=navbar-brand href=/>Romain Thomas</a>
+</div>
+<div class="navbar-collapse main-menu-item collapse justify-content-center" id=navbar-content>
+<ul class="navbar-nav d-md-inline-flex">
+<li class=nav-item>
+<a class=nav-link href=/#about><span>Home</span></a>
+</li>
+<li class=nav-item>
+<a class=nav-link href=/#publications><span>Publications</span></a>
+</li>
+<li class=nav-item>
+<a class=nav-link href=/#posts><span>Posts</span></a>
+</li>
+<li class=nav-item>
+<a class=nav-link href=/#projects><span>Projects</span></a>
+</li>
+<li class=nav-item>
+<a class=nav-link href=/#projects-images><span>Gallery</span></a>
+</li>
+<li class=nav-item>
+<a class=nav-link href=/#work-experience><span>Work experience</span></a>
+</li>
+<li class=nav-item>
+<a class=nav-link href=/#contact><span>Contact</span></a>
+</li>
+</ul>
+</div>
+<ul class="nav-icons navbar-nav flex-row ml-auto d-flex pl-md-2">
+<li class=nav-item>
+<a class="nav-link js-search" href=# aria-label=Search><i class="fas fa-search" aria-hidden=true></i></a>
+</li>
+</ul>
+</div>
+</nav>
+<div class="universal-wrapper pt-3">
+<h1>Publications</h1>
+</div>
+<div class=universal-wrapper>
+<div class=row>
+<div class=col-lg-12>
+<div class="form-row mb-4">
+<div class=col-auto>
+<input type=search class=filter-search placeholder=Search... autocapitalize=off autocomplete=off autocorrect=off role=textbox spellcheck=false>
+</div>
+<div class=col-auto>
+<select class="pub-filters pubtype-select form-control form-control-sm" data-filter-group=pubtype><option value=*>Type</option><option value=.pubtype-0>
+Uncategorized
+</option><option value=.pubtype-1>
+Conference paper
+</option><option value=.pubtype-2>
+Journal article
+</option></select>
+</div>
+<div class=col-auto>
+<select class="pub-filters form-control form-control-sm" data-filter-group=year><option value=*>Date</option><option value=.year-2021>
+2021
+</option><option value=.year-2020>
+2020
+</option><option value=.year-2019>
+2019
+</option><option value=.year-2018>
+2018
+</option><option value=.year-2017>
+2017
+</option><option value=.year-2016>
+2016
+</option><option value=.year-2015>
+2015
+</option></select>
+</div>
+</div>
+<div id=container-publications>
+<div class="grid-sizer col-lg-12 isotope-item pubtype-0 year-2021">
+<div class="media stream-item">
+<div class=media-body>
+<h3 class="article-title mb-0 mt-0">
+<a href=/publication/21-ekoparty-mobile-hacking-space-pgsharp/>PGSharp: Analysis of a Cheat Engine on Android</a>
+</h3>
+<a href=/publication/21-ekoparty-mobile-hacking-space-pgsharp/ class=summary-link>
+<div class=article-style>
+PGSharp is a cheating app for PokemonGO that works on non-rooted devices. This talk introduces its functionalities and the protections …
+</div>
+</a>
+<div class="stream-meta article-metadata">
+<div>
+<span>Romain Thomas</span>
+</div>
+</div>
+<div class=btn-links>
+<a class="btn btn-outline-primary my-1 mr-1 btn-sm" href=https://github.com/romainthomas/pgsharp target=_blank rel=noopener>
+Code
+</a>
+</div>
+</div>
+<div class=ml-3>
+<a href=/publication/21-ekoparty-mobile-hacking-space-pgsharp/>
+<img src=/publication/21-ekoparty-mobile-hacking-space-pgsharp/featured_hud549c031c2cc4efdf7581c0f1c2753de_433102_150x0_resize_lanczos_3.png alt="PGSharp: Analysis of a Cheat Engine on Android">
+</a>
+</div>
+</div>
+</div>
+<div class="grid-sizer col-lg-12 isotope-item pubtype-0 year-2021">
+<div class="media stream-item">
+<div class=media-body>
+<h3 class="article-title mb-0 mt-0">
+<a href=/publication/21-sstic-qbdl/>QBDL: QuarkslaB Dynamic Loader</a>
+</h3>
+<a href=/publication/21-sstic-qbdl/ class=summary-link>
+<div class=article-style>
+The QuarkslaB Dynamic Loader (QBDL) library aims at providing a modular and portable way to dynamically load and link binaries
+</div>
+</a>
+<div class="stream-meta article-metadata">
+<div>
+<span>Adrien Guinet</span>, <span>Romain Thomas</span>
+</div>
+</div>
+<div class=btn-links>
+<a class="btn btn-outline-primary my-1 mr-1 btn-sm" href=https://github.com/quarkslab/QBDL target=_blank rel=noopener>
+Project
+</a>
+<a class="btn btn-outline-primary my-1 mr-1 btn-sm" href=https://www.sstic.org/2021/presentation/qbdl_quarkslab_dynamic_loader/ target=_blank rel=noopener>
+Source Document
+</a>
+</div>
+</div>
+<div class=ml-3>
+<a href=/publication/21-sstic-qbdl/>
+<img src=/publication/21-sstic-qbdl/featured_hu439a674e583524e612e0b908b1e6cae1_739908_150x0_resize_lanczos_3.png alt="QBDL: QuarkslaB Dynamic Loader">
+</a>
+</div>
+</div>
+</div>
+<div class="grid-sizer col-lg-12 isotope-item pubtype-1 year-2020">
+<div class="media stream-item">
+<div class=media-body>
+<h3 class="article-title mb-0 mt-0">
+<a href=/publication/20-bh-asia-dbi/>Dynamic Binary Instrumentation Techniques to Address Native Code Obfuscation</a>
+</h3>
+<a href=/publication/20-bh-asia-dbi/ class=summary-link>
+<div class=article-style>
+Android applications are becoming more and more obfuscated to prevent reverse engineering. While obfuscation can be applied on both, …
+</div>
+</a>
+<div class="stream-meta article-metadata">
+<div>
+<span>Romain Thomas</span>
+</div>
+</div>
+<div class=btn-links>
+<a class="btn btn-outline-primary my-1 mr-1 btn-sm" href=https://www.blackhat.com/asia-20/briefings/schedule/#dynamic-binary-instrumentation-techniques-to-address-native-code-obfuscation-18309 target=_blank rel=noopener>
+Source Document
+</a>
+</div>
+</div>
+<div class=ml-3>
+<a href=/publication/20-bh-asia-dbi/>
+<img src=/publication/20-bh-asia-dbi/featured_hu03eb62ed690537a0636629fd2e3c7bad_101151_150x0_resize_lanczos_3.png alt="Dynamic Binary Instrumentation Techniques to Address Native Code Obfuscation">
+</a>
+</div>
+</div>
+</div>
+<div class="grid-sizer col-lg-12 isotope-item pubtype-0 year-2019">
+<div class="media stream-item">
+<div class=media-body>
+<h3 class="article-title mb-0 mt-0">
+<a href=/publication/android-restrictions-bypass/>Android Runtime Restrictions Bypass</a>
+</h3>
+<a href=/publication/android-restrictions-bypass/ class=summary-link>
+<div class=article-style>
+This paper explains how to disable runtime restrictions without root privileges
+</div>
+</a>
+<div class="stream-meta article-metadata">
+<div>
+<span>Romain Thomas</span>
+</div>
+</div>
+<div class=btn-links>
+<a class="btn btn-outline-primary my-1 mr-1 btn-sm" href=/publication/android-restrictions-bypass/report.pdf target=_blank rel=noopener>
+PDF
+</a>
+<a class="btn btn-outline-primary my-1 mr-1 btn-sm" href=https://github.com/quarkslab/android-restriction-bypass target=_blank rel=noopener>
+Code
+</a>
+<a class="btn btn-outline-primary my-1 mr-1 btn-sm" href=/project/android-runtime-restrictions-bypass/>
+Project
+</a>
+<a class="btn btn-outline-primary my-1 mr-1 btn-sm" href=https://blog.quarkslab.com/android-runtime-restrictions-bypass.html target=_blank rel=noopener>
+Source Document
+</a>
+</div>
+</div>
+<div class=ml-3>
+<a href=/publication/android-restrictions-bypass/>
+<img src=/publication/android-restrictions-bypass/featured_huef3c54059263e27541758e1c2867e3f8_13393_150x0_resize_lanczos_3.png alt="Android Runtime Restrictions Bypass">
+</a>
+</div>
+</div>
+</div>
+<div class="grid-sizer col-lg-12 isotope-item pubtype-1 year-2018">
+<div class="media stream-item">
+<div class=media-body>
+<h3 class="article-title mb-0 mt-0">
+<a href=/publication/static-instrumentation/>Static Instrumentation Based on Executable Formats</a>
+</h3>
+<a href=/publication/static-instrumentation/ class=summary-link>
+<div class=article-style>
+Talk given at <a href=https://recon.cx/2018/montreal/>Recon Montréal</a> and <a href=https://2018.pass-the-salt.org/schedule/#instrumentation>PassTheSalt18</a> about static instrumentation and its use cases.
+</div>
+</a>
+<div class="stream-meta article-metadata">
+<div>
+<span>Romain Thomas</span>
+</div>
+</div>
+<div class=btn-links>
+<a class="btn btn-outline-primary my-1 mr-1 btn-sm" href=/project/lief/>
+Project
+</a>
+<a class="btn btn-outline-primary my-1 mr-1 btn-sm" href=/publication/static-instrumentation/18-06-Recon18-Formats-Instrumentation.pdf target=_blank rel=noopener>
+Slides
+</a>
+</div>
+</div>
+<div class=ml-3>
+<a href=/publication/static-instrumentation/>
+<img src=/publication/static-instrumentation/featured_hu86f5b8f055b7d46433c179b4401beb30_221184_150x0_resize_lanczos_3.png alt="Static Instrumentation Based on Executable Formats">
+</a>
+</div>
+</div>
+</div>
+<div class="grid-sizer col-lg-12 isotope-item pubtype-0 year-2017">
+<div class="media stream-item">
+<div class=media-body>
+<h3 class="article-title mb-0 mt-0">
+<a href=/publication/lief/>LIEF: Library to Instrument Executable Formats</a>
+</h3>
+<a href=/publication/lief/ class=summary-link>
+<div class=article-style>
+When analyzing executable, the first layer of information is the format in which the executable is wrapped. It turns out that a lot of tools and libraries exist to analyze and instrument machine code wrapped by the format, but there is not such library to handle the three mainstream executable formats and to both read and modify these formats. LIEF has been developed to that end.
+In the talk we will explain the rationale behind LIEF architecture choices, what LIEF allows to do and have a look at use cases.
+</div>
+</a>
+<div class="stream-meta article-metadata">
+<div>
+<span>Romain Thomas</span>
+</div>
+</div>
+<div class=btn-links>
+<a class="btn btn-outline-primary my-1 mr-1 btn-sm" href=/project/lief/>
+Project
+</a>
+<a class="btn btn-outline-primary my-1 mr-1 btn-sm" href=/publication/slides/17-07-RMLL-LIEF.pdf target=_blank rel=noopener>
+Slides
+</a>
+<a class="btn btn-outline-primary my-1 mr-1 btn-sm" href="https://prog2017.rmll.info/programme/securite-entre-transparence-et-opacite/lief-bibliotheque-d-instrumentation-de-formats-executables-mais-ca-fait-bife-c?lang=en" target=_blank rel=noopener>
+Source Document
+</a>
+</div>
+</div>
+<div class=ml-3>
+<a href=/publication/lief/>
+<img src=/publication/lief/featured_huf2fa3c33c93249ff583a2b3ee1ee4858_59450_150x0_resize_lanczos_3.png alt="LIEF: Library to Instrument Executable Formats">
+</a>
+</div>
+</div>
+</div>
+<div class="grid-sizer col-lg-12 isotope-item pubtype-0 year-2016">
+<div class="media stream-item">
+<div class=media-body>
+<h3 class="article-title mb-0 mt-0">
+<a href=/publication/triton-vm-protection/>How Triton can help to reverse virtual machine based software protections</a>
+</h3>
+<a href=/publication/triton-vm-protection/ class=summary-link>
+<div class=article-style>
+The first part of the talk is going to be an introduction to the Triton framework to expose its components and to explain how they work …
+</div>
+</a>
+<div class="stream-meta article-metadata">
+<div>
+<span>Jonathan Salwan</span>, <span>Romain Thomas</span>
+</div>
+</div>
+<div class=btn-links>
+<a class="btn btn-outline-primary my-1 mr-1 btn-sm" href=https://triton.quarkslab.com/ target=_blank rel=noopener>
+Project
+</a>
+<a class="btn btn-outline-primary my-1 mr-1 btn-sm" href=https://triton.quarkslab.com/files/csaw2016-sos-rthomas-jsalwan.pdf target=_blank rel=noopener>
+Slides
+</a>
+</div>
+</div>
+<div class=ml-3>
+<a href=/publication/triton-vm-protection/>
+<img src=/publication/triton-vm-protection/featured_hu50701c9015490488935fbd6adaea7063_193044_150x0_resize_lanczos_3.png alt="How Triton can help to reverse virtual machine based software protections">
+</a>
+</div>
+</div>
+</div>
+<div class="grid-sizer col-lg-12 isotope-item pubtype-1 year-2016">
+<div class="media stream-item">
+<div class=media-body>
+<h3 class="article-title mb-0 mt-0">
+<a href=/publication/dynamic-binary-analysis-and-obfuscation/>Dynamic Binary Analysis and Obfuscated Codes</a>
+</h3>
+<a href=/publication/dynamic-binary-analysis-and-obfuscation/ class=summary-link>
+<div class=article-style>
+At this presentation we will talk about how a DBA (Dynamic Binary Analysis) may help a reverse engineer to reverse obfuscated code. We …
+</div>
+</a>
+<div class="stream-meta article-metadata">
+<div>
+<span>Jonathan Salwan</span>, <span>Romain Thomas</span>
+</div>
+</div>
+<div class=btn-links>
+<a class="btn btn-outline-primary my-1 mr-1 btn-sm" href=https://triton.quarkslab.com/ target=_blank rel=noopener>
+Project
+</a>
+<a class="btn btn-outline-primary my-1 mr-1 btn-sm" href=/publication/dynamic-binary-analysis-and-obfuscation/sthack2016-rthomas-jsalwan.pdf target=_blank rel=noopener>
+Slides
+</a>
+</div>
+</div>
+<div class=ml-3>
+<a href=/publication/dynamic-binary-analysis-and-obfuscation/>
+<img src=/publication/dynamic-binary-analysis-and-obfuscation/featured_hu7df653c919f153b4e47877ea20711b26_39360_150x0_resize_lanczos_3.png alt="Dynamic Binary Analysis and Obfuscated Codes">
+</a>
+</div>
+</div>
+</div>
+<div class="grid-sizer col-lg-12 isotope-item pubtype-2 year-2015">
+<div class="media stream-item">
+<div class=media-body>
+<h3 class="article-title mb-0 mt-0">
+<a href=/publication/triton/>How Triton may help to analyse obfuscated binaries</a>
+</h3>
+<a href=/publication/triton/ class=summary-link>
+<div class=article-style>
+Binary obfuscation is used to protect software&rsquo;s intellectual property. There exist different kinds of obfucation but roughly, it …
+</div>
+</a>
+<div class="stream-meta article-metadata">
+<div>
+<span>Jonathan Salwan</span>, <span>Romain Thomas</span>
+</div>
+</div>
+<div class=btn-links>
+<a class="btn btn-outline-primary my-1 mr-1 btn-sm" href=/publication/triton/misc82-triton.pdf target=_blank rel=noopener>
+PDF
+</a>
+<a class="btn btn-outline-primary my-1 mr-1 btn-sm" href=https://triton.quarkslab.com/ target=_blank rel=noopener>
+Project
+</a>
+</div>
+</div>
+<div class=ml-3>
+<a href=/publication/triton/>
+<img src=/publication/triton/featured_hu74b06b6607b595c1ca69e663a1b4612c_130470_150x0_resize_lanczos_3.png alt="How Triton may help to analyse obfuscated binaries">
+</a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script src=https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin=anonymous></script>
+<script src=https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/4.1.4/imagesloaded.pkgd.min.js integrity="sha256-lqvxZrPLtfffUl2G/e7szqSvPBILGbwmsGE1MKlOi0Q=" crossorigin=anonymous></script>
+<script src=https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.6/isotope.pkgd.min.js integrity="sha256-CBrpuqrMhXwcLLUd5tvQ4euBHCdh7wGlDfNz8vbu/iI=" crossorigin=anonymous></script>
+<script src=https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin=anonymous></script>
+<script src=https://cdnjs.cloudflare.com/ajax/libs/instant.page/5.1.0/instantpage.min.js integrity="sha512-1+qUtKoh9XZW7j+6LhRMAyOrgSQKenQ4mluTR+cvxXjP1Z54RxZuzstR/H9kgPXQsVB8IW7DMDFUJpzLjvhGSQ==" crossorigin=anonymous></script>
+<script src=https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.2/highlight.min.js integrity="sha512-7t8APmYpzEsZP7CYoA7RfMPV9Bb+PJHa9x2WiUnDXZx3XHveuyWUtvNOexhkierl5flZ3tr92dP1mMS+SGlD+A==" crossorigin=anonymous></script>
+<script src=https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.2/languages/r.min.js></script>
+<script src=https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.2/languages/armasm.min.js></script>
+<script src=https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet.js integrity="sha256-EErZamuLefUnbMBQbsEqu1USa+btR2oIlCpBJbyD4/g=" crossorigin=anonymous></script>
+<script>const code_highlighting=!0</script>
+<script>const isSiteThemeDark=!1</script>
+<script>const search_config={indexURI:"/index.json",minLength:1,threshold:.3},i18n={no_results:"No results found",placeholder:"Search...",results:"results found"},content_type={post:"Posts",project:"Projects",publication:"Publications",talk:"Talks",slides:"Slides"}</script>
+<script id=search-hit-fuse-template type=text/x-template>
       <div class="search-hit" id="summary-{{key}}">
       <div class="search-hit-content">
         <div class="search-hit-name">
@@ -30,6 +453,49 @@ In the talk we will explain the rationale behind LIEF architecture choices, what
         </div>
       </div>
       </div>
-    </script><script src=https://cdnjs.cloudflare.com/ajax/libs/fuse.js/3.2.1/fuse.min.js integrity="sha256-VzgmKYmhsGNNN4Ph1kMW+BjoYJM2jV5i4IlFoeZA9XI=" crossorigin=anonymous></script><script src=https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin=anonymous></script><script src=/js/academic.min.f6ecf7692215f2bc4850b72c8176bfa2.js></script><div class=container><footer class=site-footer><p class=powered-by>Published with <a href=https://sourcethemes.com/academic/ target=_blank rel=noopener>Academic Website Builder</a> - Icons made by <a href=http://www.freepik.com/ title=Freepik>Freepik</a></p><p class=powered-by><span class=float-right aria-hidden=true><a href=# class=back-to-top><span class=button_icon><i class="fas fa-chevron-up fa-2x"></i></span></a></span></p></footer></div><div id=modal class="modal fade" role=dialog><div class=modal-dialog><div class=modal-content><div class=modal-header><h5 class=modal-title>Cite</h5><button type=button class=close data-dismiss=modal aria-label=Close>
-<span aria-hidden=true>&#215;</span></button></div><div class=modal-body><pre><code class="tex hljs"></code></pre></div><div class=modal-footer><a class="btn btn-outline-primary my-1 js-copy-cite" href=# target=_blank><i class="fas fa-copy"></i> Copy</a>
-<a class="btn btn-outline-primary my-1 js-download-cite" href=# target=_blank><i class="fas fa-download"></i> Download</a><div id=modal-error></div></div></div></div></div></body></html>
+    </script>
+<script src=https://cdnjs.cloudflare.com/ajax/libs/fuse.js/3.2.1/fuse.min.js integrity="sha256-VzgmKYmhsGNNN4Ph1kMW+BjoYJM2jV5i4IlFoeZA9XI=" crossorigin=anonymous></script>
+<script src=https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin=anonymous></script>
+<script src=/js/academic.min.f6ecf7692215f2bc4850b72c8176bfa2.js></script>
+<div class=container>
+<footer class=site-footer>
+<p class=powered-by>
+Published with <a href=https://sourcethemes.com/academic/ target=_blank rel=noopener>Academic Website Builder</a>
+</p>
+<p class=powered-by>
+<span class=float-right aria-hidden=true>
+<a href=# class=back-to-top>
+<span class=button_icon>
+<i class="fas fa-chevron-up fa-2x"></i>
+</span>
+</a>
+</span>
+</p>
+</footer>
+</div>
+<div id=modal class="modal fade" role=dialog>
+<div class=modal-dialog>
+<div class=modal-content>
+<div class=modal-header>
+<h5 class=modal-title>Cite</h5>
+<button type=button class=close data-dismiss=modal aria-label=Close>
+<span aria-hidden=true>&#215;</span>
+</button>
+</div>
+<div class=modal-body>
+<pre><code class="tex hljs"></code></pre>
+</div>
+<div class=modal-footer>
+<a class="btn btn-outline-primary my-1 js-copy-cite" href=# target=_blank>
+<i class="fas fa-copy"></i> Copy
+</a>
+<a class="btn btn-outline-primary my-1 js-download-cite" href=# target=_blank>
+<i class="fas fa-download"></i> Download
+</a>
+<div id=modal-error></div>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

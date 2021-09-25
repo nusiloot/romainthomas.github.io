@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>iOS | Romain Thomas</title><link>https://www.romainthomas.fr/categories/ios/</link><atom:link href="https://www.romainthomas.fr/categories/ios/index.xml" rel="self" type="application/rss+xml"/><description>iOS</description><generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>Published with Academic Website Builder - Icons made by Freepik</copyright><lastBuildDate>Sun, 18 Jul 2021 00:00:00 +0000</lastBuildDate><image><url>https://www.romainthomas.fr/images/icon_hu2654a0fcc87c65a864822ac27b001d3b_698_512x512_fill_lanczos_center_2.png</url><title>iOS</title><link>https://www.romainthomas.fr/categories/ios/</link></image><item><title>Gotta Catch 'Em All: Frida &amp; jailbreak detection</title><link>https://www.romainthomas.fr/post/21-07-pokemongo-anti-frida-jailbreak-bypass/</link><pubDate>Sun, 18 Jul 2021 00:00:00 +0000</pubDate><guid>https://www.romainthomas.fr/post/21-07-pokemongo-anti-frida-jailbreak-bypass/</guid><description>&lt;style>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>DEFAULT iOS | Romain Thomas</title><link>https://www.romainthomas.fr/categories/ios/</link><atom:link href="https://www.romainthomas.fr/categories/ios/index.xml" rel="self" type="application/rss+xml"/><description>iOS</description><generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>Published with Academic Website Builder</copyright><lastBuildDate>Sun, 18 Jul 2021 00:00:00 +0000</lastBuildDate><image><url>https://www.romainthomas.fr/images/icon_hu2654a0fcc87c65a864822ac27b001d3b_698_512x512_fill_lanczos_center_3.png</url><title>iOS</title><link>https://www.romainthomas.fr/categories/ios/</link></image><item><title>Gotta Catch 'Em All: Frida &amp; jailbreak detection</title><link>https://www.romainthomas.fr/post/21-07-pokemongo-anti-frida-jailbreak-bypass/</link><pubDate>Sun, 18 Jul 2021 00:00:00 +0000</pubDate><guid>https://www.romainthomas.fr/post/21-07-pokemongo-anti-frida-jailbreak-bypass/</guid><description>&lt;style>
 .green {
 color:green;
 font-family: 'Fira Code', monospace;
@@ -70,7 +70,7 @@ as described in
 &lt;a href="https://www.linkedin.com/pulse/decrypting-apps-ios-john-coates/" target="_blank" rel="noopener">Decrypting Apps on iOS&lt;/a>.&lt;/p>
 &lt;h2 id="pokemongo-overview">PokemonGO Overview&lt;/h2>
 &lt;p>When running PokemonGO on a jailbroken device&lt;sup id="fnref:1">&lt;a href="#fn:1" class="footnote-ref" role="doc-noteref">1&lt;/a>&lt;/sup>, the application immediately crashes with the following backtrace:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text">0 ??? 0x000000020ac46ab8 0 + 8770579128
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-text" data-lang="text">0 ??? 0x000000020ac46ab8 0 + 8770579128
 1 libdyld.dylib 0x0000000184df8304 invocation function for block in dyld3::AllImages::runAllInitializersInImage(dyld3::closure::Image const*, dyld3::MachOLoaded const*) + 136
 2 libdyld.dylib 0x0000000184dea5b0 dyld3::closure::Image::forEachInitializer(void const*, void (void const*) block_pointer) const + 96
 3 libdyld.dylib 0x0000000184df8160 invocation function for block in dyld3::AllImages::runInitialzersBottomUp(dyld3::closure::Image const*) + 296
@@ -133,42 +133,42 @@ most of the logic to load Mach-O files.
 It turns out that at some points, the Mach-O&amp;rsquo;s constructors are processed in the &lt;code>doModInitFunctions&lt;/code> function
 (from
 &lt;a href="https://github.com/apple-opensource/dyld/blob/1128192c016372ae94793d88530bc5978c1fce93/src/ImageLoaderMachO.cpp#L2290" target="_blank" rel="noopener">ImageLoaderMachO.cpp&lt;/a>).&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="color:#66d9ef">void&lt;/span> ImageLoaderMachO&lt;span style="color:#f92672">::&lt;/span>doModInitFunctions(&lt;span style="color:#66d9ef">const&lt;/span> LinkContext&lt;span style="color:#f92672">&amp;amp;&lt;/span> context) {
-...
-&lt;span style="color:#66d9ef">for&lt;/span> (&lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#66d9ef">struct&lt;/span> &lt;span style="color:#a6e22e">macho_section&lt;/span>&lt;span style="color:#f92672">*&lt;/span> sect&lt;span style="color:#f92672">=&lt;/span>sectionsStart; sect &lt;span style="color:#f92672">&amp;lt;&lt;/span> sectionsEnd; &lt;span style="color:#f92672">++&lt;/span>sect) {
-&lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#66d9ef">uint8_t&lt;/span> type &lt;span style="color:#f92672">=&lt;/span> sect&lt;span style="color:#f92672">-&amp;gt;&lt;/span>flags &lt;span style="color:#f92672">&amp;amp;&lt;/span> SECTION_TYPE;
-&lt;span style="color:#66d9ef">if&lt;/span> ( type &lt;span style="color:#f92672">==&lt;/span> S_MOD_INIT_FUNC_POINTERS ) {
-Initializer&lt;span style="color:#f92672">*&lt;/span> inits &lt;span style="color:#f92672">=&lt;/span> (Initializer&lt;span style="color:#f92672">*&lt;/span>)(sect&lt;span style="color:#f92672">-&amp;gt;&lt;/span>addr &lt;span style="color:#f92672">+&lt;/span> fSlide);
-...
-&lt;span style="color:#66d9ef">if&lt;/span> (&lt;span style="color:#f92672">!&lt;/span>&lt;span style="color:#66d9ef">this&lt;/span>&lt;span style="color:#f92672">-&amp;gt;&lt;/span>containsAddress(stripPointer((&lt;span style="color:#66d9ef">void&lt;/span>&lt;span style="color:#f92672">*&lt;/span>)func)) ) {
-dyld&lt;span style="color:#f92672">::&lt;/span>throwf(&lt;span style="color:#e6db74">&amp;#34;initializer function %p not in mapped image for %s&lt;/span>&lt;span style="color:#ae81ff">\n&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>, func, &lt;span style="color:#66d9ef">this&lt;/span>&lt;span style="color:#f92672">-&amp;gt;&lt;/span>getPath());
-}
-...
-func(context.argc, context.argv, context.envp, context.apple, &lt;span style="color:#f92672">&amp;amp;&lt;/span>context.programVars);
-}
-}
-...
-}
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-cpp" data-lang="cpp">&lt;span class="kt">void&lt;/span> &lt;span class="n">ImageLoaderMachO&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">doModInitFunctions&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="k">const&lt;/span> &lt;span class="n">LinkContext&lt;/span>&lt;span class="o">&amp;amp;&lt;/span> &lt;span class="n">context&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;span class="p">...&lt;/span>
+&lt;span class="k">for&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="k">const&lt;/span> &lt;span class="k">struct&lt;/span> &lt;span class="nc">macho_section&lt;/span>&lt;span class="o">*&lt;/span> &lt;span class="n">sect&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="n">sectionsStart&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="n">sect&lt;/span> &lt;span class="o">&amp;lt;&lt;/span> &lt;span class="n">sectionsEnd&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="o">++&lt;/span>&lt;span class="n">sect&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;span class="k">const&lt;/span> &lt;span class="kt">uint8_t&lt;/span> &lt;span class="n">type&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">sect&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">flags&lt;/span> &lt;span class="o">&amp;amp;&lt;/span> &lt;span class="n">SECTION_TYPE&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;span class="k">if&lt;/span> &lt;span class="p">(&lt;/span> &lt;span class="n">type&lt;/span> &lt;span class="o">==&lt;/span> &lt;span class="n">S_MOD_INIT_FUNC_POINTERS&lt;/span> &lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;span class="n">Initializer&lt;/span>&lt;span class="o">*&lt;/span> &lt;span class="n">inits&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">Initializer&lt;/span>&lt;span class="o">*&lt;/span>&lt;span class="p">)(&lt;/span>&lt;span class="n">sect&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">addr&lt;/span> &lt;span class="o">+&lt;/span> &lt;span class="n">fSlide&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;span class="p">...&lt;/span>
+&lt;span class="k">if&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="o">!&lt;/span>&lt;span class="k">this&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">containsAddress&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">stripPointer&lt;/span>&lt;span class="p">((&lt;/span>&lt;span class="kt">void&lt;/span>&lt;span class="o">*&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="n">func&lt;/span>&lt;span class="p">))&lt;/span> &lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;span class="n">dyld&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">throwf&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;initializer function %p not in mapped image for %s&lt;/span>&lt;span class="se">\n&lt;/span>&lt;span class="s">&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">func&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="k">this&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">getPath&lt;/span>&lt;span class="p">());&lt;/span>
+&lt;span class="p">}&lt;/span>
+&lt;span class="p">...&lt;/span>
+&lt;span class="n">func&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">context&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">argc&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">context&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">argv&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">context&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">envp&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">context&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">apple&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="o">&amp;amp;&lt;/span>&lt;span class="n">context&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">programVars&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;span class="p">}&lt;/span>
+&lt;span class="p">}&lt;/span>
+&lt;span class="p">...&lt;/span>
+&lt;span class="p">}&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>From this code, we can notice that &lt;strong>all&lt;/strong> constructor addresses are checked &lt;strong>beforehand&lt;/strong> by the
 &lt;code>containsAddress&lt;/code> function. Therefore, it makes this function a good hooking spot as it is executed before
 calling the constructor itself. One can use the native SDK of
 &lt;a href="https://github.com/frida/frida-gum" target="_blank" rel="noopener">frida-gum&lt;/a>
 to perform this action:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="color:#75715e">// Address of ImageLoader::containsAddress in /usr/lib/dyld
-&lt;/span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#66d9ef">const&lt;/span> uintptr_t containsAddress_ptr &lt;span style="color:#f92672">=&lt;/span> ...;
-&lt;span style="color:#75715e">// Setup hooks with gum_interceptor_attach
-&lt;/span>&lt;span style="color:#75715e">&lt;/span>GumAttachReturn attach_ret &lt;span style="color:#f92672">=&lt;/span> gum_interceptor_attach(
-listener_&lt;span style="color:#f92672">-&amp;gt;&lt;/span>interceptor,
-&lt;span style="color:#75715e">/* target */&lt;/span> &lt;span style="color:#66d9ef">reinterpret_cast&lt;/span>&lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#66d9ef">void&lt;/span>&lt;span style="color:#f92672">*&amp;gt;&lt;/span>(containsAddress_ptr),
-&lt;span style="color:#66d9ef">reinterpret_cast&lt;/span>&lt;span style="color:#f92672">&amp;lt;&lt;/span>GumInvocationListener&lt;span style="color:#f92672">*&amp;gt;&lt;/span>(listener_),
-&lt;span style="color:#75715e">/* ID */&lt;/span> &lt;span style="color:#66d9ef">reinterpret_cast&lt;/span>&lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#66d9ef">void&lt;/span>&lt;span style="color:#f92672">*&amp;gt;&lt;/span>(containsAddress_ptr)
-);
-....
-&lt;span style="color:#75715e">// Equivalent of onEnter in Javascript
-&lt;/span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#66d9ef">void&lt;/span> native_listener_on_enter(GumInvocationListener&lt;span style="color:#f92672">*&lt;/span> listener, GumInvocationContext&lt;span style="color:#f92672">*&lt;/span> ic) {
-&lt;span style="color:#66d9ef">const&lt;/span> uintptr_t ctor_function_addr &lt;span style="color:#f92672">=&lt;/span> ic&lt;span style="color:#f92672">-&amp;gt;&lt;/span>cpu_context&lt;span style="color:#f92672">-&amp;gt;&lt;/span>x[&lt;span style="color:#ae81ff">1&lt;/span>];
-&lt;span style="color:#75715e">// Do stuff with ctor_function_addr
-&lt;/span>&lt;span style="color:#75715e">&lt;/span>}
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-cpp" data-lang="cpp">&lt;span class="c1">// Address of ImageLoader::containsAddress in /usr/lib/dyld
+&lt;/span>&lt;span class="c1">&lt;/span>&lt;span class="k">const&lt;/span> &lt;span class="n">uintptr_t&lt;/span> &lt;span class="n">containsAddress_ptr&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="p">...;&lt;/span>
+&lt;span class="c1">// Setup hooks with gum_interceptor_attach
+&lt;/span>&lt;span class="c1">&lt;/span>&lt;span class="n">GumAttachReturn&lt;/span> &lt;span class="n">attach_ret&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">gum_interceptor_attach&lt;/span>&lt;span class="p">(&lt;/span>
+&lt;span class="n">listener_&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">interceptor&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;span class="cm">/* target */&lt;/span> &lt;span class="k">reinterpret_cast&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="kt">void&lt;/span>&lt;span class="o">*&amp;gt;&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">containsAddress_ptr&lt;/span>&lt;span class="p">),&lt;/span>
+&lt;span class="k">reinterpret_cast&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="n">GumInvocationListener&lt;/span>&lt;span class="o">*&amp;gt;&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">listener_&lt;/span>&lt;span class="p">),&lt;/span>
+&lt;span class="cm">/* ID */&lt;/span> &lt;span class="k">reinterpret_cast&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="kt">void&lt;/span>&lt;span class="o">*&amp;gt;&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">containsAddress_ptr&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="p">);&lt;/span>
+&lt;span class="p">....&lt;/span>
+&lt;span class="c1">// Equivalent of onEnter in Javascript
+&lt;/span>&lt;span class="c1">&lt;/span>&lt;span class="kt">void&lt;/span> &lt;span class="n">native_listener_on_enter&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">GumInvocationListener&lt;/span>&lt;span class="o">*&lt;/span> &lt;span class="n">listener&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">GumInvocationContext&lt;/span>&lt;span class="o">*&lt;/span> &lt;span class="n">ic&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;span class="k">const&lt;/span> &lt;span class="n">uintptr_t&lt;/span> &lt;span class="n">ctor_function_addr&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">ic&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">cpu_context&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">x&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="mi">1&lt;/span>&lt;span class="p">];&lt;/span>
+&lt;span class="c1">// Do stuff with ctor_function_addr
+&lt;/span>&lt;span class="c1">&lt;/span>&lt;span class="p">}&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;div class="alert alert-note">
 &lt;div>
 &lt;code>containsAddress&lt;/code> is a member function, therefore &lt;code>x0&lt;/code> contains a pointer on &lt;code>this&lt;/code> and the address
@@ -235,10 +235,10 @@ anti-debugs. They always come in two parts:&lt;/p>
 &lt;li>Try to &lt;em>&amp;ldquo;kill&amp;rdquo;&lt;/em> its own pid with the 0-signal&lt;/li>
 &lt;li>Check if PTRACE is flagged&lt;/li>
 &lt;/ol>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="color:#66d9ef">void&lt;/span> &lt;span style="color:#a6e22e">try_kill&lt;/span>() {
-&lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#66d9ef">int&lt;/span> pid &lt;span style="color:#f92672">=&lt;/span> getpid(); &lt;span style="color:#75715e">// syscall@0x436cdc
-&lt;/span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">int&lt;/span> ret &lt;span style="color:#f92672">=&lt;/span> kill(pid, &lt;span style="color:#ae81ff">0&lt;/span>); &lt;span style="color:#75715e">// syscall@0x436d28
-&lt;/span>&lt;span style="color:#75715e">&lt;/span>}
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-cpp" data-lang="cpp">&lt;span class="kt">void&lt;/span> &lt;span class="nf">try_kill&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;span class="k">const&lt;/span> &lt;span class="kt">int&lt;/span> &lt;span class="n">pid&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">getpid&lt;/span>&lt;span class="p">();&lt;/span> &lt;span class="c1">// syscall@0x436cdc
+&lt;/span>&lt;span class="c1">&lt;/span> &lt;span class="kt">int&lt;/span> &lt;span class="n">ret&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">kill&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">pid&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mi">0&lt;/span>&lt;span class="p">);&lt;/span> &lt;span class="c1">// syscall@0x436d28
+&lt;/span>&lt;span class="c1">&lt;/span>&lt;span class="p">}&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>According to the man page of kill (&lt;code>man 2 kill&lt;/code>), the signal &lt;code>0&lt;/code> is used to check
 that the &lt;code>pid&lt;/code> given in the first parameter really exists.&lt;/p>
 &lt;blockquote>
@@ -246,20 +246,20 @@ that the &lt;code>pid&lt;/code> given in the first parameter really exists.&lt;/
 to check the validity of pid.&lt;/p>
 &lt;/blockquote>
 &lt;p>This &lt;em>kill&lt;/em> operation is followed by three &lt;code>PTRACE&lt;/code> checks:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="color:#75715e">// Done three times
-&lt;/span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#66d9ef">inline&lt;/span> &lt;span style="color:#66d9ef">bool&lt;/span> &lt;span style="color:#a6e22e">ptrace_detect&lt;/span>() {
-&lt;span style="color:#66d9ef">int32_t&lt;/span> opt[&lt;span style="color:#ae81ff">4&lt;/span>] &lt;span style="color:#f92672">=&lt;/span> {
-CTL_KERN,
-KERN_PROC,
-KERN_PROC_PID,
-getpid(),
-};
-kinfo_proc info;
-sysctl(opt, &lt;span style="color:#ae81ff">4&lt;/span>, &lt;span style="color:#f92672">&amp;amp;&lt;/span>info, &lt;span style="color:#66d9ef">sizeof&lt;/span>(kinfo_proc), &lt;span style="color:#66d9ef">nullptr&lt;/span>, &lt;span style="color:#ae81ff">0&lt;/span>);
-&lt;span style="color:#66d9ef">return&lt;/span> info.kp_proc.p_flag &lt;span style="color:#f92672">&amp;amp;&lt;/span> P_TRACED;
-}
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-cpp" data-lang="cpp">&lt;span class="c1">// Done three times
+&lt;/span>&lt;span class="c1">&lt;/span>&lt;span class="kr">inline&lt;/span> &lt;span class="kt">bool&lt;/span> &lt;span class="nf">ptrace_detect&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;span class="kt">int32_t&lt;/span> &lt;span class="n">opt&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="mi">4&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;span class="n">CTL_KERN&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;span class="n">KERN_PROC&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;span class="n">KERN_PROC_PID&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;span class="n">getpid&lt;/span>&lt;span class="p">(),&lt;/span>
+&lt;span class="p">};&lt;/span>
+&lt;span class="n">kinfo_proc&lt;/span> &lt;span class="n">info&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;span class="n">sysctl&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">opt&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mi">4&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="o">&amp;amp;&lt;/span>&lt;span class="n">info&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="k">sizeof&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">kinfo_proc&lt;/span>&lt;span class="p">),&lt;/span> &lt;span class="k">nullptr&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mi">0&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;span class="k">return&lt;/span> &lt;span class="n">info&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">kp_proc&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">p_flag&lt;/span> &lt;span class="o">&amp;amp;&lt;/span> &lt;span class="n">P_TRACED&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;span class="p">}&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>These three &lt;code>P_TRACED&lt;/code> checks &lt;strong>always&lt;/strong> come together:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text">0x436cdc: getpid(): 6015
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-text" data-lang="text">0x436cdc: getpid(): 6015
 0x436d28: kill(6015, 0): 0
 0x4374b0: sysctl(CTL_KERN, KERN_PROC, KERN_PROC_PID, 6015)
 0x4371e8: sysctl(CTL_KERN, KERN_PROC, KERN_PROC_PID, 6015)
@@ -267,7 +267,7 @@ sysctl(opt, &lt;span style="color:#ae81ff">4&lt;/span>, &lt;span style="color:#f
 &lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="frida-detection">Frida Detection&lt;/h2>
 &lt;p>Frida is detected by the application through its client-server mode, which binds the localhost on the port &lt;code>27042&lt;/code>.
 When PokemonGO is starting, it tries to open a socket on this port and if it manages to connect, it tests the Frida handshake.&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text">0x00e3b8: getifaddrs(0x16b7fb518): 0x0
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-text" data-lang="text">0x00e3b8: getifaddrs(0x16b7fb518): 0x0
 0x016990: socket(&amp;#39;IPV4&amp;#39;, &amp;#39;TCP&amp;#39;, &amp;#39;0&amp;#39;): 0x8
 0x019d60: bind(&amp;#39;PF_INET&amp;#39;, 0x8, &amp;#39;127.0.0.1:27042&amp;#39;)
 0x01805c: close(0x8)
@@ -281,7 +281,7 @@ Frida libraries artifacts (like &lt;code>FridaGadget.dylib&lt;/code>).&lt;/p>
 &lt;h2 id="jailbreak-detection">Jailbreak Detection&lt;/h2>
 &lt;p>The application implements jailbreak detection by checking if some files are accessible or not on the device.
 Most of the checks are done by using the &lt;code>access()&lt;/code> syscalls that are inlined in different places:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text">0x44c390: access(&amp;#39;/bin/grep&amp;#39;, 0x0)
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-text" data-lang="text">0x44c390: access(&amp;#39;/bin/grep&amp;#39;, 0x0)
 ...
 0x7326b0: access(&amp;#39;/private/var/checkra1n.dmg&amp;#39;, 0x0)
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>The list of the checked files is given in the
@@ -293,27 +293,27 @@ This list is very close to &lt;a href="https://github.com/XsF1re/vnodebypass/blo
 &lt;/div>
 &lt;p>In addition to &lt;em>raw&lt;/em> &lt;code>access&lt;/code> syscall, the application enhances its detection by creating a symbolic link of the
 root directory in a temporary app data directory:&lt;/p>
-&lt;pre>&lt;code>0x734e08: symlink('/Applications/..', '/private/var/mobile/Containers/Data/Application/D933FBC9-90E7-4584-851E-CE2D5E900446/tmp/WCH38bnM0x101a9e7d0')
+&lt;pre tabindex="0">&lt;code>0x734e08: symlink('/Applications/..', '/private/var/mobile/Containers/Data/Application/D933FBC9-90E7-4584-851E-CE2D5E900446/tmp/WCH38bnM0x101a9e7d0')
 &lt;/code>&lt;/pre>&lt;p>Then, it performs the same checks with the app data directory as prefix: &lt;code>[...]/tmp/WCH38bnM0x101a9e7d0&lt;/code>:&lt;/p>
-&lt;pre>&lt;code>0x7376d8: access('/private/var/mobile/Containers/Data/Application/D933FBC9-90E7-4584-851E-CE2D5E900446/tmp/3Odis0x101a9dfd0/usr/bin/passwd', 0x0)
+&lt;pre tabindex="0">&lt;code>0x7376d8: access('/private/var/mobile/Containers/Data/Application/D933FBC9-90E7-4584-851E-CE2D5E900446/tmp/3Odis0x101a9dfd0/usr/bin/passwd', 0x0)
 &lt;/code>&lt;/pre>&lt;h2 id="signature-check">Signature Check&lt;/h2>
 &lt;p>At some point, one function checks the integrity of the signature of the &lt;code>pokemongo&lt;/code> binary.
 This check starts by opening the main &lt;code>pokemongo&lt;/code> binary from &lt;strong>the disk&lt;/strong>:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text">0x7392ec: add x0, x19, #6,lsl#12
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-text" data-lang="text">0x7392ec: add x0, x19, #6,lsl#12
 0x7392f0: add x0, x0, #0x540
 0x7392f4: mov w1, #0x1000000
 0x7392f8: mov x2, #0
 0x7392fc: svc 0x80 ; x16 -&amp;gt; SYS_open = 5
 // open(&amp;#39;/private/var/containers/Bundle/Application/[...]/pokemongo.app/pokemongo&amp;#39;): fd_pgo
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>Then, it reads the beginning of the file in a stack buffer:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text">0x74b494: ldr x0, [x19, #0xc0] ; fd
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-text" data-lang="text">0x74b494: ldr x0, [x19, #0xc0] ; fd
 0x74b498: ldr x1, [x19, #0x130] ; buff
 0x74b49c: ldr x2, [x19, #0xb8] ; buff_size
 0x74b4a0: svc 0x80 ; x16 -&amp;gt; SYS_read = 3
 // uint8_t macho_head[0x4167];
 // 0x74b4a0: read(fd_pgo, macho_header, 0x4167);
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>to iterate over the Mach-O load commands:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text">; x8 points to the read&amp;#39;s buffer
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-text" data-lang="text">; x8 points to the read&amp;#39;s buffer
 0x73942c: ldr w8, [x8, #0x10] ; Number of LC_COMMANDS
 for (size_t i = 0; i &amp;lt; nb_cmds; ++i) {
 0x74bc40: ldr w10, [x9, #4] ; Command&amp;#39;s size
@@ -324,12 +324,12 @@ if (cmd.type == LC_CODE_SIGNATURE) {
 }
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>With the offset of the Mach-O &lt;code>LC_CODE_SIGNATURE&lt;/code> command, it reads the raw signature using the
 &lt;code>lseek/read&lt;/code> syscalls:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text">uint8_t sig_header[0x205];
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-text" data-lang="text">uint8_t sig_header[0x205];
 0x73a978: lseek(fd_pgo, LC_CODE_SIGNATURE offset, 0x0)
 0x73aecc: read(fd_pgo, &amp;amp;sig_header, 0x205);
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>The raw signature buffer is processed by chunks of 10 bytes in
 a function that looks like a checksum:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text">[...]
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-text" data-lang="text">[...]
 0x73ad58: ldrsb w13, [x12]
 0x73ad5c: mov w14, #83
 0x73ad60: sub w13, w14, w13
@@ -367,29 +367,29 @@ run the game smoothly.
 Actually, PokemonGO is protected against such bypass with global variables that assert if a function
 ran successfully or not.&lt;/p>
 &lt;p>This protection is equivalent to the following piece of code:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="color:#66d9ef">static&lt;/span> &lt;span style="color:#66d9ef">constexpr&lt;/span> uintptr_t GOOD &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">0x00627178&lt;/span>; &lt;span style="color:#75715e">// bqx ?
-&lt;/span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#66d9ef">static&lt;/span> uintptr_t MAGIC_CFI &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">0xdeadc0de&lt;/span>;
-__attribute__((constructor))
-&lt;span style="color:#66d9ef">void&lt;/span> frida_detect() {
-&lt;span style="color:#66d9ef">if&lt;/span> (is_frida_running()) {
-crash();
-}
-MAGIC_CFI &lt;span style="color:#f92672">=&lt;/span> GOOD;
-}
-__attribute__((constructor))
-&lt;span style="color:#66d9ef">void&lt;/span> control_fault_check() {
-&lt;span style="color:#66d9ef">if&lt;/span> (MAGIC_CFI &lt;span style="color:#f92672">!=&lt;/span> GOOD) {
-crash();
-}
-}
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-cpp" data-lang="cpp">&lt;span class="k">static&lt;/span> &lt;span class="k">constexpr&lt;/span> &lt;span class="n">uintptr_t&lt;/span> &lt;span class="n">GOOD&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="mh">0x00627178&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="c1">// bqx ?
+&lt;/span>&lt;span class="c1">&lt;/span>&lt;span class="k">static&lt;/span> &lt;span class="n">uintptr_t&lt;/span> &lt;span class="n">MAGIC_CFI&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="mh">0xdeadc0de&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;span class="n">__attribute__&lt;/span>&lt;span class="p">((&lt;/span>&lt;span class="n">constructor&lt;/span>&lt;span class="p">))&lt;/span>
+&lt;span class="kt">void&lt;/span> &lt;span class="n">frida_detect&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;span class="k">if&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">is_frida_running&lt;/span>&lt;span class="p">())&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;span class="n">crash&lt;/span>&lt;span class="p">();&lt;/span>
+&lt;span class="p">}&lt;/span>
+&lt;span class="n">MAGIC_CFI&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">GOOD&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;span class="p">}&lt;/span>
+&lt;span class="n">__attribute__&lt;/span>&lt;span class="p">((&lt;/span>&lt;span class="n">constructor&lt;/span>&lt;span class="p">))&lt;/span>
+&lt;span class="kt">void&lt;/span> &lt;span class="n">control_fault_check&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;span class="k">if&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">MAGIC_CFI&lt;/span> &lt;span class="o">!=&lt;/span> &lt;span class="n">GOOD&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;span class="n">crash&lt;/span>&lt;span class="p">();&lt;/span>
+&lt;span class="p">}&lt;/span>
+&lt;span class="p">}&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>If we only disable &lt;code>frida_detect()&lt;/code>, the application will crash because of &lt;code>control_fault_check()&lt;/code>.&lt;/p>
 &lt;p>We could bypass this protection by identifying the address of the
 &lt;code>MAGIC_CFI&lt;/code> in the &lt;code>__data&lt;/code> section, or by disabling the &lt;code>control_fault_check()&lt;/code>.&lt;/p>
 &lt;h2 id="what-about-lief">What about LIEF?&lt;/h2>
 &lt;p>As mentioned in the introduction, it started with an ongoing feature to parse Mach-O files from memory.
 Basically, LIEF will&lt;sup id="fnref:3">&lt;a href="#fn:3" class="footnote-ref" role="doc-noteref">3&lt;/a>&lt;/sup> enable to parse Mach-O files&lt;sup id="fnref:4">&lt;a href="#fn:4" class="footnote-ref" role="doc-noteref">4&lt;/a>&lt;/sup> from an absolute address with this kind of API:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="color:#75715e">// 0x10234400 -&amp;gt; start of the Mach-O file
-&lt;/span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#66d9ef">auto&lt;/span> bin &lt;span style="color:#f92672">=&lt;/span> LIEF&lt;span style="color:#f92672">::&lt;/span>MachO&lt;span style="color:#f92672">::&lt;/span>Parser&lt;span style="color:#f92672">::&lt;/span>parse_from_memory(&lt;span style="color:#ae81ff">0x10234400&lt;/span>);
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-cpp" data-lang="cpp">&lt;span class="c1">// 0x10234400 -&amp;gt; start of the Mach-O file
+&lt;/span>&lt;span class="c1">&lt;/span>&lt;span class="k">auto&lt;/span> &lt;span class="n">bin&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">LIEF&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">MachO&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">Parser&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">parse_from_memory&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mh">0x10234400&lt;/span>&lt;span class="p">);&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>Depending on the user&amp;rsquo;s needs, the &lt;code>write()&lt;/code> operation will optionally undo all the relocations and the symbol bindings.
 This could be useful if we aim at (re)running the file dumped (on a Apple M1?).&lt;/p>
 &lt;p>As expected, the strings used within the &lt;span class="blue">NianticLabsPlugin&lt;/span> library are encoded
@@ -399,43 +399,43 @@ by the obfuscator. We could statically analyze the decoding routine (cf. Tim Bla
 &lt;p>It seems that the obfuscator put &lt;strong>all&lt;/strong> the strings&lt;sup id="fnref:5">&lt;a href="#fn:5" class="footnote-ref" role="doc-noteref">5&lt;/a>&lt;/sup> in the data section and decrypts &lt;strong>all of them&lt;/strong>
 in a &lt;strong>single&lt;/strong> constructor function.&lt;/p>
 &lt;p>For instance, if we have the string &amp;ldquo;TOKEN&amp;rdquo; to protect in the following functions:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="color:#66d9ef">void&lt;/span> &lt;span style="color:#a6e22e">protect_me&lt;/span>() {
-sensitive(&lt;span style="color:#e6db74">&amp;#34;TOKEN&amp;#34;&lt;/span>);
-}
-&lt;span style="color:#66d9ef">void&lt;/span> &lt;span style="color:#a6e22e">protect_me_2&lt;/span>() {
-sensitive(&lt;span style="color:#e6db74">&amp;#34;TOKEN2&amp;#34;&lt;/span>);
-}
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-cpp" data-lang="cpp">&lt;span class="kt">void&lt;/span> &lt;span class="nf">protect_me&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;span class="n">sensitive&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;TOKEN&amp;#34;&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;span class="p">}&lt;/span>
+&lt;span class="kt">void&lt;/span> &lt;span class="nf">protect_me_2&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;span class="n">sensitive&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;TOKEN2&amp;#34;&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;span class="p">}&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>The obfuscator transforms and decodes the strings into something like:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="color:#75715e">// __data section
-&lt;/span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#66d9ef">static&lt;/span> &lt;span style="color:#66d9ef">char&lt;/span> var_TOKEN[] &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;&lt;/span>&lt;span style="color:#ae81ff">\x00\x1D\xDD\xEE\xAB&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>;
-&lt;span style="color:#66d9ef">static&lt;/span> &lt;span style="color:#66d9ef">char&lt;/span> var_TOKEN_2[] &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;&lt;/span>&lt;span style="color:#ae81ff">\x00\x1D\xDD\xEE\xAF&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>;
-__attribute__((constructor))
-&lt;span style="color:#66d9ef">void&lt;/span> decode_strings() {
-decode(var_TOKEN);
-decode(var_TOKEN_2);
-}
-&lt;span style="color:#66d9ef">void&lt;/span> &lt;span style="color:#a6e22e">protect_me&lt;/span>() {
-sensitive(var_TOKEN);
-}
-&lt;span style="color:#66d9ef">void&lt;/span> &lt;span style="color:#a6e22e">protect_me_2&lt;/span>() {
-sensitive(var_TOKEN_2);
-}
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-cpp" data-lang="cpp">&lt;span class="c1">// __data section
+&lt;/span>&lt;span class="c1">&lt;/span>&lt;span class="k">static&lt;/span> &lt;span class="kt">char&lt;/span> &lt;span class="n">var_TOKEN&lt;/span>&lt;span class="p">[]&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="s">&amp;#34;&lt;/span>&lt;span class="se">\x00\x1D\xDD\xEE\xAB&lt;/span>&lt;span class="s">&amp;#34;&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;span class="k">static&lt;/span> &lt;span class="kt">char&lt;/span> &lt;span class="n">var_TOKEN_2&lt;/span>&lt;span class="p">[]&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="s">&amp;#34;&lt;/span>&lt;span class="se">\x00\x1D\xDD\xEE\xAF&lt;/span>&lt;span class="s">&amp;#34;&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;span class="n">__attribute__&lt;/span>&lt;span class="p">((&lt;/span>&lt;span class="n">constructor&lt;/span>&lt;span class="p">))&lt;/span>
+&lt;span class="kt">void&lt;/span> &lt;span class="n">decode_strings&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;span class="n">decode&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">var_TOKEN&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;span class="n">decode&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">var_TOKEN_2&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;span class="p">}&lt;/span>
+&lt;span class="kt">void&lt;/span> &lt;span class="nf">protect_me&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;span class="n">sensitive&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">var_TOKEN&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;span class="p">}&lt;/span>
+&lt;span class="kt">void&lt;/span> &lt;span class="nf">protect_me_2&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;span class="n">sensitive&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">var_TOKEN_2&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;span class="p">}&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>Since &lt;strong>all&lt;/strong> the strings are decoded at once in one of the first constructors, if we manage to dump the binary
 right after this constructor,
 we can recover the original strings for free.&lt;/p>
 &lt;p>Programmatically, it can be done using (again) frida-gum SDK with the following pseudocode:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="color:#75715e">// Hook associated with ImageLoader::containsAddress
-&lt;/span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#66d9ef">void&lt;/span> &lt;span style="color:#a6e22e">native_listener_on_enter&lt;/span>(GumInvocationListener&lt;span style="color:#f92672">*&lt;/span> listener,
-GumInvocationContext&lt;span style="color:#f92672">*&lt;/span> ic) {
-&lt;span style="color:#66d9ef">static&lt;/span> size_t CTOR_ID &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>;
-&lt;span style="color:#66d9ef">const&lt;/span> uintptr_t ctor_function_addr &lt;span style="color:#f92672">=&lt;/span> ic&lt;span style="color:#f92672">-&amp;gt;&lt;/span>cpu_context&lt;span style="color:#f92672">-&amp;gt;&lt;/span>x[&lt;span style="color:#ae81ff">1&lt;/span>];
-std&lt;span style="color:#f92672">::&lt;/span>string libname &lt;span style="color:#f92672">=&lt;/span> module_from_addr(ctor_function_addr);
-&lt;span style="color:#66d9ef">if&lt;/span> (libname &lt;span style="color:#f92672">==&lt;/span> &lt;span style="color:#e6db74">&amp;#34;NianticLabsPlugin&amp;#34;&lt;/span> &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> CTOR_ID&lt;span style="color:#f92672">++&lt;/span> &lt;span style="color:#f92672">==&lt;/span> &lt;span style="color:#ae81ff">3&lt;/span>) {
-&lt;span style="color:#66d9ef">const&lt;/span> uintptr_t base_address &lt;span style="color:#f92672">=&lt;/span> base_addr_from_ptr(ctor_function_addr);
-&lt;span style="color:#66d9ef">auto&lt;/span> bin &lt;span style="color:#f92672">=&lt;/span> LIEF&lt;span style="color:#f92672">::&lt;/span>MachO&lt;span style="color:#f92672">::&lt;/span>Parser&lt;span style="color:#f92672">::&lt;/span>parse_from_memory(base_address);
-bin&lt;span style="color:#f92672">-&amp;gt;&lt;/span>write(&lt;span style="color:#e6db74">&amp;#34;/tmp/pokemongo_after_ctor.bin&amp;#34;&lt;/span>); &lt;span style="color:#75715e">// /tmp on the iPhone
-&lt;/span>&lt;span style="color:#75715e">&lt;/span> }
-}
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-cpp" data-lang="cpp">&lt;span class="c1">// Hook associated with ImageLoader::containsAddress
+&lt;/span>&lt;span class="c1">&lt;/span>&lt;span class="kt">void&lt;/span> &lt;span class="nf">native_listener_on_enter&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">GumInvocationListener&lt;/span>&lt;span class="o">*&lt;/span> &lt;span class="n">listener&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;span class="n">GumInvocationContext&lt;/span>&lt;span class="o">*&lt;/span> &lt;span class="n">ic&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;span class="k">static&lt;/span> &lt;span class="n">size_t&lt;/span> &lt;span class="n">CTOR_ID&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="mi">0&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;span class="k">const&lt;/span> &lt;span class="n">uintptr_t&lt;/span> &lt;span class="n">ctor_function_addr&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">ic&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">cpu_context&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">x&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="mi">1&lt;/span>&lt;span class="p">];&lt;/span>
+&lt;span class="n">std&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">string&lt;/span> &lt;span class="n">libname&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">module_from_addr&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">ctor_function_addr&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;span class="k">if&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">libname&lt;/span> &lt;span class="o">==&lt;/span> &lt;span class="s">&amp;#34;NianticLabsPlugin&amp;#34;&lt;/span> &lt;span class="o">&amp;amp;&amp;amp;&lt;/span> &lt;span class="n">CTOR_ID&lt;/span>&lt;span class="o">++&lt;/span> &lt;span class="o">==&lt;/span> &lt;span class="mi">3&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;span class="k">const&lt;/span> &lt;span class="n">uintptr_t&lt;/span> &lt;span class="n">base_address&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">base_addr_from_ptr&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">ctor_function_addr&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;span class="k">auto&lt;/span> &lt;span class="n">bin&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">LIEF&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">MachO&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">Parser&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">parse_from_memory&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">base_address&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;span class="n">bin&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">write&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;/tmp/pokemongo_after_ctor.bin&amp;#34;&lt;/span>&lt;span class="p">);&lt;/span> &lt;span class="c1">// /tmp on the iPhone
+&lt;/span>&lt;span class="c1">&lt;/span> &lt;span class="p">}&lt;/span>
+&lt;span class="p">}&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>In the end, the dumped file contains the decoded strings:&lt;/p>
 &lt;p>&lt;img src="strings.png" alt="Data area after LIEF dump">&lt;/p>
 &lt;p>If we skim the &lt;code>__data&lt;/code> section, we can also observe the following changes:&lt;/p>
@@ -443,14 +443,14 @@ bin&lt;span style="color:#f92672">-&amp;gt;&lt;/span>write(&lt;span style="color
 &lt;p>A practiced eye might notice&lt;sup id="fnref:6">&lt;a href="#fn:6" class="footnote-ref" role="doc-noteref">6&lt;/a>&lt;/sup> that some strings of the section are actually
 embedded in protobuf structures. We can confirm this observation by trying to infer the data as protobuf
 types:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">&lt;span style="color:#f92672">from&lt;/span> . &lt;span style="color:#f92672">import&lt;/span> proto_dump
-&lt;span style="color:#f92672">import&lt;/span> lief
-pgo &lt;span style="color:#f92672">=&lt;/span> lief&lt;span style="color:#f92672">.&lt;/span>parse(&lt;span style="color:#e6db74">&amp;#34;pokemongo_after_ctor.bin&amp;#34;&lt;/span>)
-start &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">0x12A51A7&lt;/span>
-end &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">0x12A51E2&lt;/span>
-raw_proto &lt;span style="color:#f92672">=&lt;/span> pgo&lt;span style="color:#f92672">.&lt;/span>get_content_from_virtual_address(start, end &lt;span style="color:#f92672">-&lt;/span> start)
-&lt;span style="color:#66d9ef">print&lt;/span>(proto_dump(raw_proto))
-&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text">{
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-python" data-lang="python">&lt;span class="kn">from&lt;/span> &lt;span class="nn">.&lt;/span> &lt;span class="kn">import&lt;/span> &lt;span class="n">proto_dump&lt;/span>
+&lt;span class="kn">import&lt;/span> &lt;span class="nn">lief&lt;/span>
+&lt;span class="n">pgo&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">lief&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">parse&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;pokemongo_after_ctor.bin&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="n">start&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="mh">0x12A51A7&lt;/span>
+&lt;span class="n">end&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="mh">0x12A51E2&lt;/span>
+&lt;span class="n">raw_proto&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">pgo&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">get_content_from_virtual_address&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">start&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">end&lt;/span> &lt;span class="o">-&lt;/span> &lt;span class="n">start&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="nb">print&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">proto_dump&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">raw_proto&lt;/span>&lt;span class="p">))&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-text" data-lang="text">{
 #3 = 4
 #4 (repeated) = 1 {
 #1 = &amp;#34;CheatReputation&amp;#34;

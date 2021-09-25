@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>write-up | Romain Thomas</title><link>https://www.romainthomas.fr/tags/write-up/</link><atom:link href="https://www.romainthomas.fr/tags/write-up/index.xml" rel="self" type="application/rss+xml"/><description>write-up</description><generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>Published with Academic Website Builder - Icons made by Freepik</copyright><lastBuildDate>Sun, 27 Sep 2020 00:00:00 +0000</lastBuildDate><image><url>https://www.romainthomas.fr/images/icon_hu2654a0fcc87c65a864822ac27b001d3b_698_512x512_fill_lanczos_center_2.png</url><title>write-up</title><link>https://www.romainthomas.fr/tags/write-up/</link></image><item><title>r2-pay: whitebox (part 2)</title><link>https://www.romainthomas.fr/post/20-09-r2con-obfuscated-whitebox-part2/</link><pubDate>Sun, 27 Sep 2020 00:00:00 +0000</pubDate><guid>https://www.romainthomas.fr/post/20-09-r2con-obfuscated-whitebox-part2/</guid><description>&lt;style>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>DEFAULT write-up | Romain Thomas</title><link>https://www.romainthomas.fr/tags/write-up/</link><atom:link href="https://www.romainthomas.fr/tags/write-up/index.xml" rel="self" type="application/rss+xml"/><description>write-up</description><generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>Published with Academic Website Builder</copyright><lastBuildDate>Sun, 27 Sep 2020 00:00:00 +0000</lastBuildDate><image><url>https://www.romainthomas.fr/images/icon_hu2654a0fcc87c65a864822ac27b001d3b_698_512x512_fill_lanczos_center_3.png</url><title>write-up</title><link>https://www.romainthomas.fr/tags/write-up/</link></image><item><title>r2-pay: whitebox (part 2)</title><link>https://www.romainthomas.fr/post/20-09-r2con-obfuscated-whitebox-part2/</link><pubDate>Sun, 27 Sep 2020 00:00:00 +0000</pubDate><guid>https://www.romainthomas.fr/post/20-09-r2con-obfuscated-whitebox-part2/</guid><description>&lt;style>
 .green {
 color:green;
 font-family: 'Fira Code', monospace;
@@ -64,12 +64,12 @@ the application&amp;rsquo;s context&lt;sup id="fnref:1">&lt;a href="#fn:1" class
 &lt;p>To take a closer look at the logic of &lt;code>gXftm3iswpkVgBNDUp&lt;/code>, it would be pretty useful to be able to feed
 the function&amp;rsquo;s inputs with our &lt;strong>own standalone binary&lt;/strong>. Basically, we would like to achieve this kind
 of interface:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="color:#66d9ef">int&lt;/span> &lt;span style="color:#a6e22e">main&lt;/span>(&lt;span style="color:#66d9ef">int&lt;/span> argc, &lt;span style="color:#66d9ef">char&lt;/span>&lt;span style="color:#f92672">**&lt;/span> argv) {
-&lt;span style="color:#66d9ef">void&lt;/span>&lt;span style="color:#f92672">*&lt;/span> dlopen(&lt;span style="color:#e6db74">&amp;#34;libnative-lib.so&amp;#34;&lt;/span>, RTLD_NOW);
-...
-jbyteArray out &lt;span style="color:#f92672">=&lt;/span> gXftm3iswpkVgBNDUp(env, ...);
-&lt;span style="color:#66d9ef">return&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>;
-}
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-cpp" data-lang="cpp">&lt;span class="kt">int&lt;/span> &lt;span class="nf">main&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="kt">int&lt;/span> &lt;span class="n">argc&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="kt">char&lt;/span>&lt;span class="o">**&lt;/span> &lt;span class="n">argv&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;span class="kt">void&lt;/span>&lt;span class="o">*&lt;/span> &lt;span class="n">dlopen&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;libnative-lib.so&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">RTLD_NOW&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;span class="p">...&lt;/span>
+&lt;span class="n">jbyteArray&lt;/span> &lt;span class="n">out&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">gXftm3iswpkVgBNDUp&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">env&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="p">...);&lt;/span>
+&lt;span class="k">return&lt;/span> &lt;span class="mi">0&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;span class="p">}&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>This technique is not new and has been already described in a blog post by
 &lt;a href="https://twitter.com/caleb_fenton" target="_blank" rel="noopener">Caleb Fenton&lt;/a>&lt;sup id="fnref:2">&lt;a href="#fn:2" class="footnote-ref" role="doc-noteref">2&lt;/a>&lt;/sup>. The idea is to get
 the &lt;code>JNIEnv* env&lt;/code> variable with &lt;code>JNI_CreateJavaVM&lt;/code> which is exported by the Android runtime: &lt;code>libart.so&lt;/code>.&lt;/p>
@@ -81,32 +81,32 @@ the &lt;code>JNIEnv* env&lt;/code> variable with &lt;code>JNI_CreateJavaVM&lt;/c
 &lt;/ul>
 &lt;p>&lt;img src="shim_mechanism.png" alt="Shimming of whitebox library">&lt;/p>
 &lt;p>Long story short, we can instantiate the Android runtime with the following piece of code:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="color:#66d9ef">int&lt;/span> &lt;span style="color:#a6e22e">main&lt;/span>(&lt;span style="color:#66d9ef">int&lt;/span> argc, &lt;span style="color:#66d9ef">char&lt;/span>&lt;span style="color:#f92672">**&lt;/span> argv) {
-JavaVMOption opt[&lt;span style="color:#ae81ff">2&lt;/span>];
-opt[&lt;span style="color:#ae81ff">0&lt;/span>].optionString &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;-Djava.class.path=/data/local/tmp/re.pwnme.1.0.apk&amp;#34;&lt;/span>;
-opt[&lt;span style="color:#ae81ff">1&lt;/span>].optionString &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;-Djava.library.path=/data/local/tmp&amp;#34;&lt;/span>;
-JavaVMInitArgs args;
-args.version &lt;span style="color:#f92672">=&lt;/span> JNI_VERSION_1_6;
-args.options &lt;span style="color:#f92672">=&lt;/span> opt;
-args.nOptions &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">2&lt;/span>;
-args.ignoreUnrecognized &lt;span style="color:#f92672">=&lt;/span> JNI_FALSE;
-&lt;span style="color:#66d9ef">void&lt;/span>&lt;span style="color:#f92672">*&lt;/span> handler &lt;span style="color:#f92672">=&lt;/span> dlopen(&lt;span style="color:#e6db74">&amp;#34;/system/lib64/libart.so&amp;#34;&lt;/span>, RTLD_NOW);
-&lt;span style="color:#66d9ef">auto&lt;/span> JNI_CreateJavaVM_f &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#66d9ef">reinterpret_cast&lt;/span>&lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#66d9ef">decltype&lt;/span>(JNI_CreateJavaVM)&lt;span style="color:#f92672">*&amp;gt;&lt;/span>(dlsym(handler, &lt;span style="color:#e6db74">&amp;#34;JNI_CreateJavaVM&amp;#34;&lt;/span>));
-JNI_CreateJavaVM_f(&lt;span style="color:#f92672">&amp;amp;&lt;/span>jvm, &lt;span style="color:#f92672">&amp;amp;&lt;/span>env, &lt;span style="color:#f92672">&amp;amp;&lt;/span>args);
-}
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-cpp" data-lang="cpp">&lt;span class="kt">int&lt;/span> &lt;span class="nf">main&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="kt">int&lt;/span> &lt;span class="n">argc&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="kt">char&lt;/span>&lt;span class="o">**&lt;/span> &lt;span class="n">argv&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;span class="n">JavaVMOption&lt;/span> &lt;span class="n">opt&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="mi">2&lt;/span>&lt;span class="p">];&lt;/span>
+&lt;span class="n">opt&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="mi">0&lt;/span>&lt;span class="p">].&lt;/span>&lt;span class="n">optionString&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="s">&amp;#34;-Djava.class.path=/data/local/tmp/re.pwnme.1.0.apk&amp;#34;&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;span class="n">opt&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="mi">1&lt;/span>&lt;span class="p">].&lt;/span>&lt;span class="n">optionString&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="s">&amp;#34;-Djava.library.path=/data/local/tmp&amp;#34;&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;span class="n">JavaVMInitArgs&lt;/span> &lt;span class="n">args&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;span class="n">args&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">version&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">JNI_VERSION_1_6&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;span class="n">args&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">options&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">opt&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;span class="n">args&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">nOptions&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="mi">2&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;span class="n">args&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">ignoreUnrecognized&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">JNI_FALSE&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;span class="kt">void&lt;/span>&lt;span class="o">*&lt;/span> &lt;span class="n">handler&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">dlopen&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;/system/lib64/libart.so&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">RTLD_NOW&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;span class="k">auto&lt;/span> &lt;span class="n">JNI_CreateJavaVM_f&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="k">reinterpret_cast&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="k">decltype&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">JNI_CreateJavaVM&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="o">*&amp;gt;&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">dlsym&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">handler&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="s">&amp;#34;JNI_CreateJavaVM&amp;#34;&lt;/span>&lt;span class="p">));&lt;/span>
+&lt;span class="n">JNI_CreateJavaVM_f&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">&amp;amp;&lt;/span>&lt;span class="n">jvm&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="o">&amp;amp;&lt;/span>&lt;span class="n">env&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="o">&amp;amp;&lt;/span>&lt;span class="n">args&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;span class="p">}&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>Then, we can resolve the &lt;code>gXftm3iswpkVgBNDUp&lt;/code> function with the base address of &lt;code>libnative-lib.so&lt;/code>
 and its offset &lt;code>0x9B41C&lt;/code>:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="color:#66d9ef">void&lt;/span>&lt;span style="color:#f92672">*&lt;/span> hdl &lt;span style="color:#f92672">=&lt;/span> dlopen(&lt;span style="color:#e6db74">&amp;#34;libnative-lib.so&amp;#34;&lt;/span>, RTLD_NOW);
-uintptr_t base_address &lt;span style="color:#f92672">=&lt;/span> get_base_address(&lt;span style="color:#e6db74">&amp;#34;libnative-lib.so&amp;#34;&lt;/span>);
-&lt;span style="color:#66d9ef">using&lt;/span> gXftm3iswpkVgBNDUp_t &lt;span style="color:#f92672">=&lt;/span> jbyteArray(&lt;span style="color:#f92672">*&lt;/span>)(JNIEnv&lt;span style="color:#f92672">*&lt;/span>, jobject, jbyteArray, jbyte);
-gXftm3iswpkVgBNDUp &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#66d9ef">reinterpret_cast&lt;/span>&lt;span style="color:#f92672">&amp;lt;&lt;/span>gXftm3iswpkVgBNDUp_t&lt;span style="color:#f92672">&amp;gt;&lt;/span>(base_address &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#ae81ff">0x9B41C&lt;/span>);
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-cpp" data-lang="cpp">&lt;span class="kt">void&lt;/span>&lt;span class="o">*&lt;/span> &lt;span class="n">hdl&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">dlopen&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;libnative-lib.so&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">RTLD_NOW&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;span class="n">uintptr_t&lt;/span> &lt;span class="n">base_address&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">get_base_address&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;libnative-lib.so&amp;#34;&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;span class="k">using&lt;/span> &lt;span class="n">gXftm3iswpkVgBNDUp_t&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">jbyteArray&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">*&lt;/span>&lt;span class="p">)(&lt;/span>&lt;span class="n">JNIEnv&lt;/span>&lt;span class="o">*&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">jobject&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">jbyteArray&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">jbyte&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;span class="n">gXftm3iswpkVgBNDUp&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="k">reinterpret_cast&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="n">gXftm3iswpkVgBNDUp_t&lt;/span>&lt;span class="o">&amp;gt;&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">base_address&lt;/span> &lt;span class="o">+&lt;/span> &lt;span class="mh">0x9B41C&lt;/span>&lt;span class="p">);&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>Finally, we can run the function with our own inputs:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">std&lt;span style="color:#f92672">::&lt;/span>string pin_amount &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;0000123400004567&amp;#34;&lt;/span>;
-jbyteArray array &lt;span style="color:#f92672">=&lt;/span> convert_to_jbyteArray(pin_amount, ptr);
-jbyteArray jencrypted_buffer &lt;span style="color:#f92672">=&lt;/span> gXftm3iswpkVgBNDUp(env, &lt;span style="color:#66d9ef">nullptr&lt;/span>, array, &lt;span style="color:#ae81ff">0xF0&lt;/span>);
-&lt;span style="color:#66d9ef">const&lt;/span> std&lt;span style="color:#f92672">::&lt;/span>vector&lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#66d9ef">uint8_t&lt;/span>&lt;span style="color:#f92672">&amp;gt;&lt;/span> encrypted_buffer &lt;span style="color:#f92672">=&lt;/span> from_jbytes(jencrypted_buffer);
-std&lt;span style="color:#f92672">::&lt;/span>string hex_str &lt;span style="color:#f92672">=&lt;/span> to_hex(encrypted_buffer);
-LOG_INFO(&lt;span style="color:#e6db74">&amp;#34;{} --&amp;gt; {}&amp;#34;&lt;/span>, pin_amount, ref_str);
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-cpp" data-lang="cpp">&lt;span class="n">std&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">string&lt;/span> &lt;span class="n">pin_amount&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="s">&amp;#34;0000123400004567&amp;#34;&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;span class="n">jbyteArray&lt;/span> &lt;span class="n">array&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">convert_to_jbyteArray&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">pin_amount&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">ptr&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;span class="n">jbyteArray&lt;/span> &lt;span class="n">jencrypted_buffer&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">gXftm3iswpkVgBNDUp&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">env&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="k">nullptr&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">array&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mh">0xF0&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;span class="k">const&lt;/span> &lt;span class="n">std&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">vector&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="kt">uint8_t&lt;/span>&lt;span class="o">&amp;gt;&lt;/span> &lt;span class="n">encrypted_buffer&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">from_jbytes&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">jencrypted_buffer&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;span class="n">std&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">string&lt;/span> &lt;span class="n">hex_str&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">to_hex&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">encrypted_buffer&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;span class="n">LOG_INFO&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;{} --&amp;gt; {}&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">pin_amount&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">ref_str&lt;/span>&lt;span class="p">);&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;div class="alert alert-note">
 &lt;div>
 The whole implementation is available &lt;a href="https://github.com/romainthomas/r2pay/blob/master/shim-whitebox">here &lt;i class="fab fa-github">&lt;/i>&lt;/a>.
@@ -116,21 +116,21 @@ The whole implementation is available &lt;a href="https://github.com/romainthoma
 &lt;p>Now that we are able to run the &lt;code>gXftm3iswpkVgBNDUp&lt;/code> function without the GUI layer, we can easily
 create an interface with
 &lt;a href="https://qbdi.quarkslab.com" target="_blank" rel="noopener">QBDI&lt;/a>:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">VM vm;
-vm.addInstrumentedModule(&lt;span style="color:#e6db74">&amp;#34;libnative-lib.so&amp;#34;&lt;/span>);
-...
-jbyteArray array &lt;span style="color:#f92672">=&lt;/span> to_jarray(pin_amount, ptr);
-jbyteArray qbdi_encrypted_buffer;
-vm.call(
-&lt;span style="color:#75715e">/* ret */&lt;/span> &lt;span style="color:#66d9ef">reinterpret_cast&lt;/span>&lt;span style="color:#f92672">&amp;lt;&lt;/span>uintptr_t&lt;span style="color:#f92672">*&amp;gt;&lt;/span>(&lt;span style="color:#f92672">&amp;amp;&lt;/span>qbdi_encrypted_buffer),
-&lt;span style="color:#75715e">/* target */&lt;/span> &lt;span style="color:#66d9ef">reinterpret_cast&lt;/span>&lt;span style="color:#f92672">&amp;lt;&lt;/span>uintptr_t&lt;span style="color:#f92672">&amp;gt;&lt;/span>(gXftm3iswpkVgBNDUp),
-&lt;span style="color:#75715e">/* params */&lt;/span> {
-&lt;span style="color:#75715e">/* p_0: JNIEnv* */&lt;/span> &lt;span style="color:#66d9ef">reinterpret_cast&lt;/span>&lt;span style="color:#f92672">&amp;lt;&lt;/span>rword&lt;span style="color:#f92672">&amp;gt;&lt;/span>(env),
-&lt;span style="color:#75715e">/* p_1: jobject thiz */&lt;/span> &lt;span style="color:#66d9ef">reinterpret_cast&lt;/span>&lt;span style="color:#f92672">&amp;lt;&lt;/span>rword&lt;span style="color:#f92672">&amp;gt;&lt;/span>(&lt;span style="color:#66d9ef">nullptr&lt;/span>),
-&lt;span style="color:#75715e">/* p_2: inbuffer */&lt;/span> &lt;span style="color:#66d9ef">reinterpret_cast&lt;/span>&lt;span style="color:#f92672">&amp;lt;&lt;/span>rword&lt;span style="color:#f92672">&amp;gt;&lt;/span>(array),
-&lt;span style="color:#ae81ff">0xF0&lt;/span>
-}
-);
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-cpp" data-lang="cpp">&lt;span class="n">VM&lt;/span> &lt;span class="n">vm&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;span class="n">vm&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">addInstrumentedModule&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;libnative-lib.so&amp;#34;&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;span class="p">...&lt;/span>
+&lt;span class="n">jbyteArray&lt;/span> &lt;span class="n">array&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">to_jarray&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">pin_amount&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">ptr&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;span class="n">jbyteArray&lt;/span> &lt;span class="n">qbdi_encrypted_buffer&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;span class="n">vm&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">call&lt;/span>&lt;span class="p">(&lt;/span>
+&lt;span class="cm">/* ret */&lt;/span> &lt;span class="k">reinterpret_cast&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="n">uintptr_t&lt;/span>&lt;span class="o">*&amp;gt;&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">&amp;amp;&lt;/span>&lt;span class="n">qbdi_encrypted_buffer&lt;/span>&lt;span class="p">),&lt;/span>
+&lt;span class="cm">/* target */&lt;/span> &lt;span class="k">reinterpret_cast&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="n">uintptr_t&lt;/span>&lt;span class="o">&amp;gt;&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">gXftm3iswpkVgBNDUp&lt;/span>&lt;span class="p">),&lt;/span>
+&lt;span class="cm">/* params */&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;span class="cm">/* p_0: JNIEnv* */&lt;/span> &lt;span class="k">reinterpret_cast&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="n">rword&lt;/span>&lt;span class="o">&amp;gt;&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">env&lt;/span>&lt;span class="p">),&lt;/span>
+&lt;span class="cm">/* p_1: jobject thiz */&lt;/span> &lt;span class="k">reinterpret_cast&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="n">rword&lt;/span>&lt;span class="o">&amp;gt;&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="k">nullptr&lt;/span>&lt;span class="p">),&lt;/span>
+&lt;span class="cm">/* p_2: inbuffer */&lt;/span> &lt;span class="k">reinterpret_cast&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="n">rword&lt;/span>&lt;span class="o">&amp;gt;&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">array&lt;/span>&lt;span class="p">),&lt;/span>
+&lt;span class="mh">0xF0&lt;/span>
+&lt;span class="p">}&lt;/span>
+&lt;span class="p">);&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>The execution in QBDI &lt;strong>without user&amp;rsquo;s callbacks&lt;/strong> takes about &lt;strong>3min 30s&lt;/strong> which is quite huge compared to
 the &lt;strong>real execution&lt;/strong> that takes about &lt;strong>853ms&lt;/strong>:&lt;/p>
 &lt;p>&lt;img src="benchmark.svg" alt="Performances with different configurations">&lt;/p>
@@ -138,11 +138,11 @@ the &lt;strong>real execution&lt;/strong> that takes about &lt;strong>853ms&lt;/
 analysis, it turns out that this function is not relevant to instrument to break the whitebox.
 We can force its &lt;em>real&lt;/em> execution
 (i.e. outside QBDI) &lt;strong>by removing the function&amp;rsquo;s address from the instrumented range&lt;/strong>&lt;sup id="fnref:3">&lt;a href="#fn:3" class="footnote-ref" role="doc-noteref">3&lt;/a>&lt;/sup>.&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="color:#66d9ef">static&lt;/span> &lt;span style="color:#66d9ef">constexpr&lt;/span> uintptr_t HEAVY_FUNCTION &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">0x1038f0&lt;/span>;
-vm.removeInstrumentedRange(
-base_address &lt;span style="color:#f92672">+&lt;/span> HEAVY_FUNCTION,
-base_address &lt;span style="color:#f92672">+&lt;/span> HEAVY_FUNCTION &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#ae81ff">1&lt;/span>
-);
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-cpp" data-lang="cpp">&lt;span class="k">static&lt;/span> &lt;span class="k">constexpr&lt;/span> &lt;span class="n">uintptr_t&lt;/span> &lt;span class="n">HEAVY_FUNCTION&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="mh">0x1038f0&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;span class="n">vm&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">removeInstrumentedRange&lt;/span>&lt;span class="p">(&lt;/span>
+&lt;span class="n">base_address&lt;/span> &lt;span class="o">+&lt;/span> &lt;span class="n">HEAVY_FUNCTION&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;span class="n">base_address&lt;/span> &lt;span class="o">+&lt;/span> &lt;span class="n">HEAVY_FUNCTION&lt;/span> &lt;span class="o">+&lt;/span> &lt;span class="mi">1&lt;/span>
+&lt;span class="p">);&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>This small adjustment &lt;strong>drops the execution to 3'30sec&lt;/strong>.&lt;/p>
 &lt;hr>
 &lt;p>Some cryptographic algorithms can be fingerprinted either with predefined constants or with their memory accesses.
@@ -152,27 +152,27 @@ the whitebox lookup tables are likely to be stored in the &lt;code>.data, .rodat
 &lt;p>By looking at the sizes of these sections, only the &lt;code>.data&lt;/code> section seems to have an appropriate size.
 We can generate a memory trace on this section to see if we can outline some patterns.
 It can be made with the following piece of code:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">vm.recordMemoryAccess(MEMORY_READ_WRITE);
-vm.addMemRangeCB(
-&lt;span style="color:#75715e">/* .data start address */&lt;/span> base_address &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#ae81ff">0x127000&lt;/span>,
-&lt;span style="color:#75715e">/* .data end address */&lt;/span> base_address &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#ae81ff">0x127000&lt;/span> &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#ae81ff">0x8e000&lt;/span>,
-&lt;span style="color:#75715e">/* Record both: reads and writes */&lt;/span> MEMORY_READ_WRITE,
-&lt;span style="color:#75715e">/* Memory callback */&lt;/span>
-[] (VM&lt;span style="color:#f92672">*&lt;/span> vm, GPRState&lt;span style="color:#f92672">*&lt;/span>, FPRState&lt;span style="color:#f92672">*&lt;/span>, &lt;span style="color:#66d9ef">void&lt;/span>&lt;span style="color:#f92672">*&lt;/span> data) {
-&lt;span style="color:#66d9ef">auto&lt;/span> ctx &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#66d9ef">reinterpret_cast&lt;/span>&lt;span style="color:#f92672">&amp;lt;&lt;/span>qbdi_ctx&lt;span style="color:#f92672">*&amp;gt;&lt;/span>(data);
-&lt;span style="color:#75715e">/*
-&lt;/span>&lt;span style="color:#75715e"> * &amp;#39;for&amp;#39; loop since on AArch64 we can have multiple reads / writes
-&lt;/span>&lt;span style="color:#75715e"> * at once. (e.g. stp x0, x1, [sp, #128])
-&lt;/span>&lt;span style="color:#75715e"> */&lt;/span>
-&lt;span style="color:#66d9ef">for&lt;/span> (&lt;span style="color:#66d9ef">const&lt;/span> MemoryAccess&lt;span style="color:#f92672">&amp;amp;&lt;/span> mem_access : vm&lt;span style="color:#f92672">-&amp;gt;&lt;/span>getInstMemoryAccess()) {
-ctx&lt;span style="color:#f92672">-&amp;gt;&lt;/span>trace&lt;span style="color:#f92672">-&amp;gt;&lt;/span>push_back({
-mem_access.instAddress &lt;span style="color:#f92672">-&lt;/span> base_address,
-mem_access.accessAddress &lt;span style="color:#f92672">-&lt;/span> base_address,
-mem_access.size,
-});
-}
-&lt;span style="color:#66d9ef">return&lt;/span> VMAction&lt;span style="color:#f92672">::&lt;/span>CONTINUE;
-}, &lt;span style="color:#f92672">&amp;amp;&lt;/span>ctx);
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-cpp" data-lang="cpp">&lt;span class="n">vm&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">recordMemoryAccess&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">MEMORY_READ_WRITE&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;span class="n">vm&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">addMemRangeCB&lt;/span>&lt;span class="p">(&lt;/span>
+&lt;span class="cm">/* .data start address */&lt;/span> &lt;span class="n">base_address&lt;/span> &lt;span class="o">+&lt;/span> &lt;span class="mh">0x127000&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;span class="cm">/* .data end address */&lt;/span> &lt;span class="n">base_address&lt;/span> &lt;span class="o">+&lt;/span> &lt;span class="mh">0x127000&lt;/span> &lt;span class="o">+&lt;/span> &lt;span class="mh">0x8e000&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;span class="cm">/* Record both: reads and writes */&lt;/span> &lt;span class="n">MEMORY_READ_WRITE&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;span class="cm">/* Memory callback */&lt;/span>
+&lt;span class="p">[]&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">VM&lt;/span>&lt;span class="o">*&lt;/span> &lt;span class="n">vm&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">GPRState&lt;/span>&lt;span class="o">*&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">FPRState&lt;/span>&lt;span class="o">*&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="kt">void&lt;/span>&lt;span class="o">*&lt;/span> &lt;span class="n">data&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;span class="k">auto&lt;/span> &lt;span class="n">ctx&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="k">reinterpret_cast&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="n">qbdi_ctx&lt;/span>&lt;span class="o">*&amp;gt;&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">data&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;span class="cm">/*
+&lt;/span>&lt;span class="cm"> * &amp;#39;for&amp;#39; loop since on AArch64 we can have multiple reads / writes
+&lt;/span>&lt;span class="cm"> * at once. (e.g. stp x0, x1, [sp, #128])
+&lt;/span>&lt;span class="cm"> */&lt;/span>
+&lt;span class="k">for&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="k">const&lt;/span> &lt;span class="n">MemoryAccess&lt;/span>&lt;span class="o">&amp;amp;&lt;/span> &lt;span class="nl">mem_access&lt;/span> &lt;span class="p">:&lt;/span> &lt;span class="n">vm&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">getInstMemoryAccess&lt;/span>&lt;span class="p">())&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;span class="n">ctx&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">trace&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">push_back&lt;/span>&lt;span class="p">({&lt;/span>
+&lt;span class="n">mem_access&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">instAddress&lt;/span> &lt;span class="o">-&lt;/span> &lt;span class="n">base_address&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;span class="n">mem_access&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">accessAddress&lt;/span> &lt;span class="o">-&lt;/span> &lt;span class="n">base_address&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;span class="n">mem_access&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">size&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;span class="p">});&lt;/span>
+&lt;span class="p">}&lt;/span>
+&lt;span class="k">return&lt;/span> &lt;span class="n">VMAction&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">CONTINUE&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;span class="p">},&lt;/span> &lt;span class="o">&amp;amp;&lt;/span>&lt;span class="n">ctx&lt;/span>&lt;span class="p">);&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;div class="alert alert-note">
 &lt;div>
 Generating the memory trace takes about 11sec which is acceptable.
@@ -196,41 +196,41 @@ The memory trace is available in the &lt;a href="https://github.com/romainthomas
 &lt;/div>
 &lt;p>To efficiently make
 the injection, we can first reduce the memory addresses to only keep those that are used in the last 2 rounds:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">trace_file &lt;span style="color:#f92672">=&lt;/span> CWD &lt;span style="color:#f92672">/&lt;/span> &lt;span style="color:#e6db74">&amp;#34;..&amp;#34;&lt;/span> &lt;span style="color:#f92672">/&lt;/span> &lt;span style="color:#e6db74">&amp;#34;assets&amp;#34;&lt;/span> &lt;span style="color:#f92672">/&lt;/span> &lt;span style="color:#e6db74">&amp;#34;mem_trace.json&amp;#34;&lt;/span>
-trace &lt;span style="color:#f92672">=&lt;/span> json&lt;span style="color:#f92672">.&lt;/span>loads(trace_file&lt;span style="color:#f92672">.&lt;/span>read_bytes())[&lt;span style="color:#ae81ff">0&lt;/span>]
-&lt;span style="color:#75715e"># Keep the entries that are involved in the last 2-rounds (empirical number)&lt;/span>
-nice_trace &lt;span style="color:#f92672">=&lt;/span> trace[&lt;span style="color:#f92672">-&lt;/span>&lt;span style="color:#ae81ff">1000&lt;/span>:]
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-python" data-lang="python">&lt;span class="n">trace_file&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">CWD&lt;/span> &lt;span class="o">/&lt;/span> &lt;span class="s2">&amp;#34;..&amp;#34;&lt;/span> &lt;span class="o">/&lt;/span> &lt;span class="s2">&amp;#34;assets&amp;#34;&lt;/span> &lt;span class="o">/&lt;/span> &lt;span class="s2">&amp;#34;mem_trace.json&amp;#34;&lt;/span>
+&lt;span class="n">trace&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">json&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">loads&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">trace_file&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">read_bytes&lt;/span>&lt;span class="p">())[&lt;/span>&lt;span class="mi">0&lt;/span>&lt;span class="p">]&lt;/span>
+&lt;span class="c1"># Keep the entries that are involved in the last 2-rounds (empirical number)&lt;/span>
+&lt;span class="n">nice_trace&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">trace&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="o">-&lt;/span>&lt;span class="mi">1000&lt;/span>&lt;span class="p">:]&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>Then, we can use our shim mechanism to inject the faults in the &lt;code>.data&lt;/code> section with the addresses previously selected.
 Moreover, we can reduce the set of &lt;code>.data&lt;/code> addresses with the faults that introduce exactly &lt;strong>4 differences&lt;/strong> in the ciphertext:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="color:#75715e">// Make sure the .data section is writable
-&lt;/span>&lt;span style="color:#75715e">&lt;/span>mprotect(
-&lt;span style="color:#66d9ef">reinterpret_cast&lt;/span>&lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#66d9ef">void&lt;/span>&lt;span style="color:#f92672">*&amp;gt;&lt;/span>(base_address &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#75715e">/* .data */&lt;/span> &lt;span style="color:#ae81ff">0x127000&lt;/span>),
-&lt;span style="color:#ae81ff">0x8e000&lt;/span>,
-PROT_READ &lt;span style="color:#f92672">|&lt;/span> PROT_WRITE
-);
-&lt;span style="color:#66d9ef">for&lt;/span> (uintptr_t fault_addr : selected_addresses) {
-&lt;span style="color:#66d9ef">uint8_t&lt;/span>&lt;span style="color:#f92672">&amp;amp;&lt;/span> target_byte &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#f92672">*&lt;/span>&lt;span style="color:#66d9ef">reinterpret_cast&lt;/span>&lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#66d9ef">uint8_t&lt;/span>&lt;span style="color:#f92672">*&amp;gt;&lt;/span>(base_address &lt;span style="color:#f92672">+&lt;/span> fault_addr);
-&lt;span style="color:#66d9ef">uint8_t&lt;/span> backup &lt;span style="color:#f92672">=&lt;/span> target_byte;
-&lt;span style="color:#75715e">// Fault 1 byte:
-&lt;/span>&lt;span style="color:#75715e">&lt;/span> target_byte &lt;span style="color:#f92672">^=&lt;/span> &lt;span style="color:#ae81ff">0x33&lt;/span>;
-&lt;span style="color:#75715e">// Run the whitebox with the faulty byte
-&lt;/span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">const&lt;/span> std&lt;span style="color:#f92672">::&lt;/span>vector&lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#66d9ef">uint8_t&lt;/span>&lt;span style="color:#f92672">&amp;gt;&lt;/span> encrypted &lt;span style="color:#f92672">=&lt;/span> encrypt(msg);
-&lt;span style="color:#75715e">// Restore the original byte
-&lt;/span>&lt;span style="color:#75715e">&lt;/span> target_byte &lt;span style="color:#f92672">=&lt;/span> backup;
-&lt;span style="color:#75715e">// Compute the number of errors
-&lt;/span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#75715e">// ...
-&lt;/span>&lt;span style="color:#75715e">&lt;/span>}
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-cpp" data-lang="cpp">&lt;span class="c1">// Make sure the .data section is writable
+&lt;/span>&lt;span class="c1">&lt;/span>&lt;span class="n">mprotect&lt;/span>&lt;span class="p">(&lt;/span>
+&lt;span class="k">reinterpret_cast&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="kt">void&lt;/span>&lt;span class="o">*&amp;gt;&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">base_address&lt;/span> &lt;span class="o">+&lt;/span> &lt;span class="cm">/* .data */&lt;/span> &lt;span class="mh">0x127000&lt;/span>&lt;span class="p">),&lt;/span>
+&lt;span class="mh">0x8e000&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;span class="n">PROT_READ&lt;/span> &lt;span class="o">|&lt;/span> &lt;span class="n">PROT_WRITE&lt;/span>
+&lt;span class="p">);&lt;/span>
+&lt;span class="k">for&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">uintptr_t&lt;/span> &lt;span class="nl">fault_addr&lt;/span> &lt;span class="p">:&lt;/span> &lt;span class="n">selected_addresses&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;span class="kt">uint8_t&lt;/span>&lt;span class="o">&amp;amp;&lt;/span> &lt;span class="n">target_byte&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="o">*&lt;/span>&lt;span class="k">reinterpret_cast&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="kt">uint8_t&lt;/span>&lt;span class="o">*&amp;gt;&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">base_address&lt;/span> &lt;span class="o">+&lt;/span> &lt;span class="n">fault_addr&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;span class="kt">uint8_t&lt;/span> &lt;span class="n">backup&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">target_byte&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;span class="c1">// Fault 1 byte:
+&lt;/span>&lt;span class="c1">&lt;/span> &lt;span class="n">target_byte&lt;/span> &lt;span class="o">^=&lt;/span> &lt;span class="mh">0x33&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;span class="c1">// Run the whitebox with the faulty byte
+&lt;/span>&lt;span class="c1">&lt;/span> &lt;span class="k">const&lt;/span> &lt;span class="n">std&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">vector&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="kt">uint8_t&lt;/span>&lt;span class="o">&amp;gt;&lt;/span> &lt;span class="n">encrypted&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">encrypt&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">msg&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;span class="c1">// Restore the original byte
+&lt;/span>&lt;span class="c1">&lt;/span> &lt;span class="n">target_byte&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">backup&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;span class="c1">// Compute the number of errors
+&lt;/span>&lt;span class="c1">&lt;/span> &lt;span class="c1">// ...
+&lt;/span>&lt;span class="c1">&lt;/span>&lt;span class="p">}&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>Finally, with the subset of the addresses that affect exactly 4 bytes, we can generate several faults for a given
 address:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="color:#66d9ef">for&lt;/span> (uintptr_t nice_fault_addr : four_bytes_fault_addresses) {
-&lt;span style="color:#66d9ef">for&lt;/span> (size_t i &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>; i &lt;span style="color:#f92672">&amp;lt;&lt;/span> &lt;span style="color:#ae81ff">255&lt;/span>; &lt;span style="color:#f92672">++&lt;/span>i) {
-&lt;span style="color:#66d9ef">const&lt;/span> std&lt;span style="color:#f92672">::&lt;/span>vector&lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#66d9ef">uint8_t&lt;/span>&lt;span style="color:#f92672">&amp;gt;&amp;amp;&lt;/span> output &lt;span style="color:#f92672">=&lt;/span> inject_fault(addr, PIN_AMOUNT, i);
-&lt;span style="color:#66d9ef">const&lt;/span> size_t nb_errors &lt;span style="color:#f92672">=&lt;/span> get_error(genuine_value, output);
-&lt;span style="color:#66d9ef">if&lt;/span> (nb_errors &lt;span style="color:#f92672">==&lt;/span> &lt;span style="color:#ae81ff">4&lt;/span> and unique.insert(output).second) {
-&lt;span style="color:#75715e">// Record the entry ...
-&lt;/span>&lt;span style="color:#75715e">&lt;/span> }
-}
-}
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-cpp" data-lang="cpp">&lt;span class="k">for&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">uintptr_t&lt;/span> &lt;span class="nl">nice_fault_addr&lt;/span> &lt;span class="p">:&lt;/span> &lt;span class="n">four_bytes_fault_addresses&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;span class="k">for&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">size_t&lt;/span> &lt;span class="n">i&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="mi">0&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="n">i&lt;/span> &lt;span class="o">&amp;lt;&lt;/span> &lt;span class="mi">255&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="o">++&lt;/span>&lt;span class="n">i&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;span class="k">const&lt;/span> &lt;span class="n">std&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">vector&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="kt">uint8_t&lt;/span>&lt;span class="o">&amp;gt;&amp;amp;&lt;/span> &lt;span class="n">output&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">inject_fault&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">addr&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">PIN_AMOUNT&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">i&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;span class="k">const&lt;/span> &lt;span class="n">size_t&lt;/span> &lt;span class="n">nb_errors&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">get_error&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">genuine_value&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">output&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;span class="k">if&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">nb_errors&lt;/span> &lt;span class="o">==&lt;/span> &lt;span class="mi">4&lt;/span> &lt;span class="n">and&lt;/span> &lt;span class="n">unique&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">insert&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">output&lt;/span>&lt;span class="p">).&lt;/span>&lt;span class="n">second&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;span class="c1">// Record the entry ...
+&lt;/span>&lt;span class="c1">&lt;/span> &lt;span class="p">}&lt;/span>
+&lt;span class="p">}&lt;/span>
+&lt;span class="p">}&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>The aforementioned code gives an idea about how to generate the faults. One can find the whole implementation in
 this file:
 &lt;a href="https://github.com/romainthomas/r2pay/blob/master/shim-whitebox/src/main.cpp#L343-L365" target="_blank" rel="noopener">shim-whitebox/src/main.cpp&lt;/a> that produces
@@ -241,16 +241,16 @@ this set of files
 &lt;a href="https://github.com/SideChannelMarvels" target="_blank" rel="noopener">&lt;i class="fab fa-github">&lt;/i> Side-Channel Marvels&lt;/a> project,
 we can use
 &lt;a href="https://github.com/SideChannelMarvels/JeanGrey" target="_blank" rel="noopener">JeanGrey&lt;/a> &amp;mdash; developed by Philippe Teuwen &amp;mdash; to recover the whitebox&amp;rsquo;s key from the faulty traces:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">&lt;span style="color:#f92672">import&lt;/span> pathlib
-&lt;span style="color:#f92672">import&lt;/span> phoenixAES
-CWD &lt;span style="color:#f92672">=&lt;/span> pathlib&lt;span style="color:#f92672">.&lt;/span>Path(__file__)&lt;span style="color:#f92672">.&lt;/span>parent
-trace_dir &lt;span style="color:#f92672">=&lt;/span> CWD &lt;span style="color:#f92672">/&lt;/span> &lt;span style="color:#e6db74">&amp;#34;..&amp;#34;&lt;/span> &lt;span style="color:#f92672">/&lt;/span> &lt;span style="color:#e6db74">&amp;#34;assets&amp;#34;&lt;/span> &lt;span style="color:#f92672">/&lt;/span> &lt;span style="color:#e6db74">&amp;#34;wb-traces&amp;#34;&lt;/span>
-&lt;span style="color:#66d9ef">for&lt;/span> f &lt;span style="color:#f92672">in&lt;/span> trace_dir&lt;span style="color:#f92672">.&lt;/span>iterdir():
-x &lt;span style="color:#f92672">=&lt;/span> phoenixAES&lt;span style="color:#f92672">.&lt;/span>crack_file(f)
-&lt;span style="color:#66d9ef">if&lt;/span> x &lt;span style="color:#f92672">is&lt;/span> &lt;span style="color:#f92672">not&lt;/span> None:
-&lt;span style="color:#66d9ef">print&lt;/span>(x, f&lt;span style="color:#f92672">.&lt;/span>name)
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-python" data-lang="python">&lt;span class="kn">import&lt;/span> &lt;span class="nn">pathlib&lt;/span>
+&lt;span class="kn">import&lt;/span> &lt;span class="nn">phoenixAES&lt;/span>
+&lt;span class="n">CWD&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">pathlib&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Path&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="vm">__file__&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">parent&lt;/span>
+&lt;span class="n">trace_dir&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">CWD&lt;/span> &lt;span class="o">/&lt;/span> &lt;span class="s2">&amp;#34;..&amp;#34;&lt;/span> &lt;span class="o">/&lt;/span> &lt;span class="s2">&amp;#34;assets&amp;#34;&lt;/span> &lt;span class="o">/&lt;/span> &lt;span class="s2">&amp;#34;wb-traces&amp;#34;&lt;/span>
+&lt;span class="k">for&lt;/span> &lt;span class="n">f&lt;/span> &lt;span class="ow">in&lt;/span> &lt;span class="n">trace_dir&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">iterdir&lt;/span>&lt;span class="p">():&lt;/span>
+&lt;span class="n">x&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">phoenixAES&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">crack_file&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">f&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="k">if&lt;/span> &lt;span class="n">x&lt;/span> &lt;span class="ow">is&lt;/span> &lt;span class="ow">not&lt;/span> &lt;span class="kc">None&lt;/span>&lt;span class="p">:&lt;/span>
+&lt;span class="nb">print&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">x&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">f&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">name&lt;/span>&lt;span class="p">)&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>It provides the following results which enable to retrieve the key:&lt;/p>
-&lt;pre>&lt;code class="language-console" data-lang="console">$ python wb_key_recovery.py
+&lt;pre tabindex="0">&lt;code class="language-console" data-lang="console">$ python wb_key_recovery.py
 ..8D....7F............9A....79.. injection-1a930d.trace
 ..8D....7F............9A....79.. injection-1a95bd.trace
 ....19....62....B0............8F injection-1a91b2.trace
@@ -261,12 +261,12 @@ x &lt;span style="color:#f92672">=&lt;/span> phoenixAES&lt;span style="color:#f9
 ....19....62....B0............8F injection-1a8efd.trace
 r 2 p 4 y 1 s N 0 w S e c u r 3
 &lt;/code>&lt;/pre>&lt;p>Finally, we can verify that &lt;strong>r2p4y1sN0wSecur3&lt;/strong> is the right key by trying to decrypt &lt;code>9497cdf1df2600e7f63778d0ae91dcbb&lt;/code>&lt;sup id="fnref:4">&lt;a href="#fn:4" class="footnote-ref" role="doc-noteref">4&lt;/a>&lt;/sup>:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">&lt;span style="color:#f92672">from&lt;/span> Crypto.Cipher &lt;span style="color:#f92672">import&lt;/span> AES
-WB_KEY &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">b&lt;/span>&lt;span style="color:#e6db74">&amp;#34;r2p4y1sN0wSecur3&amp;#34;&lt;/span>
-cipher &lt;span style="color:#f92672">=&lt;/span> AES&lt;span style="color:#f92672">.&lt;/span>new(WB_KEY, AES&lt;span style="color:#f92672">.&lt;/span>MODE_ECB)
-output &lt;span style="color:#f92672">=&lt;/span> cipher&lt;span style="color:#f92672">.&lt;/span>decrypt(bytes&lt;span style="color:#f92672">.&lt;/span>fromhex(&lt;span style="color:#e6db74">&amp;#34;9497cdf1df2600e7f63778d0ae91dcbb&amp;#34;&lt;/span>))
-&lt;span style="color:#66d9ef">print&lt;/span>(output&lt;span style="color:#f92672">.&lt;/span>decode())
-&lt;/code>&lt;/pre>&lt;/div>&lt;pre>&lt;code class="language-console" data-lang="console">$ python ./aes_test.py
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-python" data-lang="python">&lt;span class="kn">from&lt;/span> &lt;span class="nn">Crypto.Cipher&lt;/span> &lt;span class="kn">import&lt;/span> &lt;span class="n">AES&lt;/span>
+&lt;span class="n">WB_KEY&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="sa">b&lt;/span>&lt;span class="s2">&amp;#34;r2p4y1sN0wSecur3&amp;#34;&lt;/span>
+&lt;span class="n">cipher&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">AES&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">new&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">WB_KEY&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">AES&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">MODE_ECB&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="n">output&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">cipher&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">decrypt&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nb">bytes&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">fromhex&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;9497cdf1df2600e7f63778d0ae91dcbb&amp;#34;&lt;/span>&lt;span class="p">))&lt;/span>
+&lt;span class="nb">print&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">output&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">decode&lt;/span>&lt;span class="p">())&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;pre tabindex="0">&lt;code class="language-console" data-lang="console">$ python ./aes_test.py
 0000123400004567
 &lt;/code>&lt;/pre>&lt;h2 id="side-note-about-the-data-section">Side note about the &lt;code>.data&lt;/code> section&lt;/h2>
 &lt;p>Most of the obfuscators encode strings so that we don&amp;rsquo;t have any clue about functions' logic. The obfuscator
@@ -276,10 +276,10 @@ As explained in the previous part, they are generated by the obfuscator and aime
 &lt;p>Since these functions are in the &lt;strong>ELF constructors&lt;/strong>, this means that they are executed as soon as the library is loaded.
 In particular, when calling &lt;code>dlopen(...)&lt;/code> these constructors are executed. It can be confirmed by
 dumping the &lt;code>.data&lt;/code> section right after &lt;code>dlopen()&lt;/code>:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">dlopen(&lt;span style="color:#e6db74">&amp;#34;libnative-lib.so&amp;#34;&lt;/span>, RTLD_NOW);
-std&lt;span style="color:#f92672">::&lt;/span>ofstream ofs{fmt&lt;span style="color:#f92672">::&lt;/span>format(&lt;span style="color:#e6db74">&amp;#34;/data/local/tmp/{}&amp;#34;&lt;/span>, output)};
-&lt;span style="color:#66d9ef">auto&lt;/span> start &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#66d9ef">reinterpret_cast&lt;/span>&lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#66d9ef">char&lt;/span>&lt;span style="color:#f92672">*&amp;gt;&lt;/span>(base_address &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#ae81ff">0x127000&lt;/span>);
-ofs.write(start, &lt;span style="color:#75715e">/* sizeof(.data) */&lt;/span> &lt;span style="color:#ae81ff">0x8d49f&lt;/span>);
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-cpp" data-lang="cpp">&lt;span class="n">dlopen&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;libnative-lib.so&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">RTLD_NOW&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;span class="n">std&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">ofstream&lt;/span> &lt;span class="n">ofs&lt;/span>&lt;span class="p">{&lt;/span>&lt;span class="n">fmt&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">format&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;/data/local/tmp/{}&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">output&lt;/span>&lt;span class="p">)};&lt;/span>
+&lt;span class="k">auto&lt;/span> &lt;span class="n">start&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="k">reinterpret_cast&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="k">const&lt;/span> &lt;span class="kt">char&lt;/span>&lt;span class="o">*&amp;gt;&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">base_address&lt;/span> &lt;span class="o">+&lt;/span> &lt;span class="mh">0x127000&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;span class="n">ofs&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">write&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">start&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="cm">/* sizeof(.data) */&lt;/span> &lt;span class="mh">0x8d49f&lt;/span>&lt;span class="p">);&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>Then, we can compare the bytes distribution with
 &lt;a href="https://binvis.io/" target="_blank" rel="noopener">binvis.io&lt;/a>:&lt;/p>
 &lt;p>&lt;img src="data_strings.png" alt="Bytes distribution in the .data section">&lt;/p>
@@ -317,10 +317,12 @@ Implementations&lt;/a> by Philippe Teuwen (
 &lt;hr>
 &lt;ol>
 &lt;li id="fn:1" role="doc-endnote">
-&lt;p>&lt;a href="https://developer.android.com/reference/android/content/Context">https://developer.android.com/reference/android/content/Context&lt;/a>&amp;#160;&lt;a href="#fnref:1" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;p>
+&lt;a href="https://developer.android.com/reference/android/content/Context" target="_blank" rel="noopener">https://developer.android.com/reference/android/content/Context&lt;/a>&amp;#160;&lt;a href="#fnref:1" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
 &lt;/li>
 &lt;li id="fn:2" role="doc-endnote">
-&lt;p>&lt;a href="https://calebfenton.github.io/2017/04/05/creating_java_vm_from_android_native_code/">https://calebfenton.github.io/2017/04/05/creating_java_vm_from_android_native_code/&lt;/a>&amp;#160;&lt;a href="#fnref:2" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;p>
+&lt;a href="https://calebfenton.github.io/2017/04/05/creating_java_vm_from_android_native_code/" target="_blank" rel="noopener">https://calebfenton.github.io/2017/04/05/creating_java_vm_from_android_native_code/&lt;/a>&amp;#160;&lt;a href="#fnref:2" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
 &lt;/li>
 &lt;li id="fn:3" role="doc-endnote">
 &lt;p>QBDI will execute the function using the
@@ -427,7 +429,7 @@ which is used to detect if the device is rooted.&lt;/p>
 an exception by dividing a number with 0.&lt;/p>
 &lt;p>On this point, we can disable the check by using
 &lt;a href="https://frida.re/" target="_blank" rel="noopener">Frida&lt;/a> on the rootbeer&amp;rsquo;s functions involved in the detection:&lt;/p>
-&lt;pre>&lt;code>// frida -U -l ./bypass-root.js --no-pause -f re.pwnme
+&lt;pre tabindex="0">&lt;code>// frida -U -l ./bypass-root.js --no-pause -f re.pwnme
 Java.perform(function () {
 var RootCheck = Java.use('\u266b.\u1d64');
 RootCheck['₤'].implementation = function () {
@@ -440,7 +442,7 @@ return false;
 }
 })
 &lt;/code>&lt;/pre>&lt;p>Nevertheless, the application still crashes as soon as it starts and generates the following backtrace:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text">F libc : Fatal signal 11 (SIGSEGV), code 1 (SEGV_MAPERR), fault addr 0xfa929095 in tid 8875 (re.pwnme), pid 8849 (re.pwnme)
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-text" data-lang="text">F libc : Fatal signal 11 (SIGSEGV), code 1 (SEGV_MAPERR), fault addr 0xfa929095 in tid 8875 (re.pwnme), pid 8849 (re.pwnme)
 F DEBUG : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
 F DEBUG : Build fingerprint: &amp;#39;google/taimen/taimen:9/PQ3A.190801.002/5670241:user/release-keys&amp;#39;
 F DEBUG : Revision: &amp;#39;rev_10&amp;#39;
@@ -473,7 +475,7 @@ available as soon as the library is loaded.
 &lt;code>/proc/self/maps&lt;/code> with the syscalls &lt;span class="blue">openat&lt;/span>/&lt;span class="hl-keyword">read&lt;/span>
 that are located at the addresses &lt;span class="blue">0x009870&lt;/span> and &lt;span class="hl-keyword">0x00b448&lt;/span>.&lt;/p>
 &lt;p>Then, we observe the following sequence:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text">0x011fb0: syscall: openat(0xffffffffffffff9c, &amp;#39;/system/lib64/libc.so&amp;#39;)
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-text" data-lang="text">0x011fb0: syscall: openat(0xffffffffffffff9c, &amp;#39;/system/lib64/libc.so&amp;#39;)
 0x012884: syscall: read(51, 0x7ffc006c58, 64): &amp;#39;ELF@)@8@&amp;#39;
 0x013170: syscall: lseek(51, 0x112918, 0)
 0x0145f8: syscall: read(51, 0x7ffc006c18, 64)
@@ -505,10 +507,10 @@ that are located at the addresses &lt;span class="blue">0x009870&lt;/span> and &
 &lt;p>These operations suggest that the function checks if the &lt;code>.plt&lt;/code> of &lt;code>/system/lib64/libc.so&lt;/code> is not tampered with.
 In particular, if we use Frida on a libc&amp;rsquo;s function this check won&amp;rsquo;t pass.&lt;/p>
 &lt;p>After this check, the function &lt;span class="green">sub_9080&lt;/span> spawns a thread:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text">0x0195dc: pthread_create(0xf1079f10, 0x0, 0x1a690, 0x0)
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-text" data-lang="text">0x0195dc: pthread_create(0xf1079f10, 0x0, 0x1a690, 0x0)
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>The libc integrity check makes more sense as it is probably used to protect the library against a hook of &lt;code>pthread_create()&lt;/code>.&lt;/p>
 &lt;p>The thread&amp;rsquo;s routine &lt;span class="red">sub_1a690&lt;/span> starts by making two calls to the mathematical function &lt;code>tan()&lt;/code>:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text">0x01b774: tan(0.): 0.
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-text" data-lang="text">0x01b774: tan(0.): 0.
 0x01b79c: tan(-7832.0): -0.00951489
 0x01cc74: memcpy(0x7ffc006598, libnative-lib.so!0x1267f0, 80) -&amp;gt; !7Nl
 0x01ceb8: rand()
@@ -522,7 +524,7 @@ floating-point instructions such as &lt;code>FCMP&lt;/code> or &lt;code>FMOV&lt;
 the process is ptrace-debugged (which is the case with gdb).
 Dynamically, we observe syscalls that open &lt;code>/proc/self/status&lt;/code> and read the content
 byte-per-byte:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text">0x020ee0: syscall: openat(0xffffffffffffff9c, &amp;#39;/proc/self/status&amp;#39;): 51
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-text" data-lang="text">0x020ee0: syscall: openat(0xffffffffffffff9c, &amp;#39;/proc/self/status&amp;#39;): 51
 0x0231e8: syscall: read(51, 0x7ffc00656c, 1): &amp;#39;N&amp;#39;
 0x0231e8: syscall: read(51, 0x7ffc00656c, 1): &amp;#39;a&amp;#39;
 0x0231e8: syscall: read(51, 0x7ffc00656c, 1): &amp;#39;m&amp;#39;
@@ -549,7 +551,7 @@ byte-per-byte:&lt;/p>
 &lt;p>Still in the thread&amp;rsquo;s routine &lt;span class="red">sub_1a690&lt;/span>, the function checks if Frida is running by looking
 at all the values of &lt;code>/proc/self/task/&amp;lt;tid&amp;gt;/status&lt;/code> and by checking if one of the names is &lt;span class="red">&lt;b>&lt;u>gmain&lt;/u>&lt;/b>&lt;/span>.
 It turns out that it&amp;rsquo;s the case when Frida is used in the application :-)&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text">0x0368e4: snprintf(&amp;#39;/proc/self/task/9719/status&amp;#39;, &amp;#39;/proc/self/task/%s/status&amp;#39;): &amp;#39;/proc/self/task/9719/status&amp;#39;
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-text" data-lang="text">0x0368e4: snprintf(&amp;#39;/proc/self/task/9719/status&amp;#39;, &amp;#39;/proc/self/task/%s/status&amp;#39;): &amp;#39;/proc/self/task/9719/status&amp;#39;
 0x036a1c: syscall: openat(0xffffffffffffff9c, &amp;#39;/proc/self/task/9719/status&amp;#39;)
 0x03897c: syscall: read(73, 0x7ffc400af4, 1): &amp;#39;N&amp;#39;
 0x03897c: syscall: read(73, 0x7ffc400af4, 1): &amp;#39;a&amp;#39;
@@ -574,7 +576,7 @@ of the process. It iterates over &lt;code>/proc/self/fd/%s&lt;/code> and looks a
 &lt;p>Frida &lt;span class="blue">server&lt;/span> &amp;mdash; which is running globally on the device &amp;mdash; and Frida agent &amp;mdash; which is injected in the
 process &amp;mdash; communicate with named pipes that are associated with a file descriptor.&lt;/p>
 &lt;p>If Frida server is running, we can observe the following values:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text">0x04308c: lstat(&amp;#39;/proc/self/fd/32&amp;#39;)
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-text" data-lang="text">0x04308c: lstat(&amp;#39;/proc/self/fd/32&amp;#39;)
 0x043448: syscall: readlinkat(0xffffffffffffff9c, &amp;#39;/proc/self/fd/32&amp;#39;, 0x7ffbffdc10, 256): &amp;#39;anon_inode:[eventfd]&amp;#39;
 0x041844: readdir(&amp;#39;33&amp;#39;)
 0x043078: snprintf(&amp;#39;/proc/self/fd/33&amp;#39;, &amp;#39;/proc/self/fd/%s&amp;#39;): &amp;#39;/proc/self/fd/33&amp;#39;
@@ -591,29 +593,29 @@ which triggers the detection and the application crashes.&lt;/p>
 by &lt;strong>dynamically changing&lt;/strong> the result of &lt;code>readlinkat()&lt;/code>. For instance, we can use
 &lt;a href="https://qbdi.quarkslab.com/" target="_blank" rel="noopener">QBDI&lt;/a> to
 instrument syscall instructions and process the result of &lt;code>readlinkat()&lt;/code> in an user callback:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">
-vm.addMnemonicCB(&lt;span style="color:#e6db74">&amp;#34;SVC&amp;#34;&lt;/span>, POST_INST,
-[] (VMInstanceRef vm, GPRState&lt;span style="color:#f92672">*&lt;/span> gprState, FPRState&lt;span style="color:#f92672">*&lt;/span>, &lt;span style="color:#66d9ef">void&lt;/span>&lt;span style="color:#f92672">*&lt;/span> data) {
-&lt;span style="color:#66d9ef">if&lt;/span> (gprState&lt;span style="color:#f92672">-&amp;gt;&lt;/span>x8 &lt;span style="color:#f92672">!=&lt;/span> __NR_readlinkat) {
-&lt;span style="color:#66d9ef">return&lt;/span> VMAction&lt;span style="color:#f92672">::&lt;/span>CONTINUE;
-}
-std&lt;span style="color:#f92672">::&lt;/span>string buf &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#66d9ef">reinterpret_cast&lt;/span>&lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#66d9ef">char&lt;/span>&lt;span style="color:#f92672">*&amp;gt;&lt;/span>(gprState&lt;span style="color:#f92672">-&amp;gt;&lt;/span>x2);
-&lt;span style="color:#66d9ef">if&lt;/span> (buf.find(&lt;span style="color:#e6db74">&amp;#34;re.frida.server&amp;#34;&lt;/span>) &lt;span style="color:#f92672">!=&lt;/span> std&lt;span style="color:#f92672">::&lt;/span>string&lt;span style="color:#f92672">::&lt;/span>npos) {
-&lt;span style="color:#66d9ef">static&lt;/span> &lt;span style="color:#66d9ef">const&lt;/span> std&lt;span style="color:#f92672">::&lt;/span>string FAKE_VALUE &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;anon_inode:[eventfd]&amp;#34;&lt;/span>;
-&lt;span style="color:#75715e">// Bypass Frida detection!
-&lt;/span>&lt;span style="color:#75715e">&lt;/span> memcpy(
-&lt;span style="color:#66d9ef">reinterpret_cast&lt;/span>&lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#66d9ef">void&lt;/span>&lt;span style="color:#f92672">*&amp;gt;&lt;/span>(gprState&lt;span style="color:#f92672">-&amp;gt;&lt;/span>x2),
-&lt;span style="color:#66d9ef">reinterpret_cast&lt;/span>&lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#66d9ef">void&lt;/span>&lt;span style="color:#f92672">*&amp;gt;&lt;/span>(FAKE_VALUE.c_str()),
-FAKE_VALUE.size() &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#ae81ff">1&lt;/span>
-);
-gprState&lt;span style="color:#f92672">-&amp;gt;&lt;/span>x0 &lt;span style="color:#f92672">=&lt;/span> FAKE_VALUE.size() &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#ae81ff">1&lt;/span>;
-}
-&lt;span style="color:#66d9ef">return&lt;/span> VMAction&lt;span style="color:#f92672">::&lt;/span>CONTINUE;
-}, ctx);
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-cpp" data-lang="cpp">
+&lt;span class="n">vm&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">addMnemonicCB&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;SVC&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">POST_INST&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;span class="p">[]&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">VMInstanceRef&lt;/span> &lt;span class="n">vm&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">GPRState&lt;/span>&lt;span class="o">*&lt;/span> &lt;span class="n">gprState&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">FPRState&lt;/span>&lt;span class="o">*&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="kt">void&lt;/span>&lt;span class="o">*&lt;/span> &lt;span class="n">data&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;span class="k">if&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">gprState&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">x8&lt;/span> &lt;span class="o">!=&lt;/span> &lt;span class="n">__NR_readlinkat&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;span class="k">return&lt;/span> &lt;span class="n">VMAction&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">CONTINUE&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;span class="p">}&lt;/span>
+&lt;span class="n">std&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">string&lt;/span> &lt;span class="n">buf&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="k">reinterpret_cast&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="kt">char&lt;/span>&lt;span class="o">*&amp;gt;&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">gprState&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">x2&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;span class="k">if&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">buf&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">find&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;re.frida.server&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="o">!=&lt;/span> &lt;span class="n">std&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">string&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">npos&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;span class="k">static&lt;/span> &lt;span class="k">const&lt;/span> &lt;span class="n">std&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">string&lt;/span> &lt;span class="n">FAKE_VALUE&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="s">&amp;#34;anon_inode:[eventfd]&amp;#34;&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;span class="c1">// Bypass Frida detection!
+&lt;/span>&lt;span class="c1">&lt;/span> &lt;span class="n">memcpy&lt;/span>&lt;span class="p">(&lt;/span>
+&lt;span class="k">reinterpret_cast&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="kt">void&lt;/span>&lt;span class="o">*&amp;gt;&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">gprState&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">x2&lt;/span>&lt;span class="p">),&lt;/span>
+&lt;span class="k">reinterpret_cast&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="kt">void&lt;/span>&lt;span class="o">*&amp;gt;&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">FAKE_VALUE&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">c_str&lt;/span>&lt;span class="p">()),&lt;/span>
+&lt;span class="n">FAKE_VALUE&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">size&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="o">+&lt;/span> &lt;span class="mi">1&lt;/span>
+&lt;span class="p">);&lt;/span>
+&lt;span class="n">gprState&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">x0&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">FAKE_VALUE&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">size&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="o">+&lt;/span> &lt;span class="mi">1&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;span class="p">}&lt;/span>
+&lt;span class="k">return&lt;/span> &lt;span class="n">VMAction&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">CONTINUE&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;span class="p">},&lt;/span> &lt;span class="n">ctx&lt;/span>&lt;span class="p">);&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="anti-frida-3-">Anti-Frida #3 ?&lt;/h2>
 &lt;p>I&amp;rsquo;m not sure if the following calls sequence is used to check the libc&amp;rsquo;s integrity against Frida but
 at the end of the thread&amp;rsquo;s routine, we can observe these syscalls:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text">0x048ff0: syscall: openat(0xffffffffffffff9c, &amp;#39;/proc/self/maps&amp;#39;): 51
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-text" data-lang="text">0x048ff0: syscall: openat(0xffffffffffffff9c, &amp;#39;/proc/self/maps&amp;#39;): 51
 0x04ae6c: syscall: read(51, 0x7ffc006578, 1): &amp;#39;1&amp;#39;
 0x04ae6c: syscall: read(51, 0x7ffc006578, 1): &amp;#39;2&amp;#39;
 0x04ae6c: syscall: read(51, 0x7ffc006578, 1): &amp;#39;c&amp;#39;
@@ -631,7 +633,7 @@ or to the libc&amp;rsquo;s base address (to check if it is consistent).&lt;/p>
 &lt;p>In addition to the root-beer detection, the library embeds another root detection located in the &lt;strong>second&lt;/strong> ELF constructor.
 This constructor &amp;mdash; &lt;span class="yellow">sub_77D14&lt;/span> &amp;mdash; performs the same early checks as the first constructor
 on the libc&amp;rsquo;s &lt;code>.plt&lt;/code> integrity before spawning another thread routine, &lt;span class="yellow">sub_98c00&lt;/span>.&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text">0x08861c: pthread_create(0xfa780b70, 0x0, 0x98c00, 0x0)
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-text" data-lang="text">0x08861c: pthread_create(0xfa780b70, 0x0, 0x98c00, 0x0)
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;img src="ctor_pthread.png" alt="ELF constructors: anti-frida and anti-root">&lt;/p>
 &lt;p>By tracing the thread&amp;rsquo;s routine, we notice that it checks if &lt;code>su&lt;/code> files are present on the device through
 three different calls:&lt;/p>
@@ -640,7 +642,7 @@ three different calls:&lt;/p>
 &lt;li>One syscall to &lt;code>openat()&lt;/code>: &lt;span class="hl-literal">0x0992a4: syscall: openat(&amp;hellip;, &lt;span class="hl-strings">'/data/su'&lt;/span>)&lt;/span>&lt;/li>
 &lt;li>One syscall to &lt;code>faccessat()&lt;/code>: &lt;span class="hl-literal">0x0993f0: syscall: faccessat(&lt;span class="hl-strings">'/sbin/su'&lt;/span>)&lt;/span>&lt;/li>
 &lt;/ol>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text">0x099180: open(&amp;#39;/data/local/su&amp;#39;): -1
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-text" data-lang="text">0x099180: open(&amp;#39;/data/local/su&amp;#39;): -1
 0x0992a4: syscall: openat(0xffffffffffffff9c, &amp;#39;/data/local/su&amp;#39;): -2
 0x0993f0: syscall: faccessat(&amp;#39;/data/local/su&amp;#39;): -2
 0x099180: open(&amp;#39;/data/local/bin/su&amp;#39;): -1
@@ -673,7 +675,7 @@ Crash!
 &lt;/ul>
 &lt;p>At the end of the thread&amp;rsquo;s routine, we can also observe the following calls that
 are probably used to check if the application is running on a real Android system.&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text">0x099e30: syscall: faccessat(&amp;#39;/system&amp;#39;)
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-text" data-lang="text">0x099e30: syscall: faccessat(&amp;#39;/system&amp;#39;)
 0x099e30: syscall: faccessat(&amp;#39;/system/bin&amp;#39;)
 0x099e30: syscall: faccessat(&amp;#39;/system/sbin&amp;#39;)
 0x099e30: syscall: faccessat(&amp;#39;/system/xbin&amp;#39;)
@@ -693,46 +695,46 @@ at the following locations:&lt;/p>
 the checks in the ELF constructors are annoying.&lt;/p>
 &lt;p>One way to disable the checks in the thread&amp;rsquo;s routines is to disable the &lt;code>pthread_create(...)&lt;/code>. It can
 be achieved by patching the &lt;code>.plt&lt;/code> entry associated with the function:&lt;/p>
-&lt;pre>&lt;code class="language-armasm" data-lang="armasm">mov x0, xzr;
+&lt;pre tabindex="0">&lt;code class="language-armasm" data-lang="armasm">mov x0, xzr;
 ret;
 &lt;/code>&lt;/pre>&lt;p>Thanks to &lt;code>llvm-mc&lt;/code>, we can get the raw bytes of these instructions:&lt;/p>
-&lt;pre>&lt;code class="language-console" data-lang="console">$ echo &amp;quot;mov x0, xzr;ret;&amp;quot;|llvm-mc -arch=aarch64 -show-encoding
+&lt;pre tabindex="0">&lt;code class="language-console" data-lang="console">$ echo &amp;quot;mov x0, xzr;ret;&amp;quot;|llvm-mc -arch=aarch64 -show-encoding
 .text
 mov x0, xzr // encoding: [0xe0,0x03,0x1f,0xaa]
 ret // encoding: [0xc0,0x03,0x5f,0xd6]
 &lt;/code>&lt;/pre>&lt;p>Finally, we can patch the &lt;code>.plt&lt;/code> with
 &lt;a href="https://lief.quarkslab.com" target="_blank" rel="noopener">LIEF&lt;/a>:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">&lt;span style="color:#f92672">import&lt;/span> lief
-lib &lt;span style="color:#f92672">=&lt;/span> lief&lt;span style="color:#f92672">.&lt;/span>parse(&lt;span style="color:#e6db74">&amp;#34;./libnative-lib.so&amp;#34;&lt;/span>)
-lib&lt;span style="color:#f92672">.&lt;/span>patch_address(&lt;span style="color:#ae81ff">0x5870&lt;/span>, [&lt;span style="color:#ae81ff">0xe0&lt;/span>,&lt;span style="color:#ae81ff">0x03&lt;/span>,&lt;span style="color:#ae81ff">0x1f&lt;/span>,&lt;span style="color:#ae81ff">0xaa&lt;/span>])
-lib&lt;span style="color:#f92672">.&lt;/span>patch_address(&lt;span style="color:#ae81ff">0x5874&lt;/span>, [&lt;span style="color:#ae81ff">0xc0&lt;/span>,&lt;span style="color:#ae81ff">0x03&lt;/span>,&lt;span style="color:#ae81ff">0x5f&lt;/span>,&lt;span style="color:#ae81ff">0xd6&lt;/span>])
-lib&lt;span style="color:#f92672">.&lt;/span>write(&lt;span style="color:#e6db74">&amp;#34;./libnative-lib-patched.so&amp;#34;&lt;/span>)
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-python" data-lang="python">&lt;span class="kn">import&lt;/span> &lt;span class="nn">lief&lt;/span>
+&lt;span class="n">lib&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">lief&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">parse&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;./libnative-lib.so&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="n">lib&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">patch_address&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mh">0x5870&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="p">[&lt;/span>&lt;span class="mh">0xe0&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x03&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x1f&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xaa&lt;/span>&lt;span class="p">])&lt;/span>
+&lt;span class="n">lib&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">patch_address&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mh">0x5874&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="p">[&lt;/span>&lt;span class="mh">0xc0&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x03&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x5f&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xd6&lt;/span>&lt;span class="p">])&lt;/span>
+&lt;span class="n">lib&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">write&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;./libnative-lib-patched.so&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;img src="patching.png" alt="pthread_create patches">&lt;/p>
 &lt;p>Using these patches and the Frida script exposed in the first section, we are able to &lt;strong>load&lt;/strong> the application but the other
 detections are triggered in &lt;code>gXftm3iswpkVgBNDUp&lt;/code>. Nevertheless, with
 the Frida&amp;rsquo;s stalker or QBDI we can trace the instructions and disable the other checks.&lt;/p>
 &lt;p>If one wants to completely bypass all the protections statically, here are the patches:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">&lt;span style="color:#f92672">import&lt;/span> lief
-lib &lt;span style="color:#f92672">=&lt;/span> lief&lt;span style="color:#f92672">.&lt;/span>parse(&lt;span style="color:#e6db74">&amp;#34;./libnative-lib.so&amp;#34;&lt;/span>)
-&lt;span style="color:#75715e"># Keys are str objects for a better understanding :)&lt;/span>
-INST &lt;span style="color:#f92672">=&lt;/span> {
-&lt;span style="color:#e6db74">&amp;#34;mov x0, #0&amp;#34;&lt;/span>: [&lt;span style="color:#ae81ff">0xe0&lt;/span>, &lt;span style="color:#ae81ff">0x03&lt;/span>, &lt;span style="color:#ae81ff">0x1f&lt;/span>, &lt;span style="color:#ae81ff">0xaa&lt;/span>],
-&lt;span style="color:#e6db74">&amp;#34;ret&amp;#34;&lt;/span>: [&lt;span style="color:#ae81ff">0xc0&lt;/span>, &lt;span style="color:#ae81ff">0x03&lt;/span>, &lt;span style="color:#ae81ff">0x5f&lt;/span>, &lt;span style="color:#ae81ff">0xd6&lt;/span>],
-&lt;span style="color:#e6db74">&amp;#34;nop&amp;#34;&lt;/span>: [&lt;span style="color:#ae81ff">0x1f&lt;/span>, &lt;span style="color:#ae81ff">0x20&lt;/span>, &lt;span style="color:#ae81ff">0x03&lt;/span>, &lt;span style="color:#ae81ff">0xd5&lt;/span>],
-}
-PATCHES &lt;span style="color:#f92672">=&lt;/span> [
-&lt;span style="color:#75715e"># Patch the .plt entry of pthread_create&lt;/span>
-(&lt;span style="color:#ae81ff">0x5870&lt;/span>, INST[&lt;span style="color:#e6db74">&amp;#34;mov x0, #0&amp;#34;&lt;/span>]),
-(&lt;span style="color:#ae81ff">0x5874&lt;/span>, INST[&lt;span style="color:#e6db74">&amp;#34;ret&amp;#34;&lt;/span>]),
-&lt;span style="color:#75715e"># Disable anti-frida checks&lt;/span>
-(&lt;span style="color:#ae81ff">0x0d718c&lt;/span>, INST[&lt;span style="color:#e6db74">&amp;#34;mov x0, #0&amp;#34;&lt;/span>]), &lt;span style="color:#75715e"># /proc/self/fd : patch the result of readlinkat syscall&lt;/span>
-(&lt;span style="color:#ae81ff">0x0e1940&lt;/span>, INST[&lt;span style="color:#e6db74">&amp;#34;mov x0, #0&amp;#34;&lt;/span>]), &lt;span style="color:#75715e"># /proc/self/task/&amp;lt;tid&amp;gt;/status: patch the result of read syscall&lt;/span>
-&lt;span style="color:#75715e"># Disable .text integrity checks&lt;/span>
-(&lt;span style="color:#ae81ff">0xB64D0&lt;/span>, INST[&lt;span style="color:#e6db74">&amp;#34;nop&amp;#34;&lt;/span>]),
-]
-&lt;span style="color:#66d9ef">for&lt;/span> patch &lt;span style="color:#f92672">in&lt;/span> PATCHES:
-lib&lt;span style="color:#f92672">.&lt;/span>patch_address(&lt;span style="color:#f92672">*&lt;/span>patch)
-lib&lt;span style="color:#f92672">.&lt;/span>write(&lt;span style="color:#e6db74">&amp;#34;libnative-lib.so&amp;#34;&lt;/span>)
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-python" data-lang="python">&lt;span class="kn">import&lt;/span> &lt;span class="nn">lief&lt;/span>
+&lt;span class="n">lib&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">lief&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">parse&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;./libnative-lib.so&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="c1"># Keys are str objects for a better understanding :)&lt;/span>
+&lt;span class="n">INST&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;span class="s2">&amp;#34;mov x0, #0&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="p">[&lt;/span>&lt;span class="mh">0xe0&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mh">0x03&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mh">0x1f&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mh">0xaa&lt;/span>&lt;span class="p">],&lt;/span>
+&lt;span class="s2">&amp;#34;ret&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="p">[&lt;/span>&lt;span class="mh">0xc0&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mh">0x03&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mh">0x5f&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mh">0xd6&lt;/span>&lt;span class="p">],&lt;/span>
+&lt;span class="s2">&amp;#34;nop&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="p">[&lt;/span>&lt;span class="mh">0x1f&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mh">0x20&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mh">0x03&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mh">0xd5&lt;/span>&lt;span class="p">],&lt;/span>
+&lt;span class="p">}&lt;/span>
+&lt;span class="n">PATCHES&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="p">[&lt;/span>
+&lt;span class="c1"># Patch the .plt entry of pthread_create&lt;/span>
+&lt;span class="p">(&lt;/span>&lt;span class="mh">0x5870&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">INST&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="s2">&amp;#34;mov x0, #0&amp;#34;&lt;/span>&lt;span class="p">]),&lt;/span>
+&lt;span class="p">(&lt;/span>&lt;span class="mh">0x5874&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">INST&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="s2">&amp;#34;ret&amp;#34;&lt;/span>&lt;span class="p">]),&lt;/span>
+&lt;span class="c1"># Disable anti-frida checks&lt;/span>
+&lt;span class="p">(&lt;/span>&lt;span class="mh">0x0d718c&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">INST&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="s2">&amp;#34;mov x0, #0&amp;#34;&lt;/span>&lt;span class="p">]),&lt;/span> &lt;span class="c1"># /proc/self/fd : patch the result of readlinkat syscall&lt;/span>
+&lt;span class="p">(&lt;/span>&lt;span class="mh">0x0e1940&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">INST&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="s2">&amp;#34;mov x0, #0&amp;#34;&lt;/span>&lt;span class="p">]),&lt;/span> &lt;span class="c1"># /proc/self/task/&amp;lt;tid&amp;gt;/status: patch the result of read syscall&lt;/span>
+&lt;span class="c1"># Disable .text integrity checks&lt;/span>
+&lt;span class="p">(&lt;/span>&lt;span class="mh">0xB64D0&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">INST&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="s2">&amp;#34;nop&amp;#34;&lt;/span>&lt;span class="p">]),&lt;/span>
+&lt;span class="p">]&lt;/span>
+&lt;span class="k">for&lt;/span> &lt;span class="n">patch&lt;/span> &lt;span class="ow">in&lt;/span> &lt;span class="n">PATCHES&lt;/span>&lt;span class="p">:&lt;/span>
+&lt;span class="n">lib&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">patch_address&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">*&lt;/span>&lt;span class="n">patch&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="n">lib&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">write&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;libnative-lib.so&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>When writing this write-up, I realized that patching the syscalls involved in the anti-frida (&lt;span class="hl-literal">/proc/self/fd/&lt;/span> and &lt;span class="hl-literal">/proc/self/task/&amp;lt;tid&amp;gt;/status&lt;/span>)
 makes the application crash.&lt;/p>
 &lt;p>It turns out that the library seems to implement &lt;strong>code integrity on the &lt;code>.text&lt;/code> section&lt;/strong> that I didn&amp;rsquo;t notice when running
@@ -748,12 +750,12 @@ The scripts and the patched library are available &lt;a href="https://github.com
 &lt;p>Regarding &lt;code>JNI_OnLoad()&lt;/code>, a trace generated with
 &lt;a href="https://github.com/QBDI/examples/blob/d589d28b237f46d16cab3b11aa36bbb51102e307/packer-android-x86/src/libshellx_qbdi.cpp#L18-L85" target="_blank" rel="noopener">QBDI&amp;rsquo;s ExecBroker&lt;/a>
 leads to following result:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">JNI_OnLoad() {
-&lt;span style="color:#ae81ff">0x09af3c&lt;/span>&lt;span style="color:#f92672">:&lt;/span> GetEnv(&lt;span style="color:#ae81ff">0x7fcb507460&lt;/span>, &lt;span style="color:#ae81ff">0x10006&lt;/span>)
-&lt;span style="color:#ae81ff">0x09b0ac&lt;/span>&lt;span style="color:#f92672">:&lt;/span> FindClass(&lt;span style="color:#e6db74">&amp;#34;re/pwnme/MainActivity&amp;#34;&lt;/span>)&lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#ae81ff">537&lt;/span>
-&lt;span style="color:#ae81ff">0x09b1b4&lt;/span>&lt;span style="color:#f92672">:&lt;/span> RegisterNatives()
-gXftm3iswpkVgBNDUp ([BB)[B &lt;span style="color:#f92672">-&amp;gt;&lt;/span> &lt;span style="color:#e6db74">&amp;#34;libnative-lib.so@0x9b41c&amp;#34;&lt;/span>
-}
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-cpp" data-lang="cpp">&lt;span class="n">JNI_OnLoad&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;span class="mh">0x09af3c&lt;/span>&lt;span class="o">:&lt;/span> &lt;span class="n">GetEnv&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mh">0x7fcb507460&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mh">0x10006&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="mh">0x09b0ac&lt;/span>&lt;span class="o">:&lt;/span> &lt;span class="n">FindClass&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;re/pwnme/MainActivity&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="o">:&lt;/span> &lt;span class="mi">537&lt;/span>
+&lt;span class="mh">0x09b1b4&lt;/span>&lt;span class="o">:&lt;/span> &lt;span class="n">RegisterNatives&lt;/span>&lt;span class="p">()&lt;/span>
+&lt;span class="n">gXftm3iswpkVgBNDUp&lt;/span> &lt;span class="p">([&lt;/span>&lt;span class="n">BB&lt;/span>&lt;span class="p">)[&lt;/span>&lt;span class="n">B&lt;/span> &lt;span class="o">-&amp;gt;&lt;/span> &lt;span class="s">&amp;#34;libnative-lib.so@0x9b41c&amp;#34;&lt;/span>
+&lt;span class="p">}&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>Then, we can extract the function&amp;rsquo;s offset: &lt;span class="blue">gXftm3iswpkVgBNDUp&lt;/span>: &lt;span class="red">0x9b41c&lt;/span>.&lt;/p>
 &lt;h2 id="summary--conclusion">Summary &amp;amp; Conclusion&lt;/h2>
 &lt;p>Whilst Frida detections are usually based on sockets and library names in &lt;code>/proc/self/maps&lt;/code>,
@@ -794,7 +796,8 @@ For those who are interested in similar topics, you can take a look at the Quark
 &lt;a href="https://github.com/GoSSIP-SJTU/Armariris/blob/0cba41329244a29c7cb94e25458191b68967b6e8/lib/Transforms/Obfuscation/StringObfuscation.cpp#L140" target="_blank" rel="noopener">&lt;code>StringObfuscation.cpp#L140&lt;/code>&lt;/a>&amp;#160;&lt;a href="#fnref:1" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
 &lt;/li>
 &lt;li id="fn:2" role="doc-endnote">
-&lt;p>&lt;a href="https://developer.android.com/training/articles/perf-jni#native-libraries">https://developer.android.com/training/articles/perf-jni#native-libraries&lt;/a>&amp;#160;&lt;a href="#fnref:2" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;p>
+&lt;a href="https://developer.android.com/training/articles/perf-jni#native-libraries" target="_blank" rel="noopener">https://developer.android.com/training/articles/perf-jni#native-libraries&lt;/a>&amp;#160;&lt;a href="#fnref:2" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
 &lt;/li>
 &lt;li id="fn:3" role="doc-endnote">
 &lt;p>
@@ -805,7 +808,7 @@ For those who are interested in similar topics, you can take a look at the Quark
 &lt;a href="https://android.googlesource.com/platform/bionic/&amp;#43;/refs/tags/android-9.0.0_r60/linker/linker_soinfo.cpp#420" target="_blank" rel="noopener">&lt;code>linker/linker_soinfo.cpp:420&lt;/code>&lt;/a>&amp;#160;&lt;a href="#fnref:4" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
 &lt;/li>
 &lt;/ol>
-&lt;/section></description></item><item><title>HITB 2015 Write-up - Crypto 300</title><link>https://www.romainthomas.fr/post/writeup-hitb2015-crypto300/</link><pubDate>Tue, 03 Nov 2015 00:00:00 +0100</pubDate><guid>https://www.romainthomas.fr/post/writeup-hitb2015-crypto300/</guid><description>&lt;h2 id="introduction">Introduction&lt;/h2>
+&lt;/section></description></item><item><title>HITB 2015 Write-up - Crypto 300</title><link>https://www.romainthomas.fr/post/writeup-hitb2015-crypto300/</link><pubDate>Tue, 03 Nov 2015 00:00:00 +0000</pubDate><guid>https://www.romainthomas.fr/post/writeup-hitb2015-crypto300/</guid><description>&lt;h2 id="introduction">Introduction&lt;/h2>
 &lt;p>The crypto 300 challenge was about RSA with a special generation of the prime numbers $p$ and $q$.
 We were given a mail
 &lt;a href="mail.msg">mail.msg&lt;/a> which has been encrypted with RSA and whose the public key is in the
@@ -816,20 +819,20 @@ We were given a mail
 &lt;p>$$q = (p\alpha \bmod e) + k\cdot e$$&lt;/p>
 &lt;p>$k$ is a positive integer such as $q$ is a prime number and $e$ is the public exponent which is also a random prime number.&lt;/p>
 &lt;p>The following code is the implementation in Python:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">gen_rsa_parameters&lt;/span>():
-r &lt;span style="color:#f92672">=&lt;/span> os&lt;span style="color:#f92672">.&lt;/span>urandom(&lt;span style="color:#ae81ff">63&lt;/span>)
-e &lt;span style="color:#f92672">=&lt;/span> int(r&lt;span style="color:#f92672">.&lt;/span>encode(&lt;span style="color:#e6db74">&amp;#39;hex&amp;#39;&lt;/span>), &lt;span style="color:#ae81ff">16&lt;/span>)
-e &lt;span style="color:#f92672">=&lt;/span> next_prime(e)
-r &lt;span style="color:#f92672">=&lt;/span> os&lt;span style="color:#f92672">.&lt;/span>urandom(&lt;span style="color:#ae81ff">64&lt;/span>)
-p &lt;span style="color:#f92672">=&lt;/span> int(r&lt;span style="color:#f92672">.&lt;/span>encode(&lt;span style="color:#e6db74">&amp;#39;hex&amp;#39;&lt;/span>), &lt;span style="color:#ae81ff">16&lt;/span>)
-p &lt;span style="color:#f92672">=&lt;/span> next_prime(p)
-q &lt;span style="color:#f92672">=&lt;/span> (p&lt;span style="color:#f92672">*&lt;/span>modinv(p&lt;span style="color:#f92672">-&lt;/span>&lt;span style="color:#ae81ff">1&lt;/span>, e)&lt;span style="color:#f92672">%&lt;/span>e)
-&lt;span style="color:#66d9ef">while&lt;/span> &lt;span style="color:#f92672">not&lt;/span> is_prime(q):
-q &lt;span style="color:#f92672">+=&lt;/span> e
-N &lt;span style="color:#f92672">=&lt;/span> p&lt;span style="color:#f92672">*&lt;/span>q
-phi &lt;span style="color:#f92672">=&lt;/span> (p&lt;span style="color:#f92672">-&lt;/span>&lt;span style="color:#ae81ff">1&lt;/span>)&lt;span style="color:#f92672">*&lt;/span>(q&lt;span style="color:#f92672">-&lt;/span>&lt;span style="color:#ae81ff">1&lt;/span>)
-d &lt;span style="color:#f92672">=&lt;/span> modinv(e,phi)
-&lt;span style="color:#66d9ef">return&lt;/span> N,e,d,p,q
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-python" data-lang="python">&lt;span class="k">def&lt;/span> &lt;span class="nf">gen_rsa_parameters&lt;/span>&lt;span class="p">():&lt;/span>
+&lt;span class="n">r&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">os&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">urandom&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">63&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="n">e&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nb">int&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">r&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">encode&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s1">&amp;#39;hex&amp;#39;&lt;/span>&lt;span class="p">),&lt;/span> &lt;span class="mi">16&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="n">e&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">next_prime&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">e&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="n">r&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">os&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">urandom&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">64&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="n">p&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nb">int&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">r&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">encode&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s1">&amp;#39;hex&amp;#39;&lt;/span>&lt;span class="p">),&lt;/span> &lt;span class="mi">16&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="n">p&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">next_prime&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">p&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="n">q&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">p&lt;/span>&lt;span class="o">*&lt;/span>&lt;span class="n">modinv&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">p&lt;/span>&lt;span class="o">-&lt;/span>&lt;span class="mi">1&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">e&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="o">%&lt;/span>&lt;span class="n">e&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="k">while&lt;/span> &lt;span class="ow">not&lt;/span> &lt;span class="n">is_prime&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">q&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;span class="n">q&lt;/span> &lt;span class="o">+=&lt;/span> &lt;span class="n">e&lt;/span>
+&lt;span class="n">N&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">p&lt;/span>&lt;span class="o">*&lt;/span>&lt;span class="n">q&lt;/span>
+&lt;span class="n">phi&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">p&lt;/span>&lt;span class="o">-&lt;/span>&lt;span class="mi">1&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="o">*&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">q&lt;/span>&lt;span class="o">-&lt;/span>&lt;span class="mi">1&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="n">d&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">modinv&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">e&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="n">phi&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="k">return&lt;/span> &lt;span class="n">N&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="n">e&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="n">d&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="n">p&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="n">q&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="theoretical-attack">Theoretical attack&lt;/h2>
 &lt;p>Let&amp;rsquo;s $N^{\prime} = N \bmod{e}$. So we have&lt;/p>
 &lt;p>\begin{eqnarray}
@@ -854,16 +857,16 @@ X^2 - 2bX + 1 &amp;amp; \equiv &amp;amp; 0 &amp;amp; \pmod{e} \\\&lt;br>
 \end{eqnarray}&lt;/p>
 &lt;p>by using
 &lt;a href="https://en.wikipedia.org/wiki/Quadratic_residue" target="_blank" rel="noopener">quadratic residue&lt;/a> we can find a solution. We can also use &lt;em>SAGE&lt;/em> and the &lt;code>sqrt()&lt;/code> function:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">Np &lt;span style="color:#f92672">=&lt;/span> N &lt;span style="color:#f92672">%&lt;/span> e
-b &lt;span style="color:#f92672">=&lt;/span> (Np &lt;span style="color:#f92672">-&lt;/span> &lt;span style="color:#ae81ff">2&lt;/span>) &lt;span style="color:#f92672">/&lt;/span> &lt;span style="color:#ae81ff">2&lt;/span>
-p &lt;span style="color:#f92672">=&lt;/span> Mod(pow(b, &lt;span style="color:#ae81ff">2&lt;/span>) &lt;span style="color:#f92672">-&lt;/span> &lt;span style="color:#ae81ff">1&lt;/span>, e)&lt;span style="color:#f92672">.&lt;/span>sqrt() &lt;span style="color:#f92672">+&lt;/span> b &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#ae81ff">1&lt;/span>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-python" data-lang="python">&lt;span class="n">Np&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">N&lt;/span> &lt;span class="o">%&lt;/span> &lt;span class="n">e&lt;/span>
+&lt;span class="n">b&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">Np&lt;/span> &lt;span class="o">-&lt;/span> &lt;span class="mi">2&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="o">/&lt;/span> &lt;span class="mi">2&lt;/span>
+&lt;span class="n">p&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">Mod&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nb">pow&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">b&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mi">2&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="o">-&lt;/span> &lt;span class="mi">1&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">e&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">sqrt&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="o">+&lt;/span> &lt;span class="n">b&lt;/span> &lt;span class="o">+&lt;/span> &lt;span class="mi">1&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>At this point, we find $p \bmod{e}$ but not $p$ !&lt;/p>
 &lt;p>I tried to find $p$ by adding some $e$ but the &lt;em>distance&lt;/em> between $p$ and $p \bmod{e}$ is huge. So I had to find another way.&lt;/p>
 &lt;p>By knowing $p \bmod{e}$ we can compute $\alpha$. Remember $$\alpha \cdot (p - 1) \equiv 1 \pmod{e}$$ and by having $\alpha$ and $p \bmod{e}$ we can brute force $q$ by adding $e$ until $(p\alpha \bmod e) + k\cdot e$ is prime and it divide $N$.&lt;/p>
 &lt;p>We did the assumption that $N^{\prime} - 2$ has to be even (so $N^{\prime}$ must be even) and in the certificate $N^{\prime}$ is even so everything is right.&lt;/p>
 &lt;h2 id="pratical-attack">Pratical Attack&lt;/h2>
 &lt;p>First we have to extract the modulus $N$ and the public key $e$ from the certificate:&lt;/p>
-&lt;pre>&lt;code class="language-console" data-lang="console">$ openssl x509 -in hitbctf.crt -text -noout
+&lt;pre tabindex="0">&lt;code class="language-console" data-lang="console">$ openssl x509 -in hitbctf.crt -text -noout
 Certificate:
 Data:
 Version: 1 (0x0)
@@ -910,41 +913,41 @@ cf:cf:da:63:b1:c1:56:e8:0c:8e:56:7f:08:94:0d:2b:2a:08:
 &lt;code>1931455822669631548838317075220811407344210520390992334648372016602816069805&lt;/code>
 &lt;code>30249&lt;/code>&lt;/p>
 &lt;p>With SAGE:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">sage: Np &lt;span style="color:#f92672">=&lt;/span> N &lt;span style="color:#f92672">%&lt;/span> e
-sage: b &lt;span style="color:#f92672">=&lt;/span> (Np &lt;span style="color:#f92672">-&lt;/span> &lt;span style="color:#ae81ff">2&lt;/span>) &lt;span style="color:#f92672">/&lt;/span> &lt;span style="color:#ae81ff">2&lt;/span>
-sage: pp &lt;span style="color:#f92672">=&lt;/span> int(Mod(pow(b, &lt;span style="color:#ae81ff">2&lt;/span>) &lt;span style="color:#f92672">-&lt;/span> &lt;span style="color:#ae81ff">1&lt;/span>, e)&lt;span style="color:#f92672">.&lt;/span>sqrt()) &lt;span style="color:#f92672">+&lt;/span> b &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#ae81ff">1&lt;/span>
-sage: alpha &lt;span style="color:#f92672">=&lt;/span> inverse_mod(int(X), int(e))
-sage: q &lt;span style="color:#f92672">=&lt;/span> (pp &lt;span style="color:#f92672">*&lt;/span> alpha) &lt;span style="color:#f92672">%&lt;/span> e
-sage: &lt;span style="color:#66d9ef">while&lt;/span> &lt;span style="color:#f92672">not&lt;/span> is_prime(q) &lt;span style="color:#f92672">and&lt;/span> N &lt;span style="color:#f92672">%&lt;/span> q &lt;span style="color:#f92672">!=&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>:
-&lt;span style="color:#f92672">....&lt;/span>: q &lt;span style="color:#f92672">+=&lt;/span> e
-sage: p &lt;span style="color:#f92672">=&lt;/span> N &lt;span style="color:#f92672">/&lt;/span> q
-sage: p
-&lt;span style="color:#ae81ff">13317713478157317654574552532079837937895228108820477140030796245493222349714497856652987583926206280627498615972491072112647669795345566943409669535038641&lt;/span>
-sage: q
-&lt;span style="color:#ae81ff">12176083266650126897170100375931110708350668494730113414987801764299563774952801449439933220072280766145748279998832962142839152786620322097065894585706069&lt;/span>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-python" data-lang="python">&lt;span class="n">sage&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">Np&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">N&lt;/span> &lt;span class="o">%&lt;/span> &lt;span class="n">e&lt;/span>
+&lt;span class="n">sage&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">b&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">Np&lt;/span> &lt;span class="o">-&lt;/span> &lt;span class="mi">2&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="o">/&lt;/span> &lt;span class="mi">2&lt;/span>
+&lt;span class="n">sage&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">pp&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nb">int&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">Mod&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nb">pow&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">b&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mi">2&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="o">-&lt;/span> &lt;span class="mi">1&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">e&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">sqrt&lt;/span>&lt;span class="p">())&lt;/span> &lt;span class="o">+&lt;/span> &lt;span class="n">b&lt;/span> &lt;span class="o">+&lt;/span> &lt;span class="mi">1&lt;/span>
+&lt;span class="n">sage&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">alpha&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">inverse_mod&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nb">int&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">X&lt;/span>&lt;span class="p">),&lt;/span> &lt;span class="nb">int&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">e&lt;/span>&lt;span class="p">))&lt;/span>
+&lt;span class="n">sage&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">q&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">pp&lt;/span> &lt;span class="o">*&lt;/span> &lt;span class="n">alpha&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="o">%&lt;/span> &lt;span class="n">e&lt;/span>
+&lt;span class="n">sage&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="k">while&lt;/span> &lt;span class="ow">not&lt;/span> &lt;span class="n">is_prime&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">q&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="ow">and&lt;/span> &lt;span class="n">N&lt;/span> &lt;span class="o">%&lt;/span> &lt;span class="n">q&lt;/span> &lt;span class="o">!=&lt;/span> &lt;span class="mi">0&lt;/span>&lt;span class="p">:&lt;/span>
+&lt;span class="o">....&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">q&lt;/span> &lt;span class="o">+=&lt;/span> &lt;span class="n">e&lt;/span>
+&lt;span class="n">sage&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">p&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">N&lt;/span> &lt;span class="o">/&lt;/span> &lt;span class="n">q&lt;/span>
+&lt;span class="n">sage&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">p&lt;/span>
+&lt;span class="mi">13317713478157317654574552532079837937895228108820477140030796245493222349714497856652987583926206280627498615972491072112647669795345566943409669535038641&lt;/span>
+&lt;span class="n">sage&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">q&lt;/span>
+&lt;span class="mi">12176083266650126897170100375931110708350668494730113414987801764299563774952801449439933220072280766145748279998832962142839152786620322097065894585706069&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>We can now generate the private key by using
 &lt;a href="rsatool.py">rsatool&lt;/a>:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">$ ./rsatools.py -o private.pem &lt;span style="color:#ae81ff">\
-&lt;/span>&lt;span style="color:#ae81ff">&lt;/span>-e &lt;span style="color:#ae81ff">21558488234539889837938770635971330903489839146766895224490179041465516193145582266963154883831707522081140734421052039099233464837201660281606980530249&lt;/span> &lt;span style="color:#ae81ff">\
-&lt;/span>&lt;span style="color:#ae81ff">&lt;/span>-p &lt;span style="color:#ae81ff">13317713478157317654574552532079837937895228108820477140030796245493222349714497856652987583926206280627498615972491072112647669795345566943409669535038641&lt;/span> &lt;span style="color:#ae81ff">\
-&lt;/span>&lt;span style="color:#ae81ff">&lt;/span>-q &lt;span style="color:#ae81ff">12176083266650126897170100375931110708350668494730113414987801764299563774952801449439933220072280766145748279998832962142839152786620322097065894585706069&lt;/span>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">$ ./rsatools.py -o private.pem &lt;span class="se">\
+&lt;/span>&lt;span class="se">&lt;/span>-e &lt;span class="m">21558488234539889837938770635971330903489839146766895224490179041465516193145582266963154883831707522081140734421052039099233464837201660281606980530249&lt;/span> &lt;span class="se">\
+&lt;/span>&lt;span class="se">&lt;/span>-p &lt;span class="m">13317713478157317654574552532079837937895228108820477140030796245493222349714497856652987583926206280627498615972491072112647669795345566943409669535038641&lt;/span> &lt;span class="se">\
+&lt;/span>&lt;span class="se">&lt;/span>-q &lt;span class="m">12176083266650126897170100375931110708350668494730113414987801764299563774952801449439933220072280766145748279998832962142839152786620322097065894585706069&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>Finally, we can decrypt the message:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">openssl smime -decrypt -in mail.msg -inkey private.pem
-hitb&lt;span style="color:#f92672">{&lt;/span>0b21cc2025534dbd2965390d2bcef45d&lt;span style="color:#f92672">}&lt;/span>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">openssl smime -decrypt -in mail.msg -inkey private.pem
+hitb&lt;span class="o">{&lt;/span>0b21cc2025534dbd2965390d2bcef45d&lt;span class="o">}&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>The sources are available
-&lt;a href="hitb2015-crypto300.tar.gz">here&lt;/a>&lt;/p></description></item><item><title>HITB 2015 Write-up - Crypto 400</title><link>https://www.romainthomas.fr/post/writeup-hitb2015-crypto400/</link><pubDate>Tue, 03 Nov 2015 00:00:00 +0100</pubDate><guid>https://www.romainthomas.fr/post/writeup-hitb2015-crypto400/</guid><description>&lt;h2 id="introduction">Introduction&lt;/h2>
+&lt;a href="hitb2015-crypto300.tar.gz">here&lt;/a>&lt;/p></description></item><item><title>HITB 2015 Write-up - Crypto 400</title><link>https://www.romainthomas.fr/post/writeup-hitb2015-crypto400/</link><pubDate>Tue, 03 Nov 2015 00:00:00 +0000</pubDate><guid>https://www.romainthomas.fr/post/writeup-hitb2015-crypto400/</guid><description>&lt;h2 id="introduction">Introduction&lt;/h2>
 &lt;p>The crypto 400 challenge deals with the Even Mansour cryptosystem. To validate this challenge we have to send the flag to a server.
 The server checks if the answer matches the flag by encrypting the flag and the given message with a &lt;strong>random&lt;/strong> key.
 If both are equal the flag is correct otherwise it fails and the encrypted message is printed.&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">key &lt;span style="color:#f92672">=&lt;/span> os&lt;span style="color:#f92672">.&lt;/span>urandom(&lt;span style="color:#ae81ff">32&lt;/span>)
-enc_flag &lt;span style="color:#f92672">=&lt;/span> encrypt(flag, key)
-enc &lt;span style="color:#f92672">=&lt;/span> encrypt(answer, key)
-&lt;span style="color:#66d9ef">if&lt;/span> enc &lt;span style="color:#f92672">==&lt;/span> enc_flag:
-response &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;You lucky bastard, &lt;/span>&lt;span style="color:#e6db74">%s&lt;/span>&lt;span style="color:#e6db74"> is indeed the correct flag!&lt;/span>&lt;span style="color:#ae81ff">\n&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span> &lt;span style="color:#f92672">%&lt;/span> flag
-&lt;span style="color:#66d9ef">else&lt;/span>:
-response &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;Unfortunately that is not our flag :(&lt;/span>&lt;span style="color:#ae81ff">\n&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>
-response &lt;span style="color:#f92672">+=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;Your guess encrypts as&lt;/span>&lt;span style="color:#ae81ff">\n&lt;/span>&lt;span style="color:#e6db74">%s&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span> &lt;span style="color:#f92672">%&lt;/span> enc
-response &lt;span style="color:#f92672">+=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;whereas our flag encrypts as&lt;/span>&lt;span style="color:#ae81ff">\n&lt;/span>&lt;span style="color:#e6db74">%s&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span> &lt;span style="color:#f92672">%&lt;/span> enc_flag
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-python" data-lang="python">&lt;span class="n">key&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">os&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">urandom&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">32&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="n">enc_flag&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">encrypt&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">flag&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">key&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="n">enc&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">encrypt&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">answer&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">key&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="k">if&lt;/span> &lt;span class="n">enc&lt;/span> &lt;span class="o">==&lt;/span> &lt;span class="n">enc_flag&lt;/span>&lt;span class="p">:&lt;/span>
+&lt;span class="n">response&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="s2">&amp;#34;You lucky bastard, &lt;/span>&lt;span class="si">%s&lt;/span>&lt;span class="s2"> is indeed the correct flag!&lt;/span>&lt;span class="se">\n&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span> &lt;span class="o">%&lt;/span> &lt;span class="n">flag&lt;/span>
+&lt;span class="k">else&lt;/span>&lt;span class="p">:&lt;/span>
+&lt;span class="n">response&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="s2">&amp;#34;Unfortunately that is not our flag :(&lt;/span>&lt;span class="se">\n&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span>
+&lt;span class="n">response&lt;/span> &lt;span class="o">+=&lt;/span> &lt;span class="s2">&amp;#34;Your guess encrypts as&lt;/span>&lt;span class="se">\n&lt;/span>&lt;span class="si">%s&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span> &lt;span class="o">%&lt;/span> &lt;span class="n">enc&lt;/span>
+&lt;span class="n">response&lt;/span> &lt;span class="o">+=&lt;/span> &lt;span class="s2">&amp;#34;whereas our flag encrypts as&lt;/span>&lt;span class="se">\n&lt;/span>&lt;span class="si">%s&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span> &lt;span class="o">%&lt;/span> &lt;span class="n">enc_flag&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="even-mansour-scheme">Even Mansour scheme&lt;/h2>
 &lt;p>In this Even-Masour scheme the size of a block is 16-bytes and the key &amp;mdash; on 32-bytes &amp;mdash; is split in two: $k_1$ and $k_2$ each one on 16-bytes.
 At first, the message $M$ is xor-ed with $k_1$ then $M \oplus k_1$ is going through a $F$ function which
@@ -952,18 +955,18 @@ will be discussed later. Finally the output is xor-ed with $k_2$.&lt;/p>
 &lt;p>&lt;img src="evenmansour.png" alt="">&lt;/p>
 &lt;p>So we have:&lt;/p>
 &lt;p>$$C = F(M \oplus k_1) \oplus k_2$$&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">EvenMansour&lt;/span>(block, key):
-block &lt;span style="color:#f92672">=&lt;/span> xor(block, key[:&lt;span style="color:#ae81ff">16&lt;/span>])
-block &lt;span style="color:#f92672">=&lt;/span> F(block)
-block &lt;span style="color:#f92672">=&lt;/span> xor(block, key[&lt;span style="color:#ae81ff">16&lt;/span>:])
-&lt;span style="color:#66d9ef">return&lt;/span> block
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-python" data-lang="python">&lt;span class="k">def&lt;/span> &lt;span class="nf">EvenMansour&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">block&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">key&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;span class="n">block&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">xor&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">block&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">key&lt;/span>&lt;span class="p">[:&lt;/span>&lt;span class="mi">16&lt;/span>&lt;span class="p">])&lt;/span>
+&lt;span class="n">block&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">F&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">block&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="n">block&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">xor&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">block&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">key&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="mi">16&lt;/span>&lt;span class="p">:])&lt;/span>
+&lt;span class="k">return&lt;/span> &lt;span class="n">block&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>In this challenge, the weakness comes from the $F$ function.&lt;/p>
 &lt;h2 id="f-function">$F$ function&lt;/h2>
 &lt;p>The $F$ function is composed of 64-rounds that perform the &lt;code>step(...)&lt;/code> transformation:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">F&lt;/span>(block):
-&lt;span style="color:#66d9ef">for&lt;/span> i &lt;span style="color:#f92672">in&lt;/span> range(&lt;span style="color:#ae81ff">64&lt;/span>):
-block &lt;span style="color:#f92672">=&lt;/span> step(block)
-&lt;span style="color:#66d9ef">return&lt;/span> block
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-python" data-lang="python">&lt;span class="k">def&lt;/span> &lt;span class="nf">F&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">block&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;span class="k">for&lt;/span> &lt;span class="n">i&lt;/span> &lt;span class="ow">in&lt;/span> &lt;span class="nb">range&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">64&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;span class="n">block&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">step&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">block&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="k">return&lt;/span> &lt;span class="n">block&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;code>step&lt;/code> uses a S-Box to transform the block in this way:&lt;/p>
 &lt;p>&lt;img src="https://www.romainthomas.fr/img/step.png" alt="">&lt;/p>
 &lt;p>$\begin{cases}
@@ -971,21 +974,21 @@ block &lt;span style="color:#f92672">=&lt;/span> step(block)
 \text{block}^{n+1}_k = \text{block}^{n}_{k - 1} &amp;amp; k &amp;gt; 0
 \end{cases}$&lt;/p>
 &lt;p>$\text{block}^{n}_k$ is the byte $k$ of the &lt;em>block&lt;/em> at round $n$ ($0 \leq k &amp;lt; 16$ and $0 \leq n &amp;lt; 64$)&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">step&lt;/span>(block):
-&lt;span style="color:#66d9ef">return&lt;/span> chr( S[ ord(block[&lt;span style="color:#ae81ff">10&lt;/span>]) &lt;span style="color:#f92672">^&lt;/span> ord(block[&lt;span style="color:#ae81ff">12&lt;/span>]) &lt;span style="color:#f92672">^&lt;/span> ord(block[&lt;span style="color:#ae81ff">13&lt;/span>]) &lt;span style="color:#f92672">^&lt;/span> ord(block[&lt;span style="color:#ae81ff">15&lt;/span>]) ] ) &lt;span style="color:#f92672">+&lt;/span> block[:&lt;span style="color:#ae81ff">15&lt;/span>]
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-python" data-lang="python">&lt;span class="k">def&lt;/span> &lt;span class="nf">step&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">block&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;span class="k">return&lt;/span> &lt;span class="nb">chr&lt;/span>&lt;span class="p">(&lt;/span> &lt;span class="n">S&lt;/span>&lt;span class="p">[&lt;/span> &lt;span class="nb">ord&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">block&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="mi">10&lt;/span>&lt;span class="p">])&lt;/span> &lt;span class="o">^&lt;/span> &lt;span class="nb">ord&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">block&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="mi">12&lt;/span>&lt;span class="p">])&lt;/span> &lt;span class="o">^&lt;/span> &lt;span class="nb">ord&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">block&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="mi">13&lt;/span>&lt;span class="p">])&lt;/span> &lt;span class="o">^&lt;/span> &lt;span class="nb">ord&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">block&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="mi">15&lt;/span>&lt;span class="p">])&lt;/span> &lt;span class="p">]&lt;/span> &lt;span class="p">)&lt;/span> &lt;span class="o">+&lt;/span> &lt;span class="n">block&lt;/span>&lt;span class="p">[:&lt;/span>&lt;span class="mi">15&lt;/span>&lt;span class="p">]&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>By ploting $y = \text{S-Box}(x)$ we can notice that the S-Box has a special construction:&lt;/p>
 &lt;p>&lt;img src="https://www.romainthomas.fr/img/figure_1-1.png" alt="">&lt;/p>
 &lt;p>I thought about computing the differential characteristics which is the probability that given the input difference
 $\Delta = x \oplus y$ we get the output delta: $\delta = S(x) \oplus S(y)$.
 We will call this probability $P(\Delta | \delta)$ and with
 following function, we can compute this probability:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">P&lt;/span>(dx ,dy):
-count &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>;
-&lt;span style="color:#66d9ef">for&lt;/span> x &lt;span style="color:#f92672">in&lt;/span> range(len(SBox)):
-dY &lt;span style="color:#f92672">=&lt;/span> SBox[x] &lt;span style="color:#f92672">^&lt;/span> SBox[x &lt;span style="color:#f92672">^&lt;/span> dx]
-&lt;span style="color:#66d9ef">if&lt;/span> dY &lt;span style="color:#f92672">==&lt;/span> dy:
-count &lt;span style="color:#f92672">+=&lt;/span> &lt;span style="color:#ae81ff">1&lt;/span>;
-&lt;span style="color:#66d9ef">return&lt;/span> float(count) &lt;span style="color:#f92672">/&lt;/span> float(&lt;span style="color:#ae81ff">256&lt;/span>)
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-python" data-lang="python">&lt;span class="k">def&lt;/span> &lt;span class="nf">P&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">dx&lt;/span> &lt;span class="p">,&lt;/span>&lt;span class="n">dy&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;span class="n">count&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="mi">0&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;span class="k">for&lt;/span> &lt;span class="n">x&lt;/span> &lt;span class="ow">in&lt;/span> &lt;span class="nb">range&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nb">len&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">SBox&lt;/span>&lt;span class="p">)):&lt;/span>
+&lt;span class="n">dY&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">SBox&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="n">x&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="o">^&lt;/span> &lt;span class="n">SBox&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="n">x&lt;/span> &lt;span class="o">^&lt;/span> &lt;span class="n">dx&lt;/span>&lt;span class="p">]&lt;/span>
+&lt;span class="k">if&lt;/span> &lt;span class="n">dY&lt;/span> &lt;span class="o">==&lt;/span> &lt;span class="n">dy&lt;/span>&lt;span class="p">:&lt;/span>
+&lt;span class="n">count&lt;/span> &lt;span class="o">+=&lt;/span> &lt;span class="mi">1&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;span class="k">return&lt;/span> &lt;span class="nb">float&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">count&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="o">/&lt;/span> &lt;span class="nb">float&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">256&lt;/span>&lt;span class="p">)&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>For all $\Delta$ and $\delta$, we notice that this probability is either 0 or 1. Consequently if we know $\delta$ we are sure to find $\Delta$. This will be useful for the differential attack.&lt;/p>
 &lt;h2 id="differential-attack">Differential Attack&lt;/h2>
 &lt;p>To find the flag, we will perform a differential attack. We have a message $M_1$ that we know and we have an unknown second message $M_2$
@@ -1019,93 +1022,93 @@ Concretely, I built a table &lt;em>diffTable&lt;/em> which maps $\delta$ to $\De
 Then, with recursion we can compute $\Delta W^{0} = \Delta V$&lt;/p>
 &lt;h2 id="implementation">Implementation&lt;/h2>
 &lt;p>The following script is the implementation of the attack:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">&lt;span style="color:#75715e">#!/usr/bin/python2.7&lt;/span>
-&lt;span style="color:#75715e"># -*- coding: utf-8 -*-&lt;/span>
-&lt;span style="color:#f92672">import&lt;/span> os
-S &lt;span style="color:#f92672">=&lt;/span> [
-&lt;span style="color:#ae81ff">0xa5&lt;/span>,&lt;span style="color:#ae81ff">0xc6&lt;/span>,&lt;span style="color:#ae81ff">0x62&lt;/span>,&lt;span style="color:#ae81ff">0x01&lt;/span>,&lt;span style="color:#ae81ff">0x49&lt;/span>,&lt;span style="color:#ae81ff">0x2a&lt;/span>,&lt;span style="color:#ae81ff">0x8e&lt;/span>,&lt;span style="color:#ae81ff">0xed&lt;/span>,&lt;span style="color:#ae81ff">0x1f&lt;/span>,&lt;span style="color:#ae81ff">0x7c&lt;/span>,&lt;span style="color:#ae81ff">0xd8&lt;/span>,&lt;span style="color:#ae81ff">0xbb&lt;/span>,&lt;span style="color:#ae81ff">0xf3&lt;/span>,&lt;span style="color:#ae81ff">0x90&lt;/span>,&lt;span style="color:#ae81ff">0x34&lt;/span>,&lt;span style="color:#ae81ff">0x57&lt;/span>,
-&lt;span style="color:#ae81ff">0xb3&lt;/span>,&lt;span style="color:#ae81ff">0xd0&lt;/span>,&lt;span style="color:#ae81ff">0x74&lt;/span>,&lt;span style="color:#ae81ff">0x17&lt;/span>,&lt;span style="color:#ae81ff">0x5f&lt;/span>,&lt;span style="color:#ae81ff">0x3c&lt;/span>,&lt;span style="color:#ae81ff">0x98&lt;/span>,&lt;span style="color:#ae81ff">0xfb&lt;/span>,&lt;span style="color:#ae81ff">0x09&lt;/span>,&lt;span style="color:#ae81ff">0x6a&lt;/span>,&lt;span style="color:#ae81ff">0xce&lt;/span>,&lt;span style="color:#ae81ff">0xad&lt;/span>,&lt;span style="color:#ae81ff">0xe5&lt;/span>,&lt;span style="color:#ae81ff">0x86&lt;/span>,&lt;span style="color:#ae81ff">0x22&lt;/span>,&lt;span style="color:#ae81ff">0x41&lt;/span>,
-&lt;span style="color:#ae81ff">0x89&lt;/span>,&lt;span style="color:#ae81ff">0xea&lt;/span>,&lt;span style="color:#ae81ff">0x4e&lt;/span>,&lt;span style="color:#ae81ff">0x2d&lt;/span>,&lt;span style="color:#ae81ff">0x65&lt;/span>,&lt;span style="color:#ae81ff">0x06&lt;/span>,&lt;span style="color:#ae81ff">0xa2&lt;/span>,&lt;span style="color:#ae81ff">0xc1&lt;/span>,&lt;span style="color:#ae81ff">0x33&lt;/span>,&lt;span style="color:#ae81ff">0x50&lt;/span>,&lt;span style="color:#ae81ff">0xf4&lt;/span>,&lt;span style="color:#ae81ff">0x97&lt;/span>,&lt;span style="color:#ae81ff">0xdf&lt;/span>,&lt;span style="color:#ae81ff">0xbc&lt;/span>,&lt;span style="color:#ae81ff">0x18&lt;/span>,&lt;span style="color:#ae81ff">0x7b&lt;/span>,
-&lt;span style="color:#ae81ff">0x9f&lt;/span>,&lt;span style="color:#ae81ff">0xfc&lt;/span>,&lt;span style="color:#ae81ff">0x58&lt;/span>,&lt;span style="color:#ae81ff">0x3b&lt;/span>,&lt;span style="color:#ae81ff">0x73&lt;/span>,&lt;span style="color:#ae81ff">0x10&lt;/span>,&lt;span style="color:#ae81ff">0xb4&lt;/span>,&lt;span style="color:#ae81ff">0xd7&lt;/span>,&lt;span style="color:#ae81ff">0x25&lt;/span>,&lt;span style="color:#ae81ff">0x46&lt;/span>,&lt;span style="color:#ae81ff">0xe2&lt;/span>,&lt;span style="color:#ae81ff">0x81&lt;/span>,&lt;span style="color:#ae81ff">0xc9&lt;/span>,&lt;span style="color:#ae81ff">0xaa&lt;/span>,&lt;span style="color:#ae81ff">0x0e&lt;/span>,&lt;span style="color:#ae81ff">0x6d&lt;/span>,
-&lt;span style="color:#ae81ff">0xfd&lt;/span>,&lt;span style="color:#ae81ff">0x9e&lt;/span>,&lt;span style="color:#ae81ff">0x3a&lt;/span>,&lt;span style="color:#ae81ff">0x59&lt;/span>,&lt;span style="color:#ae81ff">0x11&lt;/span>,&lt;span style="color:#ae81ff">0x72&lt;/span>,&lt;span style="color:#ae81ff">0xd6&lt;/span>,&lt;span style="color:#ae81ff">0xb5&lt;/span>,&lt;span style="color:#ae81ff">0x47&lt;/span>,&lt;span style="color:#ae81ff">0x24&lt;/span>,&lt;span style="color:#ae81ff">0x80&lt;/span>,&lt;span style="color:#ae81ff">0xe3&lt;/span>,&lt;span style="color:#ae81ff">0xab&lt;/span>,&lt;span style="color:#ae81ff">0xc8&lt;/span>,&lt;span style="color:#ae81ff">0x6c&lt;/span>,&lt;span style="color:#ae81ff">0x0f&lt;/span>,
-&lt;span style="color:#ae81ff">0xeb&lt;/span>,&lt;span style="color:#ae81ff">0x88&lt;/span>,&lt;span style="color:#ae81ff">0x2c&lt;/span>,&lt;span style="color:#ae81ff">0x4f&lt;/span>,&lt;span style="color:#ae81ff">0x07&lt;/span>,&lt;span style="color:#ae81ff">0x64&lt;/span>,&lt;span style="color:#ae81ff">0xc0&lt;/span>,&lt;span style="color:#ae81ff">0xa3&lt;/span>,&lt;span style="color:#ae81ff">0x51&lt;/span>,&lt;span style="color:#ae81ff">0x32&lt;/span>,&lt;span style="color:#ae81ff">0x96&lt;/span>,&lt;span style="color:#ae81ff">0xf5&lt;/span>,&lt;span style="color:#ae81ff">0xbd&lt;/span>,&lt;span style="color:#ae81ff">0xde&lt;/span>,&lt;span style="color:#ae81ff">0x7a&lt;/span>,&lt;span style="color:#ae81ff">0x19&lt;/span>,
-&lt;span style="color:#ae81ff">0xd1&lt;/span>,&lt;span style="color:#ae81ff">0xb2&lt;/span>,&lt;span style="color:#ae81ff">0x16&lt;/span>,&lt;span style="color:#ae81ff">0x75&lt;/span>,&lt;span style="color:#ae81ff">0x3d&lt;/span>,&lt;span style="color:#ae81ff">0x5e&lt;/span>,&lt;span style="color:#ae81ff">0xfa&lt;/span>,&lt;span style="color:#ae81ff">0x99&lt;/span>,&lt;span style="color:#ae81ff">0x6b&lt;/span>,&lt;span style="color:#ae81ff">0x08&lt;/span>,&lt;span style="color:#ae81ff">0xac&lt;/span>,&lt;span style="color:#ae81ff">0xcf&lt;/span>,&lt;span style="color:#ae81ff">0x87&lt;/span>,&lt;span style="color:#ae81ff">0xe4&lt;/span>,&lt;span style="color:#ae81ff">0x40&lt;/span>,&lt;span style="color:#ae81ff">0x23&lt;/span>,
-&lt;span style="color:#ae81ff">0xc7&lt;/span>,&lt;span style="color:#ae81ff">0xa4&lt;/span>,&lt;span style="color:#ae81ff">0x00&lt;/span>,&lt;span style="color:#ae81ff">0x63&lt;/span>,&lt;span style="color:#ae81ff">0x2b&lt;/span>,&lt;span style="color:#ae81ff">0x48&lt;/span>,&lt;span style="color:#ae81ff">0xec&lt;/span>,&lt;span style="color:#ae81ff">0x8f&lt;/span>,&lt;span style="color:#ae81ff">0x7d&lt;/span>,&lt;span style="color:#ae81ff">0x1e&lt;/span>,&lt;span style="color:#ae81ff">0xba&lt;/span>,&lt;span style="color:#ae81ff">0xd9&lt;/span>,&lt;span style="color:#ae81ff">0x91&lt;/span>,&lt;span style="color:#ae81ff">0xf2&lt;/span>,&lt;span style="color:#ae81ff">0x56&lt;/span>,&lt;span style="color:#ae81ff">0x35&lt;/span>,
-&lt;span style="color:#ae81ff">0x14&lt;/span>,&lt;span style="color:#ae81ff">0x77&lt;/span>,&lt;span style="color:#ae81ff">0xd3&lt;/span>,&lt;span style="color:#ae81ff">0xb0&lt;/span>,&lt;span style="color:#ae81ff">0xf8&lt;/span>,&lt;span style="color:#ae81ff">0x9b&lt;/span>,&lt;span style="color:#ae81ff">0x3f&lt;/span>,&lt;span style="color:#ae81ff">0x5c&lt;/span>,&lt;span style="color:#ae81ff">0xae&lt;/span>,&lt;span style="color:#ae81ff">0xcd&lt;/span>,&lt;span style="color:#ae81ff">0x69&lt;/span>,&lt;span style="color:#ae81ff">0x0a&lt;/span>,&lt;span style="color:#ae81ff">0x42&lt;/span>,&lt;span style="color:#ae81ff">0x21&lt;/span>,&lt;span style="color:#ae81ff">0x85&lt;/span>,&lt;span style="color:#ae81ff">0xe6&lt;/span>,
-&lt;span style="color:#ae81ff">0x02&lt;/span>,&lt;span style="color:#ae81ff">0x61&lt;/span>,&lt;span style="color:#ae81ff">0xc5&lt;/span>,&lt;span style="color:#ae81ff">0xa6&lt;/span>,&lt;span style="color:#ae81ff">0xee&lt;/span>,&lt;span style="color:#ae81ff">0x8d&lt;/span>,&lt;span style="color:#ae81ff">0x29&lt;/span>,&lt;span style="color:#ae81ff">0x4a&lt;/span>,&lt;span style="color:#ae81ff">0xb8&lt;/span>,&lt;span style="color:#ae81ff">0xdb&lt;/span>,&lt;span style="color:#ae81ff">0x7f&lt;/span>,&lt;span style="color:#ae81ff">0x1c&lt;/span>,&lt;span style="color:#ae81ff">0x54&lt;/span>,&lt;span style="color:#ae81ff">0x37&lt;/span>,&lt;span style="color:#ae81ff">0x93&lt;/span>,&lt;span style="color:#ae81ff">0xf0&lt;/span>,
-&lt;span style="color:#ae81ff">0x38&lt;/span>,&lt;span style="color:#ae81ff">0x5b&lt;/span>,&lt;span style="color:#ae81ff">0xff&lt;/span>,&lt;span style="color:#ae81ff">0x9c&lt;/span>,&lt;span style="color:#ae81ff">0xd4&lt;/span>,&lt;span style="color:#ae81ff">0xb7&lt;/span>,&lt;span style="color:#ae81ff">0x13&lt;/span>,&lt;span style="color:#ae81ff">0x70&lt;/span>,&lt;span style="color:#ae81ff">0x82&lt;/span>,&lt;span style="color:#ae81ff">0xe1&lt;/span>,&lt;span style="color:#ae81ff">0x45&lt;/span>,&lt;span style="color:#ae81ff">0x26&lt;/span>,&lt;span style="color:#ae81ff">0x6e&lt;/span>,&lt;span style="color:#ae81ff">0x0d&lt;/span>,&lt;span style="color:#ae81ff">0xa9&lt;/span>,&lt;span style="color:#ae81ff">0xca&lt;/span>,
-&lt;span style="color:#ae81ff">0x2e&lt;/span>,&lt;span style="color:#ae81ff">0x4d&lt;/span>,&lt;span style="color:#ae81ff">0xe9&lt;/span>,&lt;span style="color:#ae81ff">0x8a&lt;/span>,&lt;span style="color:#ae81ff">0xc2&lt;/span>,&lt;span style="color:#ae81ff">0xa1&lt;/span>,&lt;span style="color:#ae81ff">0x05&lt;/span>,&lt;span style="color:#ae81ff">0x66&lt;/span>,&lt;span style="color:#ae81ff">0x94&lt;/span>,&lt;span style="color:#ae81ff">0xf7&lt;/span>,&lt;span style="color:#ae81ff">0x53&lt;/span>,&lt;span style="color:#ae81ff">0x30&lt;/span>,&lt;span style="color:#ae81ff">0x78&lt;/span>,&lt;span style="color:#ae81ff">0x1b&lt;/span>,&lt;span style="color:#ae81ff">0xbf&lt;/span>,&lt;span style="color:#ae81ff">0xdc&lt;/span>,
-&lt;span style="color:#ae81ff">0x4c&lt;/span>,&lt;span style="color:#ae81ff">0x2f&lt;/span>,&lt;span style="color:#ae81ff">0x8b&lt;/span>,&lt;span style="color:#ae81ff">0xe8&lt;/span>,&lt;span style="color:#ae81ff">0xa0&lt;/span>,&lt;span style="color:#ae81ff">0xc3&lt;/span>,&lt;span style="color:#ae81ff">0x67&lt;/span>,&lt;span style="color:#ae81ff">0x04&lt;/span>,&lt;span style="color:#ae81ff">0xf6&lt;/span>,&lt;span style="color:#ae81ff">0x95&lt;/span>,&lt;span style="color:#ae81ff">0x31&lt;/span>,&lt;span style="color:#ae81ff">0x52&lt;/span>,&lt;span style="color:#ae81ff">0x1a&lt;/span>,&lt;span style="color:#ae81ff">0x79&lt;/span>,&lt;span style="color:#ae81ff">0xdd&lt;/span>,&lt;span style="color:#ae81ff">0xbe&lt;/span>,
-&lt;span style="color:#ae81ff">0x5a&lt;/span>,&lt;span style="color:#ae81ff">0x39&lt;/span>,&lt;span style="color:#ae81ff">0x9d&lt;/span>,&lt;span style="color:#ae81ff">0xfe&lt;/span>,&lt;span style="color:#ae81ff">0xb6&lt;/span>,&lt;span style="color:#ae81ff">0xd5&lt;/span>,&lt;span style="color:#ae81ff">0x71&lt;/span>,&lt;span style="color:#ae81ff">0x12&lt;/span>,&lt;span style="color:#ae81ff">0xe0&lt;/span>,&lt;span style="color:#ae81ff">0x83&lt;/span>,&lt;span style="color:#ae81ff">0x27&lt;/span>,&lt;span style="color:#ae81ff">0x44&lt;/span>,&lt;span style="color:#ae81ff">0x0c&lt;/span>,&lt;span style="color:#ae81ff">0x6f&lt;/span>,&lt;span style="color:#ae81ff">0xcb&lt;/span>,&lt;span style="color:#ae81ff">0xa8&lt;/span>,
-&lt;span style="color:#ae81ff">0x60&lt;/span>,&lt;span style="color:#ae81ff">0x03&lt;/span>,&lt;span style="color:#ae81ff">0xa7&lt;/span>,&lt;span style="color:#ae81ff">0xc4&lt;/span>,&lt;span style="color:#ae81ff">0x8c&lt;/span>,&lt;span style="color:#ae81ff">0xef&lt;/span>,&lt;span style="color:#ae81ff">0x4b&lt;/span>,&lt;span style="color:#ae81ff">0x28&lt;/span>,&lt;span style="color:#ae81ff">0xda&lt;/span>,&lt;span style="color:#ae81ff">0xb9&lt;/span>,&lt;span style="color:#ae81ff">0x1d&lt;/span>,&lt;span style="color:#ae81ff">0x7e&lt;/span>,&lt;span style="color:#ae81ff">0x36&lt;/span>,&lt;span style="color:#ae81ff">0x55&lt;/span>,&lt;span style="color:#ae81ff">0xf1&lt;/span>,&lt;span style="color:#ae81ff">0x92&lt;/span>,
-&lt;span style="color:#ae81ff">0x76&lt;/span>,&lt;span style="color:#ae81ff">0x15&lt;/span>,&lt;span style="color:#ae81ff">0xb1&lt;/span>,&lt;span style="color:#ae81ff">0xd2&lt;/span>,&lt;span style="color:#ae81ff">0x9a&lt;/span>,&lt;span style="color:#ae81ff">0xf9&lt;/span>,&lt;span style="color:#ae81ff">0x5d&lt;/span>,&lt;span style="color:#ae81ff">0x3e&lt;/span>,&lt;span style="color:#ae81ff">0xcc&lt;/span>,&lt;span style="color:#ae81ff">0xaf&lt;/span>,&lt;span style="color:#ae81ff">0x0b&lt;/span>,&lt;span style="color:#ae81ff">0x68&lt;/span>,&lt;span style="color:#ae81ff">0x20&lt;/span>,&lt;span style="color:#ae81ff">0x43&lt;/span>,&lt;span style="color:#ae81ff">0xe7&lt;/span>,&lt;span style="color:#ae81ff">0x84&lt;/span>
-]
-&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">xor&lt;/span>(block1, block2):
-&lt;span style="color:#66d9ef">return&lt;/span> &lt;span style="color:#e6db74">&amp;#34;&amp;#34;&lt;/span>&lt;span style="color:#f92672">.&lt;/span>join( chr(ord(a) &lt;span style="color:#f92672">^&lt;/span> ord(b)) &lt;span style="color:#66d9ef">for&lt;/span> (a,b) &lt;span style="color:#f92672">in&lt;/span> zip(block1, block2))
-&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">step&lt;/span>(block):
-&lt;span style="color:#66d9ef">return&lt;/span> chr(S[ord(block[&lt;span style="color:#ae81ff">10&lt;/span>]) &lt;span style="color:#f92672">^&lt;/span> ord(block[&lt;span style="color:#ae81ff">12&lt;/span>]) &lt;span style="color:#f92672">^&lt;/span> ord(block[&lt;span style="color:#ae81ff">13&lt;/span>]) &lt;span style="color:#f92672">^&lt;/span> ord(block[&lt;span style="color:#ae81ff">15&lt;/span>])]) &lt;span style="color:#f92672">+&lt;/span> block[:&lt;span style="color:#ae81ff">15&lt;/span>]
-&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">F&lt;/span>(block):
-&lt;span style="color:#66d9ef">for&lt;/span> i &lt;span style="color:#f92672">in&lt;/span> xrange(&lt;span style="color:#ae81ff">64&lt;/span>):
-block &lt;span style="color:#f92672">=&lt;/span> step(block)
-&lt;span style="color:#66d9ef">return&lt;/span> block
-&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">EvenMansour&lt;/span>(block, key):
-block &lt;span style="color:#f92672">=&lt;/span> xor(block, key[:&lt;span style="color:#ae81ff">16&lt;/span>])
-block &lt;span style="color:#f92672">=&lt;/span> F(block)
-block &lt;span style="color:#f92672">=&lt;/span> xor(block, key[&lt;span style="color:#ae81ff">16&lt;/span>:])
-&lt;span style="color:#66d9ef">return&lt;/span> block
-&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">encrypt&lt;/span>(data, key):
-data, num_blocks &lt;span style="color:#f92672">=&lt;/span> pad(data)
-res &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;&amp;#34;&lt;/span>
-&lt;span style="color:#66d9ef">for&lt;/span> i &lt;span style="color:#f92672">in&lt;/span> xrange(num_blocks):
-block &lt;span style="color:#f92672">=&lt;/span> EvenMansour(data[&lt;span style="color:#ae81ff">16&lt;/span>&lt;span style="color:#f92672">*&lt;/span>i:&lt;span style="color:#ae81ff">16&lt;/span>&lt;span style="color:#f92672">*&lt;/span>i&lt;span style="color:#f92672">+&lt;/span>&lt;span style="color:#ae81ff">16&lt;/span>], key)
-res &lt;span style="color:#f92672">+=&lt;/span> block
-&lt;span style="color:#66d9ef">return&lt;/span> res
-&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">pad&lt;/span>(data):
-&lt;span style="color:#66d9ef">while&lt;/span> True:
-data &lt;span style="color:#f92672">+=&lt;/span> &lt;span style="color:#e6db74">&amp;#39;&lt;/span>&lt;span style="color:#ae81ff">\x00&lt;/span>&lt;span style="color:#e6db74">&amp;#39;&lt;/span>
-&lt;span style="color:#66d9ef">if&lt;/span> len(data) &lt;span style="color:#f92672">%&lt;/span> &lt;span style="color:#ae81ff">16&lt;/span> &lt;span style="color:#f92672">==&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>:
-&lt;span style="color:#66d9ef">return&lt;/span> data, len(data) &lt;span style="color:#f92672">/&lt;/span> &lt;span style="color:#ae81ff">16&lt;/span>
-&lt;span style="color:#75715e">#&lt;/span>
-&lt;span style="color:#75715e"># Table T[a] = b such as&lt;/span>
-&lt;span style="color:#75715e"># S[x] ^ S[y] = a and b = x ^ y&lt;/span>
-&lt;span style="color:#75715e">#&lt;/span>
-&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">DiffTable&lt;/span>(S):
-table &lt;span style="color:#f92672">=&lt;/span> [&lt;span style="color:#ae81ff">0&lt;/span> &lt;span style="color:#66d9ef">for&lt;/span> i &lt;span style="color:#f92672">in&lt;/span> range(len(S))]
-&lt;span style="color:#66d9ef">for&lt;/span> delta &lt;span style="color:#f92672">in&lt;/span> range(len(S)):
-&lt;span style="color:#66d9ef">for&lt;/span> x &lt;span style="color:#f92672">in&lt;/span> range(len(S)):
-dY &lt;span style="color:#f92672">=&lt;/span> S[x] &lt;span style="color:#f92672">^&lt;/span> S[x &lt;span style="color:#f92672">^&lt;/span> delta]
-table[dY] &lt;span style="color:#f92672">=&lt;/span> delta
-&lt;span style="color:#66d9ef">return&lt;/span> table
-&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">main&lt;/span>():
-key &lt;span style="color:#f92672">=&lt;/span> os&lt;span style="color:#f92672">.&lt;/span>urandom(&lt;span style="color:#ae81ff">32&lt;/span>)
-M1 &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;hitb{0123456789abcdef}&amp;#34;&lt;/span>
-M2 &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;aaaaaaaaaaaaaaaaaaaaaa&amp;#34;&lt;/span>
-C1 &lt;span style="color:#f92672">=&lt;/span> encrypt(M1, key)
-C2 &lt;span style="color:#f92672">=&lt;/span> encrypt(M2, key)
-numberOfBlocks &lt;span style="color:#f92672">=&lt;/span> len(C2) &lt;span style="color:#f92672">/&lt;/span> &lt;span style="color:#ae81ff">16&lt;/span>
-diffTable &lt;span style="color:#f92672">=&lt;/span> DiffTable(S)
-clearText &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;&amp;#34;&lt;/span>
-&lt;span style="color:#66d9ef">for&lt;/span> block &lt;span style="color:#f92672">in&lt;/span> range(numberOfBlocks):
-dW &lt;span style="color:#f92672">=&lt;/span> xor(C1,C2)[&lt;span style="color:#ae81ff">16&lt;/span> &lt;span style="color:#f92672">*&lt;/span> block : &lt;span style="color:#ae81ff">16&lt;/span> &lt;span style="color:#f92672">*&lt;/span> (block &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#ae81ff">1&lt;/span>)]
-&lt;span style="color:#66d9ef">for&lt;/span> i &lt;span style="color:#f92672">in&lt;/span> range(&lt;span style="color:#ae81ff">64&lt;/span>):
-dWtemp &lt;span style="color:#f92672">=&lt;/span> [dW[i &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#ae81ff">1&lt;/span>] &lt;span style="color:#66d9ef">for&lt;/span> i &lt;span style="color:#f92672">in&lt;/span> range(&lt;span style="color:#ae81ff">15&lt;/span>)]
-delta &lt;span style="color:#f92672">=&lt;/span> diffTable[ord(dW[&lt;span style="color:#ae81ff">0&lt;/span>])]
-dW15 &lt;span style="color:#f92672">=&lt;/span> chr(ord(dW[&lt;span style="color:#ae81ff">11&lt;/span>]) &lt;span style="color:#f92672">^&lt;/span> ord(dW[&lt;span style="color:#ae81ff">13&lt;/span>]) &lt;span style="color:#f92672">^&lt;/span> ord(dW[&lt;span style="color:#ae81ff">14&lt;/span>]) &lt;span style="color:#f92672">^&lt;/span> delta)
-dWtemp&lt;span style="color:#f92672">.&lt;/span>append(dW15)
-dW &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;&amp;#34;&lt;/span>&lt;span style="color:#f92672">.&lt;/span>join(dWtemp)
-M &lt;span style="color:#f92672">=&lt;/span> xor(dW, M2[&lt;span style="color:#ae81ff">16&lt;/span> &lt;span style="color:#f92672">*&lt;/span> block : &lt;span style="color:#ae81ff">16&lt;/span> &lt;span style="color:#f92672">*&lt;/span> (block &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#ae81ff">1&lt;/span>)])
-clearText &lt;span style="color:#f92672">+=&lt;/span> M
-&lt;span style="color:#66d9ef">print&lt;/span> clearText
-&lt;span style="color:#66d9ef">if&lt;/span> __name__ &lt;span style="color:#f92672">==&lt;/span> &lt;span style="color:#e6db74">&amp;#39;__main__&amp;#39;&lt;/span>:
-main()
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-python" data-lang="python">&lt;span class="ch">#!/usr/bin/python2.7&lt;/span>
+&lt;span class="c1"># -*- coding: utf-8 -*-&lt;/span>
+&lt;span class="kn">import&lt;/span> &lt;span class="nn">os&lt;/span>
+&lt;span class="n">S&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="p">[&lt;/span>
+&lt;span class="mh">0xa5&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xc6&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x62&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x01&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x49&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x2a&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x8e&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xed&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x1f&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x7c&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xd8&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xbb&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xf3&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x90&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x34&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x57&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;span class="mh">0xb3&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xd0&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x74&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x17&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x5f&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x3c&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x98&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xfb&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x09&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x6a&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xce&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xad&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xe5&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x86&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x22&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x41&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;span class="mh">0x89&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xea&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x4e&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x2d&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x65&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x06&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xa2&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xc1&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x33&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x50&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xf4&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x97&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xdf&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xbc&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x18&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x7b&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;span class="mh">0x9f&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xfc&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x58&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x3b&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x73&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x10&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xb4&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xd7&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x25&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x46&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xe2&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x81&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xc9&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xaa&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x0e&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x6d&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;span class="mh">0xfd&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x9e&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x3a&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x59&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x11&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x72&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xd6&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xb5&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x47&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x24&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x80&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xe3&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xab&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xc8&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x6c&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x0f&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;span class="mh">0xeb&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x88&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x2c&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x4f&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x07&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x64&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xc0&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xa3&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x51&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x32&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x96&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xf5&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xbd&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xde&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x7a&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x19&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;span class="mh">0xd1&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xb2&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x16&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x75&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x3d&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x5e&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xfa&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x99&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x6b&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x08&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xac&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xcf&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x87&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xe4&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x40&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x23&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;span class="mh">0xc7&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xa4&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x00&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x63&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x2b&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x48&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xec&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x8f&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x7d&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x1e&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xba&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xd9&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x91&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xf2&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x56&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x35&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;span class="mh">0x14&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x77&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xd3&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xb0&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xf8&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x9b&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x3f&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x5c&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xae&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xcd&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x69&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x0a&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x42&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x21&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x85&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xe6&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;span class="mh">0x02&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x61&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xc5&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xa6&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xee&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x8d&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x29&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x4a&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xb8&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xdb&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x7f&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x1c&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x54&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x37&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x93&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xf0&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;span class="mh">0x38&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x5b&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xff&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x9c&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xd4&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xb7&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x13&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x70&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x82&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xe1&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x45&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x26&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x6e&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x0d&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xa9&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xca&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;span class="mh">0x2e&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x4d&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xe9&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x8a&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xc2&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xa1&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x05&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x66&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x94&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xf7&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x53&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x30&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x78&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x1b&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xbf&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xdc&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;span class="mh">0x4c&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x2f&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x8b&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xe8&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xa0&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xc3&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x67&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x04&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xf6&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x95&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x31&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x52&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x1a&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x79&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xdd&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xbe&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;span class="mh">0x5a&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x39&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x9d&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xfe&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xb6&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xd5&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x71&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x12&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xe0&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x83&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x27&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x44&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x0c&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x6f&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xcb&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xa8&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;span class="mh">0x60&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x03&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xa7&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xc4&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x8c&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xef&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x4b&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x28&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xda&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xb9&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x1d&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x7e&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x36&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x55&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xf1&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x92&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;span class="mh">0x76&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x15&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xb1&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xd2&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x9a&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xf9&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x5d&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x3e&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xcc&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xaf&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x0b&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x68&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x20&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x43&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0xe7&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x84&lt;/span>
+&lt;span class="p">]&lt;/span>
+&lt;span class="k">def&lt;/span> &lt;span class="nf">xor&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">block1&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">block2&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;span class="k">return&lt;/span> &lt;span class="s2">&amp;#34;&amp;#34;&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">join&lt;/span>&lt;span class="p">(&lt;/span> &lt;span class="nb">chr&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nb">ord&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">a&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="o">^&lt;/span> &lt;span class="nb">ord&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">b&lt;/span>&lt;span class="p">))&lt;/span> &lt;span class="k">for&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">a&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="n">b&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="ow">in&lt;/span> &lt;span class="nb">zip&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">block1&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">block2&lt;/span>&lt;span class="p">))&lt;/span>
+&lt;span class="k">def&lt;/span> &lt;span class="nf">step&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">block&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;span class="k">return&lt;/span> &lt;span class="nb">chr&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">S&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="nb">ord&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">block&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="mi">10&lt;/span>&lt;span class="p">])&lt;/span> &lt;span class="o">^&lt;/span> &lt;span class="nb">ord&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">block&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="mi">12&lt;/span>&lt;span class="p">])&lt;/span> &lt;span class="o">^&lt;/span> &lt;span class="nb">ord&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">block&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="mi">13&lt;/span>&lt;span class="p">])&lt;/span> &lt;span class="o">^&lt;/span> &lt;span class="nb">ord&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">block&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="mi">15&lt;/span>&lt;span class="p">])])&lt;/span> &lt;span class="o">+&lt;/span> &lt;span class="n">block&lt;/span>&lt;span class="p">[:&lt;/span>&lt;span class="mi">15&lt;/span>&lt;span class="p">]&lt;/span>
+&lt;span class="k">def&lt;/span> &lt;span class="nf">F&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">block&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;span class="k">for&lt;/span> &lt;span class="n">i&lt;/span> &lt;span class="ow">in&lt;/span> &lt;span class="n">xrange&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">64&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;span class="n">block&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">step&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">block&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="k">return&lt;/span> &lt;span class="n">block&lt;/span>
+&lt;span class="k">def&lt;/span> &lt;span class="nf">EvenMansour&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">block&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">key&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;span class="n">block&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">xor&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">block&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">key&lt;/span>&lt;span class="p">[:&lt;/span>&lt;span class="mi">16&lt;/span>&lt;span class="p">])&lt;/span>
+&lt;span class="n">block&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">F&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">block&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="n">block&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">xor&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">block&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">key&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="mi">16&lt;/span>&lt;span class="p">:])&lt;/span>
+&lt;span class="k">return&lt;/span> &lt;span class="n">block&lt;/span>
+&lt;span class="k">def&lt;/span> &lt;span class="nf">encrypt&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">data&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">key&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;span class="n">data&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">num_blocks&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">pad&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">data&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="n">res&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="s2">&amp;#34;&amp;#34;&lt;/span>
+&lt;span class="k">for&lt;/span> &lt;span class="n">i&lt;/span> &lt;span class="ow">in&lt;/span> &lt;span class="n">xrange&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">num_blocks&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;span class="n">block&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">EvenMansour&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">data&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="mi">16&lt;/span>&lt;span class="o">*&lt;/span>&lt;span class="n">i&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="mi">16&lt;/span>&lt;span class="o">*&lt;/span>&lt;span class="n">i&lt;/span>&lt;span class="o">+&lt;/span>&lt;span class="mi">16&lt;/span>&lt;span class="p">],&lt;/span> &lt;span class="n">key&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="n">res&lt;/span> &lt;span class="o">+=&lt;/span> &lt;span class="n">block&lt;/span>
+&lt;span class="k">return&lt;/span> &lt;span class="n">res&lt;/span>
+&lt;span class="k">def&lt;/span> &lt;span class="nf">pad&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">data&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;span class="k">while&lt;/span> &lt;span class="kc">True&lt;/span>&lt;span class="p">:&lt;/span>
+&lt;span class="n">data&lt;/span> &lt;span class="o">+=&lt;/span> &lt;span class="s1">&amp;#39;&lt;/span>&lt;span class="se">\x00&lt;/span>&lt;span class="s1">&amp;#39;&lt;/span>
+&lt;span class="k">if&lt;/span> &lt;span class="nb">len&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">data&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="o">%&lt;/span> &lt;span class="mi">16&lt;/span> &lt;span class="o">==&lt;/span> &lt;span class="mi">0&lt;/span>&lt;span class="p">:&lt;/span>
+&lt;span class="k">return&lt;/span> &lt;span class="n">data&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nb">len&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">data&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="o">/&lt;/span> &lt;span class="mi">16&lt;/span>
+&lt;span class="c1">#&lt;/span>
+&lt;span class="c1"># Table T[a] = b such as&lt;/span>
+&lt;span class="c1"># S[x] ^ S[y] = a and b = x ^ y&lt;/span>
+&lt;span class="c1">#&lt;/span>
+&lt;span class="k">def&lt;/span> &lt;span class="nf">DiffTable&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">S&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;span class="n">table&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="p">[&lt;/span>&lt;span class="mi">0&lt;/span> &lt;span class="k">for&lt;/span> &lt;span class="n">i&lt;/span> &lt;span class="ow">in&lt;/span> &lt;span class="nb">range&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nb">len&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">S&lt;/span>&lt;span class="p">))]&lt;/span>
+&lt;span class="k">for&lt;/span> &lt;span class="n">delta&lt;/span> &lt;span class="ow">in&lt;/span> &lt;span class="nb">range&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nb">len&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">S&lt;/span>&lt;span class="p">)):&lt;/span>
+&lt;span class="k">for&lt;/span> &lt;span class="n">x&lt;/span> &lt;span class="ow">in&lt;/span> &lt;span class="nb">range&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nb">len&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">S&lt;/span>&lt;span class="p">)):&lt;/span>
+&lt;span class="n">dY&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">S&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="n">x&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="o">^&lt;/span> &lt;span class="n">S&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="n">x&lt;/span> &lt;span class="o">^&lt;/span> &lt;span class="n">delta&lt;/span>&lt;span class="p">]&lt;/span>
+&lt;span class="n">table&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="n">dY&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">delta&lt;/span>
+&lt;span class="k">return&lt;/span> &lt;span class="n">table&lt;/span>
+&lt;span class="k">def&lt;/span> &lt;span class="nf">main&lt;/span>&lt;span class="p">():&lt;/span>
+&lt;span class="n">key&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">os&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">urandom&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">32&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="n">M1&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="s2">&amp;#34;hitb&lt;/span>&lt;span class="si">{0123456789abcdef}&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span>
+&lt;span class="n">M2&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="s2">&amp;#34;aaaaaaaaaaaaaaaaaaaaaa&amp;#34;&lt;/span>
+&lt;span class="n">C1&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">encrypt&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">M1&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">key&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="n">C2&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">encrypt&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">M2&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">key&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="n">numberOfBlocks&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nb">len&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">C2&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="o">/&lt;/span> &lt;span class="mi">16&lt;/span>
+&lt;span class="n">diffTable&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">DiffTable&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">S&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="n">clearText&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="s2">&amp;#34;&amp;#34;&lt;/span>
+&lt;span class="k">for&lt;/span> &lt;span class="n">block&lt;/span> &lt;span class="ow">in&lt;/span> &lt;span class="nb">range&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">numberOfBlocks&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;span class="n">dW&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">xor&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">C1&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="n">C2&lt;/span>&lt;span class="p">)[&lt;/span>&lt;span class="mi">16&lt;/span> &lt;span class="o">*&lt;/span> &lt;span class="n">block&lt;/span> &lt;span class="p">:&lt;/span> &lt;span class="mi">16&lt;/span> &lt;span class="o">*&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">block&lt;/span> &lt;span class="o">+&lt;/span> &lt;span class="mi">1&lt;/span>&lt;span class="p">)]&lt;/span>
+&lt;span class="k">for&lt;/span> &lt;span class="n">i&lt;/span> &lt;span class="ow">in&lt;/span> &lt;span class="nb">range&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">64&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;span class="n">dWtemp&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="p">[&lt;/span>&lt;span class="n">dW&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="n">i&lt;/span> &lt;span class="o">+&lt;/span> &lt;span class="mi">1&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="k">for&lt;/span> &lt;span class="n">i&lt;/span> &lt;span class="ow">in&lt;/span> &lt;span class="nb">range&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">15&lt;/span>&lt;span class="p">)]&lt;/span>
+&lt;span class="n">delta&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">diffTable&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="nb">ord&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">dW&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="mi">0&lt;/span>&lt;span class="p">])]&lt;/span>
+&lt;span class="n">dW15&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nb">chr&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nb">ord&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">dW&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="mi">11&lt;/span>&lt;span class="p">])&lt;/span> &lt;span class="o">^&lt;/span> &lt;span class="nb">ord&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">dW&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="mi">13&lt;/span>&lt;span class="p">])&lt;/span> &lt;span class="o">^&lt;/span> &lt;span class="nb">ord&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">dW&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="mi">14&lt;/span>&lt;span class="p">])&lt;/span> &lt;span class="o">^&lt;/span> &lt;span class="n">delta&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="n">dWtemp&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">append&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">dW15&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="n">dW&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="s2">&amp;#34;&amp;#34;&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">join&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">dWtemp&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="n">M&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">xor&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">dW&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">M2&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="mi">16&lt;/span> &lt;span class="o">*&lt;/span> &lt;span class="n">block&lt;/span> &lt;span class="p">:&lt;/span> &lt;span class="mi">16&lt;/span> &lt;span class="o">*&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">block&lt;/span> &lt;span class="o">+&lt;/span> &lt;span class="mi">1&lt;/span>&lt;span class="p">)])&lt;/span>
+&lt;span class="n">clearText&lt;/span> &lt;span class="o">+=&lt;/span> &lt;span class="n">M&lt;/span>
+&lt;span class="nb">print&lt;/span> &lt;span class="n">clearText&lt;/span>
+&lt;span class="k">if&lt;/span> &lt;span class="vm">__name__&lt;/span> &lt;span class="o">==&lt;/span> &lt;span class="s1">&amp;#39;__main__&amp;#39;&lt;/span>&lt;span class="p">:&lt;/span>
+&lt;span class="n">main&lt;/span>&lt;span class="p">()&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="conclusion">Conclusion&lt;/h2>
 &lt;p>In fact by noticing that&lt;/p>
 &lt;p>$$F(x \oplus y) = F(x) \oplus F(y) \oplus C^{te}$$&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">&lt;span style="color:#66d9ef">for&lt;/span> b &lt;span style="color:#f92672">in&lt;/span> xrange(&lt;span style="color:#ae81ff">10&lt;/span>):
-u &lt;span style="color:#f92672">=&lt;/span> os&lt;span style="color:#f92672">.&lt;/span>urandom(&lt;span style="color:#ae81ff">16&lt;/span>);
-v &lt;span style="color:#f92672">=&lt;/span> os&lt;span style="color:#f92672">.&lt;/span>urandom(&lt;span style="color:#ae81ff">16&lt;/span>);
-d &lt;span style="color:#f92672">=&lt;/span> xor(F(xor(u,v)), xor(F(u), F(v)))
-&lt;span style="color:#66d9ef">print&lt;/span> d&lt;span style="color:#f92672">.&lt;/span>encode(&lt;span style="color:#e6db74">&amp;#34;hex&amp;#34;&lt;/span>)
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-python" data-lang="python">&lt;span class="k">for&lt;/span> &lt;span class="n">b&lt;/span> &lt;span class="ow">in&lt;/span> &lt;span class="n">xrange&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">10&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;span class="n">u&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">os&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">urandom&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">16&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;span class="n">v&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">os&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">urandom&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">16&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;span class="n">d&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">xor&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">F&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">xor&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">u&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="n">v&lt;/span>&lt;span class="p">)),&lt;/span> &lt;span class="n">xor&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">F&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">u&lt;/span>&lt;span class="p">),&lt;/span> &lt;span class="n">F&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">v&lt;/span>&lt;span class="p">)))&lt;/span>
+&lt;span class="nb">print&lt;/span> &lt;span class="n">d&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">encode&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;hex&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>We have:&lt;/p>
 &lt;p>\begin{eqnarray}
 F(M_1 \oplus k_1) \oplus F(M_2 \oplus k_1) &amp;amp; = &amp;amp; F(M_1) \oplus F(M_2)\&lt;br>
