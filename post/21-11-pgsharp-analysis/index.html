@@ -5,7 +5,7 @@
 <meta http-equiv=x-ua-compatible content="IE=edge">
 <meta name=generator content="Source Themes Academic 4.8.0">
 <meta name=description content="This blog post is about the internal mechanisms of PGSharp, a cheat engine for PokemonGO.">
-<link rel=alternate hreflang=en-us href=https://www.romainthomas.fr/post/21-09-pgsharp-analysis/>
+<link rel=alternate hreflang=en-us href=https://www.romainthomas.fr/post/21-11-pgsharp-analysis/>
 <meta name=theme-color content="#2962ff">
 <link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css integrity="sha256-FMvZuGapsJLjouA6k7Eo2lusoAX9i0ShlWFG6qt7SLc=" crossorigin=anonymous>
 <link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin=anonymous>
@@ -20,18 +20,18 @@
 <link rel=manifest href=/index.webmanifest>
 <link rel=icon type=image/png href=/images/icon_hu2654a0fcc87c65a864822ac27b001d3b_698_32x32_fill_lanczos_center_3.png>
 <link rel=apple-touch-icon type=image/png href=/images/icon_hu2654a0fcc87c65a864822ac27b001d3b_698_192x192_fill_lanczos_center_3.png>
-<link rel=canonical href=https://www.romainthomas.fr/post/21-09-pgsharp-analysis/>
+<link rel=canonical href=https://www.romainthomas.fr/post/21-11-pgsharp-analysis/>
 <meta property="twitter:card" content="summary_large_image">
 <meta property="twitter:site" content="@rh0main">
 <meta property="twitter:creator" content="@rh0main">
 <meta property="og:site_name" content="Romain Thomas">
-<meta property="og:url" content="https://www.romainthomas.fr/post/21-09-pgsharp-analysis/">
+<meta property="og:url" content="https://www.romainthomas.fr/post/21-11-pgsharp-analysis/">
 <meta property="og:title" content="PGSharp: Analysis of a Cheating App for PokemonGO | Romain Thomas">
-<meta property="og:description" content="This blog post is about the internal mechanisms of PGSharp, a cheat engine for PokemonGO."><meta property="og:image" content="https://www.romainthomas.fr/post/21-09-pgsharp-analysis/featured.png">
-<meta property="twitter:image" content="https://www.romainthomas.fr/post/21-09-pgsharp-analysis/featured.png"><meta property="og:locale" content="en-us">
+<meta property="og:description" content="This blog post is about the internal mechanisms of PGSharp, a cheat engine for PokemonGO."><meta property="og:image" content="https://www.romainthomas.fr/post/21-11-pgsharp-analysis/featured.png">
+<meta property="twitter:image" content="https://www.romainthomas.fr/post/21-11-pgsharp-analysis/featured.png"><meta property="og:locale" content="en-us">
 <meta property="article:published_time" content="2021-11-07T00:00:00+00:00">
 <meta property="article:modified_time" content="2021-11-07T00:00:00+00:00">
-<script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"https://www.romainthomas.fr/post/21-09-pgsharp-analysis/"},"headline":"PGSharp: Analysis of a Cheating App for PokemonGO","image":["https://www.romainthomas.fr/post/21-09-pgsharp-analysis/featured.png"],"datePublished":"2021-11-07T00:00:00Z","dateModified":"2021-11-07T00:00:00Z","author":{"@type":"Person","name":"Romain Thomas"},"publisher":{"@type":"Organization","name":"Romain Thomas","logo":{"@type":"ImageObject","url":"https://www.romainthomas.fr/images/icon_hu2654a0fcc87c65a864822ac27b001d3b_698_192x192_fill_lanczos_center_3.png"}},"description":"This blog post is about the internal mechanisms of PGSharp, a cheat engine for PokemonGO."}</script>
+<script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"https://www.romainthomas.fr/post/21-11-pgsharp-analysis/"},"headline":"PGSharp: Analysis of a Cheating App for PokemonGO","image":["https://www.romainthomas.fr/post/21-11-pgsharp-analysis/featured.png"],"datePublished":"2021-11-07T00:00:00Z","dateModified":"2021-11-07T00:00:00Z","author":{"@type":"Person","name":"Romain Thomas"},"publisher":{"@type":"Organization","name":"Romain Thomas","logo":{"@type":"ImageObject","url":"https://www.romainthomas.fr/images/icon_hu2654a0fcc87c65a864822ac27b001d3b_698_192x192_fill_lanczos_center_3.png"}},"description":"This blog post is about the internal mechanisms of PGSharp, a cheat engine for PokemonGO."}</script>
 <title>PGSharp: Analysis of a Cheating App for PokemonGO | Romain Thomas</title>
 </head>
 <body id=top data-spy=scroll data-offset=70 data-target=#TableOfContents>
@@ -120,7 +120,7 @@ Nov 7, 2021
 </div>
 <div class="article-header article-container featured-image-wrapper mt-4 mb-4" style=max-width:720px;max-height:410px>
 <div style=position:relative>
-<img src=/post/21-09-pgsharp-analysis/featured_huad1debbc566b2d212823c16682254604_674887_720x0_resize_lanczos_3.png alt class=featured-image>
+<img src=/post/21-11-pgsharp-analysis/featured_huad1debbc566b2d212823c16682254604_674887_720x0_resize_lanczos_3.png alt class=featured-image>
 </div>
 </div>
 <div class=article-container>
