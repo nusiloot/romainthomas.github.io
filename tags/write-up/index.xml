@@ -250,25 +250,25 @@ we can use
 &lt;span class="k">if&lt;/span> &lt;span class="n">x&lt;/span> &lt;span class="ow">is&lt;/span> &lt;span class="ow">not&lt;/span> &lt;span class="kc">None&lt;/span>&lt;span class="p">:&lt;/span>
 &lt;span class="nb">print&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">x&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">f&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">name&lt;/span>&lt;span class="p">)&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>It provides the following results which enable to retrieve the key:&lt;/p>
-&lt;pre tabindex="0">&lt;code class="language-console" data-lang="console">$ python wb_key_recovery.py
-..8D....7F............9A....79.. injection-1a930d.trace
-..8D....7F............9A....79.. injection-1a95bd.trace
-....19....62....B0............8F injection-1a91b2.trace
-....19....62....B0............8F injection-1a8fdf.trace
-76............1E....D3....E1.... injection-1a8549.trace
-......E1....A0....CD....28...... injection-1a8978.trace
-....19....62....B0............8F injection-1a90ce.trace
-....19....62....B0............8F injection-1a8efd.trace
-r 2 p 4 y 1 s N 0 w S e c u r 3
-&lt;/code>&lt;/pre>&lt;p>Finally, we can verify that &lt;strong>r2p4y1sN0wSecur3&lt;/strong> is the right key by trying to decrypt &lt;code>9497cdf1df2600e7f63778d0ae91dcbb&lt;/code>&lt;sup id="fnref:4">&lt;a href="#fn:4" class="footnote-ref" role="doc-noteref">4&lt;/a>&lt;/sup>:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-console" data-lang="console">&lt;span class="gp">$ &lt;/span>python wb_key_recovery.py
+&lt;span class="go">..8D....7F............9A....79.. injection-1a930d.trace
+&lt;/span>&lt;span class="go">..8D....7F............9A....79.. injection-1a95bd.trace
+&lt;/span>&lt;span class="go">....19....62....B0............8F injection-1a91b2.trace
+&lt;/span>&lt;span class="go">....19....62....B0............8F injection-1a8fdf.trace
+&lt;/span>&lt;span class="go">76............1E....D3....E1.... injection-1a8549.trace
+&lt;/span>&lt;span class="go">......E1....A0....CD....28...... injection-1a8978.trace
+&lt;/span>&lt;span class="go">....19....62....B0............8F injection-1a90ce.trace
+&lt;/span>&lt;span class="go">....19....62....B0............8F injection-1a8efd.trace
+&lt;/span>&lt;span class="go">r 2 p 4 y 1 s N 0 w S e c u r 3
+&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Finally, we can verify that &lt;strong>r2p4y1sN0wSecur3&lt;/strong> is the right key by trying to decrypt &lt;code>9497cdf1df2600e7f63778d0ae91dcbb&lt;/code>&lt;sup id="fnref:4">&lt;a href="#fn:4" class="footnote-ref" role="doc-noteref">4&lt;/a>&lt;/sup>:&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-python" data-lang="python">&lt;span class="kn">from&lt;/span> &lt;span class="nn">Crypto.Cipher&lt;/span> &lt;span class="kn">import&lt;/span> &lt;span class="n">AES&lt;/span>
 &lt;span class="n">WB_KEY&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="sa">b&lt;/span>&lt;span class="s2">&amp;#34;r2p4y1sN0wSecur3&amp;#34;&lt;/span>
 &lt;span class="n">cipher&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">AES&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">new&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">WB_KEY&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">AES&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">MODE_ECB&lt;/span>&lt;span class="p">)&lt;/span>
 &lt;span class="n">output&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">cipher&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">decrypt&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nb">bytes&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">fromhex&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;9497cdf1df2600e7f63778d0ae91dcbb&amp;#34;&lt;/span>&lt;span class="p">))&lt;/span>
 &lt;span class="nb">print&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">output&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">decode&lt;/span>&lt;span class="p">())&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;pre tabindex="0">&lt;code class="language-console" data-lang="console">$ python ./aes_test.py
-0000123400004567
-&lt;/code>&lt;/pre>&lt;h2 id="side-note-about-the-data-section">Side note about the &lt;code>.data&lt;/code> section&lt;/h2>
+&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-console" data-lang="console">&lt;span class="gp">$ &lt;/span>python ./aes_test.py
+&lt;span class="go">0000123400004567
+&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="side-note-about-the-data-section">Side note about the &lt;code>.data&lt;/code> section&lt;/h2>
 &lt;p>Most of the obfuscators encode strings so that we don&amp;rsquo;t have any clue about functions' logic. The obfuscator
 used in the challenge follows this rule and running the &lt;code>strings&lt;/code> utility on the library does not reveal any interesting information.&lt;/p>
 &lt;p>Nevertheless, we can find a lot of &lt;code>.datadiv_decode&amp;lt;random hex&amp;gt;&lt;/code> in the ELF constructors of the library.
@@ -695,14 +695,15 @@ at the following locations:&lt;/p>
 the checks in the ELF constructors are annoying.&lt;/p>
 &lt;p>One way to disable the checks in the thread&amp;rsquo;s routines is to disable the &lt;code>pthread_create(...)&lt;/code>. It can
 be achieved by patching the &lt;code>.plt&lt;/code> entry associated with the function:&lt;/p>
-&lt;pre tabindex="0">&lt;code class="language-armasm" data-lang="armasm">mov x0, xzr;
-ret;
-&lt;/code>&lt;/pre>&lt;p>Thanks to &lt;code>llvm-mc&lt;/code>, we can get the raw bytes of these instructions:&lt;/p>
-&lt;pre tabindex="0">&lt;code class="language-console" data-lang="console">$ echo &amp;quot;mov x0, xzr;ret;&amp;quot;|llvm-mc -arch=aarch64 -show-encoding
-.text
-mov x0, xzr // encoding: [0xe0,0x03,0x1f,0xaa]
-ret // encoding: [0xc0,0x03,0x5f,0xd6]
-&lt;/code>&lt;/pre>&lt;p>Finally, we can patch the &lt;code>.plt&lt;/code> with
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-armasm" data-lang="armasm">mov &lt;span class="nc">x0&lt;/span>, &lt;span class="err">xzr&lt;/span>&lt;span class="c1">;
+&lt;/span>&lt;span class="c1">&lt;/span>ret&lt;span class="c1">;
+&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Thanks to &lt;code>llvm-mc&lt;/code>, we can get the raw bytes of these instructions:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-console" data-lang="console">&lt;span class="gp">$ &lt;/span>&lt;span class="nb">echo&lt;/span> &lt;span class="s2">&amp;#34;mov x0, xzr;ret;&amp;#34;&lt;/span>&lt;span class="p">|&lt;/span>llvm-mc -arch&lt;span class="o">=&lt;/span>aarch64 -show-encoding
+&lt;span class="err">
+&lt;/span>&lt;span class="err">&lt;/span>&lt;span class="go">.text
+&lt;/span>&lt;span class="go">mov x0, xzr // encoding: [0xe0,0x03,0x1f,0xaa]
+&lt;/span>&lt;span class="go">ret // encoding: [0xc0,0x03,0x5f,0xd6]
+&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Finally, we can patch the &lt;code>.plt&lt;/code> with
 &lt;a href="https://lief.quarkslab.com" target="_blank" rel="noopener">LIEF&lt;/a>:&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-python" data-lang="python">&lt;span class="kn">import&lt;/span> &lt;span class="nn">lief&lt;/span>
 &lt;span class="n">lib&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">lief&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">parse&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;./libnative-lib.so&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
@@ -836,23 +837,23 @@ We were given a mail
 &lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="theoretical-attack">Theoretical attack&lt;/h2>
 &lt;p>Let&amp;rsquo;s $N^{\prime} = N \bmod{e}$. So we have&lt;/p>
 &lt;p>\begin{eqnarray}
-N^{\prime} &amp;amp; \equiv &amp;amp; p \cdot q \pmod{e} \\\&lt;br>
-&amp;amp; \equiv &amp;amp; p \cdot ((p\alpha \bmod e) + k\cdot e) \pmod{e} \\\&lt;br>
-&amp;amp; \equiv &amp;amp; p^2\alpha \pmod{e} \\\&lt;br>
+N^{\prime} &amp;amp; \equiv &amp;amp; p \cdot q \pmod{e} \\\
+&amp;amp; \equiv &amp;amp; p \cdot ((p\alpha \bmod e) + k\cdot e) \pmod{e} \\\
+&amp;amp; \equiv &amp;amp; p^2\alpha \pmod{e} \\\
 \end{eqnarray}&lt;/p>
 &lt;p>We have $\alpha$ in the equation so we can introduce $p - 1$ to remove $\alpha$&lt;/p>
 &lt;p>\begin{eqnarray}
-N^{\prime} &amp;amp; \equiv &amp;amp; (p - 1 + 1)^2\alpha \pmod{e} \\\&lt;br>
-&amp;amp; \equiv &amp;amp; (p - 1)^2\alpha + 2(p - 1)\alpha + \alpha \pmod{e} \\\&lt;br>
-&amp;amp; \equiv &amp;amp; (p - 1) + 2 + \alpha \pmod{e} \\\&lt;br>
+N^{\prime} &amp;amp; \equiv &amp;amp; (p - 1 + 1)^2\alpha \pmod{e} \\\
+&amp;amp; \equiv &amp;amp; (p - 1)^2\alpha + 2(p - 1)\alpha + \alpha \pmod{e} \\\
+&amp;amp; \equiv &amp;amp; (p - 1) + 2 + \alpha \pmod{e} \\\
 (p - 1)N^{\prime} &amp;amp; \equiv &amp;amp; (p - 1)^2 + 2(p - 1) + 1 \pmod{e}
 \end{eqnarray}&lt;/p>
 &lt;p>$$\boxed{(p - 1)^2 - (N^{\prime} - 2)(p - 1) + 1 \equiv 0 \pmod{e}}$$&lt;/p>
 &lt;p>Now we have a quadratic equation which only depends on $p$.&lt;/p>
 &lt;p>Let&amp;rsquo;s $X = p - 1$ and suppose that $N^{\prime} - 2$ is even and $N^{\prime} - 2 = 2b$.&lt;/p>
 &lt;p>\begin{eqnarray}
-X^2 - 2bX + 1 &amp;amp; \equiv &amp;amp; 0 &amp;amp; \pmod{e} \\\&lt;br>
-(X - b)^2 - b^2 + 1 &amp;amp; \equiv &amp;amp; 0 &amp;amp; \pmod{e}\\\&lt;br>
+X^2 - 2bX + 1 &amp;amp; \equiv &amp;amp; 0 &amp;amp; \pmod{e} \\\
+(X - b)^2 - b^2 + 1 &amp;amp; \equiv &amp;amp; 0 &amp;amp; \pmod{e}\\\
 (X - b)^2 &amp;amp; \equiv &amp;amp; b^2 - 1 &amp;amp; \pmod{e}
 \end{eqnarray}&lt;/p>
 &lt;p>by using
@@ -866,45 +867,46 @@ X^2 - 2bX + 1 &amp;amp; \equiv &amp;amp; 0 &amp;amp; \pmod{e} \\\&lt;br>
 &lt;p>We did the assumption that $N^{\prime} - 2$ has to be even (so $N^{\prime}$ must be even) and in the certificate $N^{\prime}$ is even so everything is right.&lt;/p>
 &lt;h2 id="pratical-attack">Pratical Attack&lt;/h2>
 &lt;p>First we have to extract the modulus $N$ and the public key $e$ from the certificate:&lt;/p>
-&lt;pre tabindex="0">&lt;code class="language-console" data-lang="console">$ openssl x509 -in hitbctf.crt -text -noout
-Certificate:
-Data:
-Version: 1 (0x0)
-Serial Number: 18379438180976429416 (0xff10e1a5ac5a0968)
-Signature Algorithm: sha1WithRSAEncryption
-Issuer: C=NL, ST=Noord-Holland, L=Amsterdam, O=HITB, OU=CTF
-Validity
-Not Before: May 24 09:58:26 2015 GMT
-Not After : May 23 09:58:26 2016 GMT
-Subject: C=NL, ST=Noord-Holland, L=Amsterdam, O=HITB, OU=CTF
-Subject Public Key Info:
-Public Key Algorithm: rsaEncryption
-Public-Key: (1024 bit)
-Modulus:
-00:e6:eb:89:c1:8d:49:c9:a2:02:2b:e0:b4:65:14:
-6e:0f:90:45:1e:a3:4c:6b:60:56:00:4e:bd:15:59:
-55:b1:35:96:c2:d6:83:ad:2f:23:6b:0b:2c:0e:0b:
-88:83:b5:d6:cb:8a:0b:4f:f9:b7:eb:64:8c:95:2b:
-6b:ef:5a:6f:04:f5:64:17:f5:1c:a9:14:d9:ea:73:
-e7:dd:c5:f2:0d:ce:c3:9c:e8:4b:72:2a:0c:f3:d8:
-5e:80:ce:78:64:63:e1:44:f6:1d:b5:9c:cf:45:ff:
-0e:d3:7f:d0:ce:bd:37:a5:8d:8a:4b:08:33:9e:a3:
-2c:bc:ab:61:64:03:fd:2c:c5
-Exponent:
-69:60:2d:93:8a:81:5f:14:cf:9f:b8:36:c2:e0:4d:
-4d:De:82:ba:fc:8d:56:c2:6d:8c:89:ef:3c:40:69:
-5d:d5:d4:ef:a7:36:36:43:15:14:95:f3:8c:bf:24:
-ae:94:30:92:40:79:12:00:1b:17:f5:53:33:9e:92:
-70:70:49
-Signature Algorithm: sha1WithRSAEncryption
-17:2b:ea:be:90:ad:98:f2:2b:ff:f5:61:d3:ea:af:fb:35:3a:
-67:10:91:13:db:60:55:d9:09:8b:c2:1a:cf:6b:c6:1f:f2:10:
-7a:d1:7b:9d:ff:10:f2:f2:c0:a9:f5:aa:2e:09:93:40:88:92:
-7d:98:ff:e1:cb:dc:db:35:8d:e0:4b:21:99:76:bf:db:04:a2:
-62:a4:18:4e:fc:bb:a7:53:be:6a:a1:ef:ec:15:86:c1:f1:1e:
-87:6a:e9:af:fe:d1:08:eb:de:22:28:c4:5e:be:f1:41:0a:ca:
-cf:cf:da:63:b1:c1:56:e8:0c:8e:56:7f:08:94:0d:2b:2a:08:
-&lt;/code>&lt;/pre>&lt;p>&lt;code>N = 1621575882314321757502664197090844942567381491984167028188381926885851&lt;/code>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-console" data-lang="console">&lt;span class="gp">$ &lt;/span>openssl x509 -in hitbctf.crt -text -noout
+&lt;span class="err">
+&lt;/span>&lt;span class="err">&lt;/span>&lt;span class="go">Certificate:
+&lt;/span>&lt;span class="go"> Data:
+&lt;/span>&lt;span class="go"> Version: 1 (0x0)
+&lt;/span>&lt;span class="go"> Serial Number: 18379438180976429416 (0xff10e1a5ac5a0968)
+&lt;/span>&lt;span class="go"> Signature Algorithm: sha1WithRSAEncryption
+&lt;/span>&lt;span class="go"> Issuer: C=NL, ST=Noord-Holland, L=Amsterdam, O=HITB, OU=CTF
+&lt;/span>&lt;span class="go"> Validity
+&lt;/span>&lt;span class="go"> Not Before: May 24 09:58:26 2015 GMT
+&lt;/span>&lt;span class="go"> Not After : May 23 09:58:26 2016 GMT
+&lt;/span>&lt;span class="go"> Subject: C=NL, ST=Noord-Holland, L=Amsterdam, O=HITB, OU=CTF
+&lt;/span>&lt;span class="go"> Subject Public Key Info:
+&lt;/span>&lt;span class="go"> Public Key Algorithm: rsaEncryption
+&lt;/span>&lt;span class="go"> Public-Key: (1024 bit)
+&lt;/span>&lt;span class="go"> Modulus:
+&lt;/span>&lt;span class="go"> 00:e6:eb:89:c1:8d:49:c9:a2:02:2b:e0:b4:65:14:
+&lt;/span>&lt;span class="go"> 6e:0f:90:45:1e:a3:4c:6b:60:56:00:4e:bd:15:59:
+&lt;/span>&lt;span class="go"> 55:b1:35:96:c2:d6:83:ad:2f:23:6b:0b:2c:0e:0b:
+&lt;/span>&lt;span class="go"> 88:83:b5:d6:cb:8a:0b:4f:f9:b7:eb:64:8c:95:2b:
+&lt;/span>&lt;span class="go"> 6b:ef:5a:6f:04:f5:64:17:f5:1c:a9:14:d9:ea:73:
+&lt;/span>&lt;span class="go"> e7:dd:c5:f2:0d:ce:c3:9c:e8:4b:72:2a:0c:f3:d8:
+&lt;/span>&lt;span class="go"> 5e:80:ce:78:64:63:e1:44:f6:1d:b5:9c:cf:45:ff:
+&lt;/span>&lt;span class="go"> 0e:d3:7f:d0:ce:bd:37:a5:8d:8a:4b:08:33:9e:a3:
+&lt;/span>&lt;span class="go"> 2c:bc:ab:61:64:03:fd:2c:c5
+&lt;/span>&lt;span class="go"> Exponent:
+&lt;/span>&lt;span class="go"> 69:60:2d:93:8a:81:5f:14:cf:9f:b8:36:c2:e0:4d:
+&lt;/span>&lt;span class="go"> 4d:De:82:ba:fc:8d:56:c2:6d:8c:89:ef:3c:40:69:
+&lt;/span>&lt;span class="go"> 5d:d5:d4:ef:a7:36:36:43:15:14:95:f3:8c:bf:24:
+&lt;/span>&lt;span class="go"> ae:94:30:92:40:79:12:00:1b:17:f5:53:33:9e:92:
+&lt;/span>&lt;span class="go"> 70:70:49
+&lt;/span>&lt;span class="go"> Signature Algorithm: sha1WithRSAEncryption
+&lt;/span>&lt;span class="go"> 17:2b:ea:be:90:ad:98:f2:2b:ff:f5:61:d3:ea:af:fb:35:3a:
+&lt;/span>&lt;span class="go"> 67:10:91:13:db:60:55:d9:09:8b:c2:1a:cf:6b:c6:1f:f2:10:
+&lt;/span>&lt;span class="go"> 7a:d1:7b:9d:ff:10:f2:f2:c0:a9:f5:aa:2e:09:93:40:88:92:
+&lt;/span>&lt;span class="go"> 7d:98:ff:e1:cb:dc:db:35:8d:e0:4b:21:99:76:bf:db:04:a2:
+&lt;/span>&lt;span class="go"> 62:a4:18:4e:fc:bb:a7:53:be:6a:a1:ef:ec:15:86:c1:f1:1e:
+&lt;/span>&lt;span class="go"> 87:6a:e9:af:fe:d1:08:eb:de:22:28:c4:5e:be:f1:41:0a:ca:
+&lt;/span>&lt;span class="go"> cf:cf:da:63:b1:c1:56:e8:0c:8e:56:7f:08:94:0d:2b:2a:08:
+&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;code>N = 1621575882314321757502664197090844942567381491984167028188381926885851&lt;/code>
 &lt;code>995558397927547394115469298694885747314992315746872071523931715177680193273&lt;/code>
 &lt;code>386465775883129725436206653605910592810579794603402792446164893148622893121&lt;/code>
 &lt;code>957048204358672599654432857497196823273138934901636721473789115585263150131&lt;/code>
@@ -970,7 +972,7 @@ will be discussed later. Finally the output is xor-ed with $k_2$.&lt;/p>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;code>step&lt;/code> uses a S-Box to transform the block in this way:&lt;/p>
 &lt;p>&lt;img src="https://www.romainthomas.fr/img/step.png" alt="">&lt;/p>
 &lt;p>$\begin{cases}
-\text{block}^{n+1}_0 = \text{SBox}(\text{block}^{n}_{10} \oplus \text{block}^{n}_{12} \oplus \text{block}^{n}_{13} \oplus \text{block}^{n+1}_{15}) &amp;amp; k = 0 \\\&lt;br>
+\text{block}^{n+1}_0 = \text{SBox}(\text{block}^{n}_{10} \oplus \text{block}^{n}_{12} \oplus \text{block}^{n}_{13} \oplus \text{block}^{n+1}_{15}) &amp;amp; k = 0 \\\
 \text{block}^{n+1}_k = \text{block}^{n}_{k - 1} &amp;amp; k &amp;gt; 0
 \end{cases}$&lt;/p>
 &lt;p>$\text{block}^{n}_k$ is the byte $k$ of the &lt;em>block&lt;/em> at round $n$ ($0 \leq k &amp;lt; 16$ and $0 \leq n &amp;lt; 64$)&lt;/p>
@@ -994,14 +996,14 @@ following function, we can compute this probability:&lt;/p>
 &lt;p>To find the flag, we will perform a differential attack. We have a message $M_1$ that we know and we have an unknown second message $M_2$
 that is the flag. We also know $C_1$ and $C_2$ such as:&lt;/p>
 &lt;p>$$\begin{eqnarray}
-C_1 &amp;amp; = &amp;amp; F(M_1 \oplus k_1) \oplus k_2 \\\&lt;br>
+C_1 &amp;amp; = &amp;amp; F(M_1 \oplus k_1) \oplus k_2 \\\
 C_2 &amp;amp; = &amp;amp; F(M_2 \oplus k_1) \oplus k_2
 \end{eqnarray}$$&lt;/p>
 &lt;p>&lt;img src="diff.png" alt="">&lt;/p>
 &lt;p>By xor-ing $C_1$ and $C_2$ we can get $\Delta W = W_1 \oplus W_2 = C_1 \oplus C_2$. If somehow we can resolve $\Delta V$:&lt;/p>
 &lt;p>$$\begin{eqnarray}
-\Delta V &amp;amp; = &amp;amp; V_1 \oplus V_2 \\\&lt;br>
-&amp;amp; = &amp;amp; M_1 \oplus k_1 \oplus M_2 \oplus k_1\\\&lt;br>
+\Delta V &amp;amp; = &amp;amp; V_1 \oplus V_2 \\\
+&amp;amp; = &amp;amp; M_1 \oplus k_1 \oplus M_2 \oplus k_1\\\
 &amp;amp; = &amp;amp; M_1 \oplus M_2.
 \end{eqnarray}$$&lt;/p>
 &lt;p>We can extract $M_2$ with:&lt;/p>
@@ -1014,8 +1016,8 @@ C_2 &amp;amp; = &amp;amp; F(M_2 \oplus k_1) \oplus k_2
 &lt;p>To find $\Delta W^{n-1}_{15}$ we will use the fact that $P(\Delta X | \Delta W^{n-1}_{15}) = 1$ for a given $\Delta X$.
 Concretely, I built a table &lt;em>diffTable&lt;/em> which maps $\delta$ to $\Delta$.&lt;/p>
 &lt;p>$\begin{eqnarray}
-\text{diffTable}(\Delta W^{n}_{0}) &amp;amp; = &amp;amp; \Delta W^{n-1}_{10} \oplus \Delta W^{n-1}_{12} \oplus \Delta W^{n-1}_{13} \oplus \Delta W^{n-1}_{15} \\\&lt;br>
-&amp;amp; = &amp;amp; \Delta W^{n}_{11} \oplus \Delta W^{n}_{13} \oplus \Delta W^{n}_{14} \oplus \Delta W^{n-1}_{15}\\\&lt;br>
+\text{diffTable}(\Delta W^{n}_{0}) &amp;amp; = &amp;amp; \Delta W^{n-1}_{10} \oplus \Delta W^{n-1}_{12} \oplus \Delta W^{n-1}_{13} \oplus \Delta W^{n-1}_{15} \\\
+&amp;amp; = &amp;amp; \Delta W^{n}_{11} \oplus \Delta W^{n}_{13} \oplus \Delta W^{n}_{14} \oplus \Delta W^{n-1}_{15}\\\
 \Delta W^{n-1}_{15} &amp;amp; = &amp;amp; \text{diffTable}(\Delta W^{n}_{0}) \oplus \Delta W^{n}_{11} \oplus \Delta W^{n}_{13} \oplus \Delta W^{n}_{14}
 \end{eqnarray}$&lt;/p>
 &lt;p>Which enables to recover $\Delta W^{n - 1}$ from $\Delta W^{n}$.
@@ -1111,7 +1113,7 @@ Then, with recursion we can compute $\Delta W^{0} = \Delta V$&lt;/p>
 &lt;span class="nb">print&lt;/span> &lt;span class="n">d&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">encode&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;hex&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>We have:&lt;/p>
 &lt;p>\begin{eqnarray}
-F(M_1 \oplus k_1) \oplus F(M_2 \oplus k_1) &amp;amp; = &amp;amp; F(M_1) \oplus F(M_2)\&lt;br>
+F(M_1 \oplus k_1) \oplus F(M_2 \oplus k_1) &amp;amp; = &amp;amp; F(M_1) \oplus F(M_2)\
 M_2 &amp;amp; = &amp;amp; F^{-1}(F(M_1) \oplus C_1 \oplus C_2)
 \end{eqnarray}&lt;/p>
 &lt;p>Which is far more easier to resolve.&lt;/p>

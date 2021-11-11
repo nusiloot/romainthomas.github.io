@@ -228,7 +228,7 @@ It adds another layer to reverse, as we need to understand the VM architecture b
 But what about using an interpreted language (like Python) and obfuscate its VM or its interpreter with O-LLVM?
 </b><br>
 </center>
-<p>This is what PGSharp does with Lua. Some parts of the cheat are written in Lua whose the VM has been modified to:</p>
+<p>This is what PGSharp does with Lua. Some parts of the cheat are written in Lua whose VM has been modified to:</p>
 <ol>
 <li>Fake the version: try to make believe <code>Lua 5.1</code> while it&rsquo;s <code>Lua 5.3</code></li>
 <li>Add new opcodes (<code>OP_RUN</code>, <code>OP_GETDOWNVAL</code>, <code>OP_OLDTABLE</code>, and <code>OP_XXOR</code>) to break decompilation and
@@ -458,7 +458,7 @@ confirms that PGSharp repackaged the original application.</p>
 <h4 id=dex-files-diff>
 <a href=#toc><i class="fas fa-angle-up"></i>  DEX Files Comparison</a></h4>
 <p>To figure out which parts of the DEX files have been modified, we can use LIEF (yes, LIEF can <u><b>read</b></u> the DEX format).
-Basically, the idea is to check which method(s) has a bytecode whose the size is different from the real PokemonGO
+Basically, the idea is to check which method(s) has a bytecode whose size is different from the real PokemonGO
 application:</p>
 <div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=kn>import</span> <span class=nn>zipfile</span>
 <span class=kn>import</span> <span class=nn>lief</span>
@@ -525,11 +525,11 @@ used in the output. On the other hand, the size bytecode for this kind of repack
 <a href=#toc><i class="fas fa-angle-up"></i>  libmain.so</a></h4>
 <p>Compared to the original PokemonGO APK, <b class=red>libmain.so</b> in PGSharp is substantially larger. Moreover,
 the ELF metadata leaks the original file name of the file:</p>
-<pre tabindex=0><code class=language-console data-lang=console>$ readelf -d libmain.so
-...
-0x000000000000000e (SONAME)             Library soname: [libhela.so]
-...
-</code></pre><p>During the analysis of PGSharp, we find references to
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-console data-lang=console><span class=gp>$ </span>readelf -d libmain.so
+<span class=go>...
+</span><span class=go>0x000000000000000e (SONAME)             Library soname: [libhela.so]
+</span><span class=go>...
+</span></code></pre></div><p>During the analysis of PGSharp, we find references to
 <a href=https://en.wikipedia.org/wiki/Hela_%28comics%29 target=_blank rel=noopener>Hela</a>
 in different places, like the package name
 of the dynamically-loaded APK:<br> <code>me.underworld.helaplugin</code>.</p>
@@ -1195,14 +1195,14 @@ that is <em>compiled</em> into <code>libil2cpp.so</code>.</p>
 <p>To perform these functionalities, PGSharp hooks (hooking like Frida) some of these Unity functions.</p>
 <p>They tried to hide<sup id=fnref:6><a href=#fn:6 class=footnote-ref role=doc-noteref>6</a></sup> the underlying hooking framework used to perform these hooks, unfortunately they missed
 to remove important strings:</p>
-<pre tabindex=0><code class=language-console data-lang=console>$ strings ./libmain.so|grep -i -E &quot;\w\+\.cc&quot;
-E:/work/code/Hela/app/src/main/cpp/Dobby/source/InterceptRouting/Routing/FunctionInlineReplace/FunctionInlineReplaceExport.cc
-E:/work/code/Hela/app/src/main/cpp/Dobby/source/TrampolineBridge/Trampoline/arm64/trampoline-arm64.cc
-E:/work/code/Hela/app/src/main/cpp/Dobby/source/MemoryAllocator/MemoryArena.cc
-E:/work/code/Hela/app/src/main/cpp/Dobby/source/InstructionRelocation/arm64/ARM64InstructionRelocation.cc
-E:/work/code/Hela/app/src/main/cpp/Dobby/source/UserMode/PlatformUtil/Linux/ProcessRuntimeUtility.cc
-E:/work/code/Hela/app/src/main/cpp/Dobby/source/UserMode/UnifiedInterface/platform-posix.cc
-</code></pre><p>So the hooking framework is Dobby:</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-console data-lang=console><span class=gp>$ </span>strings ./libmain.so<span class=p>|</span>grep -i -E <span class=s2>&#34;\w\+\.cc&#34;</span>
+<span class=go>E:/work/code/Hela/app/src/main/cpp/Dobby/source/InterceptRouting/Routing/FunctionInlineReplace/FunctionInlineReplaceExport.cc
+</span><span class=go>E:/work/code/Hela/app/src/main/cpp/Dobby/source/TrampolineBridge/Trampoline/arm64/trampoline-arm64.cc
+</span><span class=go>E:/work/code/Hela/app/src/main/cpp/Dobby/source/MemoryAllocator/MemoryArena.cc
+</span><span class=go>E:/work/code/Hela/app/src/main/cpp/Dobby/source/InstructionRelocation/arm64/ARM64InstructionRelocation.cc
+</span><span class=go>E:/work/code/Hela/app/src/main/cpp/Dobby/source/UserMode/PlatformUtil/Linux/ProcessRuntimeUtility.cc
+</span><span class=go>E:/work/code/Hela/app/src/main/cpp/Dobby/source/UserMode/UnifiedInterface/platform-posix.cc
+</span></code></pre></div><p>So the hooking framework is Dobby:</p>
 <center>
 <i class="fas fa-github"></i>&nbsp;&nbsp;&nbsp;<a href=https://github.com/jmpews/Dobby target=_blank rel=noopener>https://github.com/jmpews/Dobby</a>
 <br> <br>
@@ -1458,7 +1458,7 @@ PGSharp intercepts the nonce and forward the request to its servers:</p>
 <center>
 <span class=red>https://tens.pgsharp.com/v1/scc-2-eg[...]4/</span><br><br>
 </center>
-<p>The request is performed through a http POST, whose the data are encrypted with AES. The clear payload
+<p>The request is performed through a http POST, whose data are encrypted with AES. The clear payload
 has the following layout:</p>
 <div class=highlight><pre tabindex=0 class=chroma><code class=language-json data-lang=json><span class=p>{</span>
   <span class=nt>&#34;n&#34;</span><span class=p>:</span> <span class=s2>&#34;Cy[...]&#34;</span><span class=p>,</span>
@@ -1855,7 +1855,7 @@ get the base address by iterating over <code>/proc/&lt;pid>/maps</code>.&#160;<a
 <p>O-LLVM seems not applied on this function&#160;<a href=#fnref:8 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></p>
 </li>
 <li id=fn:9 role=doc-endnote>
-<p>One can also hook the AES encrypt/decrypt functions whose the prototype is <code>(uint8_*t key_schedule, uint8_t* inout_buffer, size_t size)</code>&#160;<a href=#fnref:9 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></p>
+<p>One can also hook the AES encrypt/decrypt functions whose prototype is <code>(uint8_*t key_schedule, uint8_t* inout_buffer, size_t size)</code>&#160;<a href=#fnref:9 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></p>
 </li>
 </ol>
 </section>

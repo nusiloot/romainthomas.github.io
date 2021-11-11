@@ -155,7 +155,7 @@ will be discussed later. Finally the output is xor-ed with $k_2$.</p>
 </code></pre></div><p><code>step</code> uses a S-Box to transform the block in this way:</p>
 <p><img src=/img/step.png alt></p>
 <p>$\begin{cases}
-\text{block}^{n+1}_0 = \text{SBox}(\text{block}^{n}_{10} \oplus \text{block}^{n}_{12} \oplus \text{block}^{n}_{13} \oplus \text{block}^{n+1}_{15}) & k = 0 \\\<br>
+\text{block}^{n+1}_0 = \text{SBox}(\text{block}^{n}_{10} \oplus \text{block}^{n}_{12} \oplus \text{block}^{n}_{13} \oplus \text{block}^{n+1}_{15}) & k = 0 \\\
 \text{block}^{n+1}_k = \text{block}^{n}_{k - 1} & k > 0
 \end{cases}$</p>
 <p>$\text{block}^{n}_k$ is the byte $k$ of the <em>block</em> at round $n$ ($0 \leq k &lt; 16$ and $0 \leq n &lt; 64$)</p>
@@ -179,14 +179,14 @@ following function, we can compute this probability:</p>
 <p>To find the flag, we will perform a differential attack. We have a message $M_1$ that we know and we have an unknown second message $M_2$
 that is the flag. We also know $C_1$ and $C_2$ such as:</p>
 <p>$$\begin{eqnarray}
-C_1 & = & F(M_1 \oplus k_1) \oplus k_2 \\\<br>
+C_1 & = & F(M_1 \oplus k_1) \oplus k_2 \\\
 C_2 & = & F(M_2 \oplus k_1) \oplus k_2
 \end{eqnarray}$$</p>
 <p><img src=diff.png alt></p>
 <p>By xor-ing $C_1$ and $C_2$ we can get $\Delta W = W_1 \oplus W_2 = C_1 \oplus C_2$. If somehow we can resolve $\Delta V$:</p>
 <p>$$\begin{eqnarray}
-\Delta V & = & V_1 \oplus V_2 \\\<br>
-& = & M_1 \oplus k_1 \oplus M_2 \oplus k_1\\\<br>
+\Delta V & = & V_1 \oplus V_2 \\\
+& = & M_1 \oplus k_1 \oplus M_2 \oplus k_1\\\
 & = & M_1 \oplus M_2.
 \end{eqnarray}$$</p>
 <p>We can extract $M_2$ with:</p>
@@ -199,8 +199,8 @@ C_2 & = & F(M_2 \oplus k_1) \oplus k_2
 <p>To find $\Delta W^{n-1}_{15}$ we will use the fact that $P(\Delta X | \Delta W^{n-1}_{15}) = 1$ for a given $\Delta X$.
 Concretely, I built a table <em>diffTable</em> which maps $\delta$ to $\Delta$.</p>
 <p>$\begin{eqnarray}
-\text{diffTable}(\Delta W^{n}_{0}) & = & \Delta W^{n-1}_{10} \oplus \Delta W^{n-1}_{12} \oplus \Delta W^{n-1}_{13} \oplus \Delta W^{n-1}_{15} \\\<br>
-& = & \Delta W^{n}_{11} \oplus \Delta W^{n}_{13} \oplus \Delta W^{n}_{14} \oplus \Delta W^{n-1}_{15}\\\<br>
+\text{diffTable}(\Delta W^{n}_{0}) & = & \Delta W^{n-1}_{10} \oplus \Delta W^{n-1}_{12} \oplus \Delta W^{n-1}_{13} \oplus \Delta W^{n-1}_{15} \\\
+& = & \Delta W^{n}_{11} \oplus \Delta W^{n}_{13} \oplus \Delta W^{n}_{14} \oplus \Delta W^{n-1}_{15}\\\
 \Delta W^{n-1}_{15} & = & \text{diffTable}(\Delta W^{n}_{0}) \oplus \Delta W^{n}_{11} \oplus \Delta W^{n}_{13} \oplus \Delta W^{n}_{14}
 \end{eqnarray}$</p>
 <p>Which enables to recover $\Delta W^{n - 1}$ from $\Delta W^{n}$.
@@ -312,7 +312,7 @@ Then, with recursion we can compute $\Delta W^{0} = \Delta V$</p>
         <span class=nb>print</span> <span class=n>d</span><span class=o>.</span><span class=n>encode</span><span class=p>(</span><span class=s2>&#34;hex&#34;</span><span class=p>)</span>
 </code></pre></div><p>We have:</p>
 <p>\begin{eqnarray}
-F(M_1 \oplus k_1) \oplus F(M_2 \oplus k_1) & = & F(M_1) \oplus F(M_2)\<br>
+F(M_1 \oplus k_1) \oplus F(M_2 \oplus k_1) & = & F(M_1) \oplus F(M_2)\
 M_2 & = & F^{-1}(F(M_1) \oplus C_1 \oplus C_2)
 \end{eqnarray}</p>
 <p>Which is far more easier to resolve.</p>

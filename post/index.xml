@@ -169,7 +169,7 @@ It adds another layer to reverse, as we need to understand the VM architecture b
 But what about using an interpreted language (like Python) and obfuscate its VM or its interpreter with O-LLVM?
 </b><br />
 </center>
-<p>This is what PGSharp does with Lua. Some parts of the cheat are written in Lua whose the VM has been modified to:</p>
+<p>This is what PGSharp does with Lua. Some parts of the cheat are written in Lua whose VM has been modified to:</p>
 <ol>
 <li>Fake the version: try to make believe <code>Lua 5.1</code> while it&rsquo;s <code>Lua 5.3</code></li>
 <li>Add new opcodes (<code>OP_RUN</code>, <code>OP_GETDOWNVAL</code>, <code>OP_OLDTABLE</code>, and <code>OP_XXOR</code>) to break decompilation and
@@ -400,7 +400,7 @@ confirms that PGSharp repackaged the original application.</p>
 <h4 id="dex-files-diff">
 <a href="#toc"><i class='fas fa-angle-up'></i>  DEX Files Comparison</a></h4>
 <p>To figure out which parts of the DEX files have been modified, we can use LIEF (yes, LIEF can <u><b>read</b></u> the DEX format).
-Basically, the idea is to check which method(s) has a bytecode whose the size is different from the real PokemonGO
+Basically, the idea is to check which method(s) has a bytecode whose size is different from the real PokemonGO
 application:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">zipfile</span>
 <span class="kn">import</span> <span class="nn">lief</span>
@@ -467,11 +467,11 @@ used in the output. On the other hand, the size bytecode for this kind of repack
 <a href="#toc"><i class='fas fa-angle-up'></i>  libmain.so</a></h4>
 <p>Compared to the original PokemonGO APK, <b class="red">libmain.so</b> in PGSharp is substantially larger. Moreover,
 the ELF metadata leaks the original file name of the file:</p>
-<pre tabindex="0"><code class="language-console" data-lang="console">$ readelf -d libmain.so
-...
-0x000000000000000e (SONAME)             Library soname: [libhela.so]
-...
-</code></pre><p>During the analysis of PGSharp, we find references to 
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="gp">$ </span>readelf -d libmain.so
+<span class="go">...
+</span><span class="go">0x000000000000000e (SONAME)             Library soname: [libhela.so]
+</span><span class="go">...
+</span></code></pre></div><p>During the analysis of PGSharp, we find references to 
 <a href="https://en.wikipedia.org/wiki/Hela_%28comics%29" target="_blank" rel="noopener">Hela</a>
 in different places, like the package name
 of the dynamically-loaded APK:<br /> <code>me.underworld.helaplugin</code>.</p>
@@ -1138,14 +1138,14 @@ that is <em>compiled</em> into <code>libil2cpp.so</code>.</p>
 <p>To perform these functionalities, PGSharp hooks (hooking like Frida) some of these Unity functions.</p>
 <p>They tried to hide<sup id="fnref:6"><a href="#fn:6" class="footnote-ref" role="doc-noteref">6</a></sup> the underlying hooking framework used to perform these hooks, unfortunately they missed
 to remove important strings:</p>
-<pre tabindex="0"><code class="language-console" data-lang="console">$ strings ./libmain.so|grep -i -E &quot;\w\+\.cc&quot;
-E:/work/code/Hela/app/src/main/cpp/Dobby/source/InterceptRouting/Routing/FunctionInlineReplace/FunctionInlineReplaceExport.cc
-E:/work/code/Hela/app/src/main/cpp/Dobby/source/TrampolineBridge/Trampoline/arm64/trampoline-arm64.cc
-E:/work/code/Hela/app/src/main/cpp/Dobby/source/MemoryAllocator/MemoryArena.cc
-E:/work/code/Hela/app/src/main/cpp/Dobby/source/InstructionRelocation/arm64/ARM64InstructionRelocation.cc
-E:/work/code/Hela/app/src/main/cpp/Dobby/source/UserMode/PlatformUtil/Linux/ProcessRuntimeUtility.cc
-E:/work/code/Hela/app/src/main/cpp/Dobby/source/UserMode/UnifiedInterface/platform-posix.cc
-</code></pre><p>So the hooking framework is Dobby:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="gp">$ </span>strings ./libmain.so<span class="p">|</span>grep -i -E <span class="s2">&#34;\w\+\.cc&#34;</span>
+<span class="go">E:/work/code/Hela/app/src/main/cpp/Dobby/source/InterceptRouting/Routing/FunctionInlineReplace/FunctionInlineReplaceExport.cc
+</span><span class="go">E:/work/code/Hela/app/src/main/cpp/Dobby/source/TrampolineBridge/Trampoline/arm64/trampoline-arm64.cc
+</span><span class="go">E:/work/code/Hela/app/src/main/cpp/Dobby/source/MemoryAllocator/MemoryArena.cc
+</span><span class="go">E:/work/code/Hela/app/src/main/cpp/Dobby/source/InstructionRelocation/arm64/ARM64InstructionRelocation.cc
+</span><span class="go">E:/work/code/Hela/app/src/main/cpp/Dobby/source/UserMode/PlatformUtil/Linux/ProcessRuntimeUtility.cc
+</span><span class="go">E:/work/code/Hela/app/src/main/cpp/Dobby/source/UserMode/UnifiedInterface/platform-posix.cc
+</span></code></pre></div><p>So the hooking framework is Dobby:</p>
 <center>
 <i class='fas fa-github'></i>&nbsp;&nbsp;&nbsp;<a href="https://github.com/jmpews/Dobby" target="_blank" rel="noopener">https://github.com/jmpews/Dobby</a>
 <br /> <br />
@@ -1405,7 +1405,7 @@ PGSharp intercepts the nonce and forward the request to its servers:</p>
 <center>
 <span class="red">https://tens.pgsharp.com/v1/scc-2-eg[...]4/</span><br /><br />
 </center>
-<p>The request is performed through a http POST, whose the data are encrypted with AES. The clear payload
+<p>The request is performed through a http POST, whose data are encrypted with AES. The clear payload
 has the following layout:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="p">{</span>
   <span class="nt">&#34;n&#34;</span><span class="p">:</span> <span class="s2">&#34;Cy[...]&#34;</span><span class="p">,</span>
@@ -1803,7 +1803,7 @@ get the base address by iterating over <code>/proc/&lt;pid&gt;/maps</code>.&#160
 <p>O-LLVM seems not applied on this function&#160;<a href="#fnref:8" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:9" role="doc-endnote">
-<p>One can also hook the AES encrypt/decrypt functions whose the prototype is <code>(uint8_*t key_schedule, uint8_t* inout_buffer, size_t size)</code>&#160;<a href="#fnref:9" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+<p>One can also hook the AES encrypt/decrypt functions whose prototype is <code>(uint8_*t key_schedule, uint8_t* inout_buffer, size_t size)</code>&#160;<a href="#fnref:9" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 </ol>
 </section>
@@ -2909,26 +2909,26 @@ we can use
     <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 </code></pre></div><p>It provides the following results which enable to retrieve the key:</p>
-<pre tabindex="0"><code class="language-console" data-lang="console">$ python wb_key_recovery.py
-..8D....7F............9A....79.. injection-1a930d.trace
-..8D....7F............9A....79.. injection-1a95bd.trace
-....19....62....B0............8F injection-1a91b2.trace
-....19....62....B0............8F injection-1a8fdf.trace
-76............1E....D3....E1.... injection-1a8549.trace
-......E1....A0....CD....28...... injection-1a8978.trace
-....19....62....B0............8F injection-1a90ce.trace
-....19....62....B0............8F injection-1a8efd.trace
-r 2 p 4 y 1 s N 0 w S e c u r 3
-</code></pre><p>Finally, we can verify that <strong>r2p4y1sN0wSecur3</strong> is the right key by trying to decrypt <code>9497cdf1df2600e7f63778d0ae91dcbb</code><sup id="fnref:4"><a href="#fn:4" class="footnote-ref" role="doc-noteref">4</a></sup>:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="gp">$ </span>python wb_key_recovery.py
+<span class="go">..8D....7F............9A....79.. injection-1a930d.trace
+</span><span class="go">..8D....7F............9A....79.. injection-1a95bd.trace
+</span><span class="go">....19....62....B0............8F injection-1a91b2.trace
+</span><span class="go">....19....62....B0............8F injection-1a8fdf.trace
+</span><span class="go">76............1E....D3....E1.... injection-1a8549.trace
+</span><span class="go">......E1....A0....CD....28...... injection-1a8978.trace
+</span><span class="go">....19....62....B0............8F injection-1a90ce.trace
+</span><span class="go">....19....62....B0............8F injection-1a8efd.trace
+</span><span class="go">r 2 p 4 y 1 s N 0 w S e c u r 3
+</span></code></pre></div><p>Finally, we can verify that <strong>r2p4y1sN0wSecur3</strong> is the right key by trying to decrypt <code>9497cdf1df2600e7f63778d0ae91dcbb</code><sup id="fnref:4"><a href="#fn:4" class="footnote-ref" role="doc-noteref">4</a></sup>:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">Crypto.Cipher</span> <span class="kn">import</span> <span class="n">AES</span>
 <span class="n">WB_KEY</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">&#34;r2p4y1sN0wSecur3&#34;</span>
 
 <span class="n">cipher</span> <span class="o">=</span> <span class="n">AES</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">WB_KEY</span><span class="p">,</span> <span class="n">AES</span><span class="o">.</span><span class="n">MODE_ECB</span><span class="p">)</span>
 <span class="n">output</span> <span class="o">=</span> <span class="n">cipher</span><span class="o">.</span><span class="n">decrypt</span><span class="p">(</span><span class="nb">bytes</span><span class="o">.</span><span class="n">fromhex</span><span class="p">(</span><span class="s2">&#34;9497cdf1df2600e7f63778d0ae91dcbb&#34;</span><span class="p">))</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">output</span><span class="o">.</span><span class="n">decode</span><span class="p">())</span>
-</code></pre></div><pre tabindex="0"><code class="language-console" data-lang="console">$ python ./aes_test.py
-0000123400004567
-</code></pre><h2 id="side-note-about-the-data-section">Side note about the <code>.data</code> section</h2>
+</code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="gp">$ </span>python ./aes_test.py
+<span class="go">0000123400004567
+</span></code></pre></div><h2 id="side-note-about-the-data-section">Side note about the <code>.data</code> section</h2>
 <p>Most of the obfuscators encode strings so that we don&rsquo;t have any clue about functions' logic. The obfuscator
 used in the challenge follows this rule and running the <code>strings</code> utility on the library does not reveal any interesting information.</p>
 <p>Nevertheless, we can find a lot of <code>.datadiv_decode&lt;random hex&gt;</code> in the ELF constructors of the library.
@@ -3375,15 +3375,15 @@ at the following locations:</p>
 the checks in the ELF constructors are annoying.</p>
 <p>One way to disable the checks in the thread&rsquo;s routines is to disable the <code>pthread_create(...)</code>. It can
 be achieved by patching the <code>.plt</code> entry associated with the function:</p>
-<pre tabindex="0"><code class="language-armasm" data-lang="armasm">mov x0, xzr;
-ret;
-</code></pre><p>Thanks to <code>llvm-mc</code>, we can get the raw bytes of these instructions:</p>
-<pre tabindex="0"><code class="language-console" data-lang="console">$ echo &quot;mov x0, xzr;ret;&quot;|llvm-mc -arch=aarch64 -show-encoding
-
-.text
-mov     x0, xzr                 // encoding: [0xe0,0x03,0x1f,0xaa]
-ret                             // encoding: [0xc0,0x03,0x5f,0xd6]
-</code></pre><p>Finally, we can patch the <code>.plt</code> with 
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-armasm" data-lang="armasm">mov <span class="nc">x0</span>, <span class="err">xzr</span><span class="c1">;
+</span><span class="c1"></span>ret<span class="c1">;
+</span></code></pre></div><p>Thanks to <code>llvm-mc</code>, we can get the raw bytes of these instructions:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="gp">$ </span><span class="nb">echo</span> <span class="s2">&#34;mov x0, xzr;ret;&#34;</span><span class="p">|</span>llvm-mc -arch<span class="o">=</span>aarch64 -show-encoding
+<span class="err">
+</span><span class="err"></span><span class="go">.text
+</span><span class="go">mov     x0, xzr                 // encoding: [0xe0,0x03,0x1f,0xaa]
+</span><span class="go">ret                             // encoding: [0xc0,0x03,0x5f,0xd6]
+</span></code></pre></div><p>Finally, we can patch the <code>.plt</code> with 
 <a href="https://lief.quarkslab.com" target="_blank" rel="noopener">LIEF</a>:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">lief</span>
 <span class="n">lib</span> <span class="o">=</span> <span class="n">lief</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s2">&#34;./libnative-lib.so&#34;</span><span class="p">)</span>
@@ -3886,15 +3886,15 @@ debug detection and what kind of data is collected (i.e. process memory map).</p
 <p>Along with the QBDI ARM support, we also added ARM support to resolve <strong>memory addresses</strong> during the
 instrumentation.
 It means that QBDI is now able to resolve <strong>the effective memory address</strong> of instructions such as:</p>
-<pre tabindex="0"><code class="language-armasm" data-lang="armasm">LDR R0, [R1, R2];         # Resolve R1 + R2
-STR R1, [R2, R3, LSL #2]; # Resolve R2 + R3 * 4
-LDRB    [PC, #4];         # Resolve **real** PC + 4
-</code></pre><p>Moreover, QBDI is also able to get <strong>the effective memory value</strong> that is read or written. This feature
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-armasm" data-lang="armasm">LDR <span class="err">R0</span>, <span class="err">[R1</span>, <span class="err">R2]</span><span class="c1">;         # Resolve R1 + R2
+</span><span class="c1"></span>STR <span class="err">R1</span>, <span class="err">[R2</span>, <span class="err">R3</span>, <span class="err">LSL</span> #<span class="mi">2</span><span class="err">]</span><span class="c1">; # Resolve R2 + R3 * 4
+</span><span class="c1"></span>LDRB    <span class="err">[PC</span>, #<span class="mi">4</span><span class="err">]</span><span class="c1">;         # Resolve **real** PC + 4
+</span></code></pre></div><p>Moreover, QBDI is also able to get <strong>the effective memory value</strong> that is read or written. This feature
 is quite useful in the case of conditional instructions such as:</p>
-<pre tabindex="0"><code class="language-armasm" data-lang="armasm">ITT LS;
-LDRLS R0, [R4];
-LDRLS R1, [R0, #4]
-</code></pre><p>The <strong>effective</strong> value of <code>R0</code> and <code>R1</code> is stored in QBDI. It may not be
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-armasm" data-lang="armasm">ITT <span class="err">LS</span><span class="c1">;
+</span><span class="c1"></span>LDRLS <span class="err">R0</span>, <span class="err">[R4]</span><span class="c1">;
+</span><span class="c1"></span>LDRLS <span class="err">R1</span>, <span class="err">[R0</span>, #<span class="mi">4</span><span class="err">]</span>
+</code></pre></div><p>The <strong>effective</strong> value of <code>R0</code> and <code>R1</code> is stored in QBDI. It may not be
 <code>*(r4)</code> and <code>*(r0 + 4)</code> since the <code>LS</code> condition may not be verified.</p>
 <p>To add a callback on memory accesses, we can use the <code>addMemAccessCB(...)</code> function on the VM instance:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="n">vm</span><span class="p">.</span><span class="n">addMemAccessCB</span><span class="p">(</span><span class="n">MEMORY_READ_WRITE</span><span class="p">,</span> <span class="n">memory_callback</span><span class="p">,</span> <span class="cm">/* data */</span> <span class="k">nullptr</span><span class="p">);</span>
@@ -4264,16 +4264,16 @@ whereas <code>lief.MachO.parse</code> returns a <strong>list</strong> of <code>l
 
   <span class="k">for</span> <span class="n">crt</span> <span class="ow">in</span> <span class="n">driver</span><span class="o">.</span><span class="n">signature</span><span class="o">.</span><span class="n">certificates</span><span class="p">:</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">crt</span><span class="p">)</span>
-</code></pre></div><pre tabindex="0"><code class="language-console" data-lang="console">
-  Version:             3
-  Serial Number:       61:07:02:dc:00:00:00:00:00:0b
-  Signature Algorithm: SHA1_WITH_RSA_ENCRYPTION
-  Valid from:          2005-9-15 21:55:41
-  Valid to:            2016-3-15 22:5:41
-  Issuer:              DC=com, DC=microsoft, CN=Microsoft Root Certificate Authority
-  Subject:             C=US, ST=Washington, L=Redmond, O=Microsoft Corporation, CN=Microsoft Windows Verification PCA
-  ...
-</code></pre><p>Full API documentation is available here</p>
+</code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="err">
+</span><span class="err"></span><span class="go">  Version:             3
+</span><span class="go">  Serial Number:       61:07:02:dc:00:00:00:00:00:0b
+</span><span class="go">  Signature Algorithm: SHA1_WITH_RSA_ENCRYPTION
+</span><span class="go">  Valid from:          2005-9-15 21:55:41
+</span><span class="go">  Valid to:            2016-3-15 22:5:41
+</span><span class="go">  Issuer:              DC=com, DC=microsoft, CN=Microsoft Root Certificate Authority
+</span><span class="go">  Subject:             C=US, ST=Washington, L=Redmond, O=Microsoft Corporation, CN=Microsoft Windows Verification PCA
+</span><span class="go">  ...
+</span></code></pre></div><p>Full API documentation is available here</p>
 <ul>
 <li>
 <a href="https://lief-project.github.io/doc/latest/api/python/index.html" target="_blank" rel="noopener">Python API</a></li>
@@ -4434,23 +4434,23 @@ We were given a mail
 </code></pre></div><h2 id="theoretical-attack">Theoretical attack</h2>
 <p>Let&rsquo;s $N^{\prime} = N \bmod{e}$. So we have</p>
 <p>\begin{eqnarray}
-N^{\prime} &amp; \equiv &amp; p \cdot q \pmod{e} \\\<br>
-&amp; \equiv &amp; p \cdot ((p\alpha \bmod e) + k\cdot e) \pmod{e} \\\<br>
-&amp; \equiv &amp; p^2\alpha \pmod{e} \\\<br>
+N^{\prime} &amp; \equiv &amp; p \cdot q \pmod{e} \\\
+&amp; \equiv &amp; p \cdot ((p\alpha \bmod e) + k\cdot e) \pmod{e} \\\
+&amp; \equiv &amp; p^2\alpha \pmod{e} \\\
 \end{eqnarray}</p>
 <p>We have $\alpha$ in the equation so we can introduce $p - 1$ to remove $\alpha$</p>
 <p>\begin{eqnarray}
-N^{\prime} &amp; \equiv &amp; (p - 1 + 1)^2\alpha \pmod{e} \\\<br>
-&amp; \equiv &amp; (p - 1)^2\alpha + 2(p - 1)\alpha + \alpha \pmod{e} \\\<br>
-&amp; \equiv &amp; (p - 1) + 2 + \alpha \pmod{e} \\\<br>
+N^{\prime} &amp; \equiv &amp; (p - 1 + 1)^2\alpha \pmod{e} \\\
+&amp; \equiv &amp; (p - 1)^2\alpha + 2(p - 1)\alpha + \alpha \pmod{e} \\\
+&amp; \equiv &amp; (p - 1) + 2 + \alpha \pmod{e} \\\
 (p - 1)N^{\prime} &amp; \equiv &amp; (p - 1)^2 + 2(p - 1) + 1 \pmod{e}
 \end{eqnarray}</p>
 <p>$$\boxed{(p - 1)^2 - (N^{\prime} - 2)(p - 1) + 1 \equiv 0 \pmod{e}}$$</p>
 <p>Now we have a quadratic equation which only depends on $p$.</p>
 <p>Let&rsquo;s $X = p - 1$ and suppose that $N^{\prime} - 2$ is even and $N^{\prime} - 2 = 2b$.</p>
 <p>\begin{eqnarray}
-X^2 - 2bX + 1 &amp; \equiv &amp; 0 &amp; \pmod{e} \\\<br>
-(X - b)^2 - b^2 + 1 &amp; \equiv &amp; 0 &amp; \pmod{e}\\\<br>
+X^2 - 2bX + 1 &amp; \equiv &amp; 0 &amp; \pmod{e} \\\
+(X - b)^2 - b^2 + 1 &amp; \equiv &amp; 0 &amp; \pmod{e}\\\
 (X - b)^2 &amp; \equiv &amp; b^2 - 1 &amp; \pmod{e}
 \end{eqnarray}</p>
 <p>by using 
@@ -4464,46 +4464,46 @@ X^2 - 2bX + 1 &amp; \equiv &amp; 0 &amp; \pmod{e} \\\<br>
 <p>We did the assumption that $N^{\prime} - 2$ has to be even (so $N^{\prime}$ must be even) and in the certificate $N^{\prime}$ is even so everything is right.</p>
 <h2 id="pratical-attack">Pratical Attack</h2>
 <p>First we have to extract the modulus $N$ and the public key $e$ from the certificate:</p>
-<pre tabindex="0"><code class="language-console" data-lang="console">$ openssl x509 -in hitbctf.crt -text -noout
-
-Certificate:
-    Data:
-        Version: 1 (0x0)
-        Serial Number: 18379438180976429416 (0xff10e1a5ac5a0968)
-    Signature Algorithm: sha1WithRSAEncryption
-        Issuer: C=NL, ST=Noord-Holland, L=Amsterdam, O=HITB, OU=CTF
-        Validity
-            Not Before: May 24 09:58:26 2015 GMT
-            Not After : May 23 09:58:26 2016 GMT
-        Subject: C=NL, ST=Noord-Holland, L=Amsterdam, O=HITB, OU=CTF
-        Subject Public Key Info:
-            Public Key Algorithm: rsaEncryption
-                Public-Key: (1024 bit)
-                Modulus:
-                    00:e6:eb:89:c1:8d:49:c9:a2:02:2b:e0:b4:65:14:
-                    6e:0f:90:45:1e:a3:4c:6b:60:56:00:4e:bd:15:59:
-                    55:b1:35:96:c2:d6:83:ad:2f:23:6b:0b:2c:0e:0b:
-                    88:83:b5:d6:cb:8a:0b:4f:f9:b7:eb:64:8c:95:2b:
-                    6b:ef:5a:6f:04:f5:64:17:f5:1c:a9:14:d9:ea:73:
-                    e7:dd:c5:f2:0d:ce:c3:9c:e8:4b:72:2a:0c:f3:d8:
-                    5e:80:ce:78:64:63:e1:44:f6:1d:b5:9c:cf:45:ff:
-                    0e:d3:7f:d0:ce:bd:37:a5:8d:8a:4b:08:33:9e:a3:
-                    2c:bc:ab:61:64:03:fd:2c:c5
-                Exponent:
-                    69:60:2d:93:8a:81:5f:14:cf:9f:b8:36:c2:e0:4d:
-                    4d:De:82:ba:fc:8d:56:c2:6d:8c:89:ef:3c:40:69:
-                    5d:d5:d4:ef:a7:36:36:43:15:14:95:f3:8c:bf:24:
-                    ae:94:30:92:40:79:12:00:1b:17:f5:53:33:9e:92:
-                    70:70:49
-    Signature Algorithm: sha1WithRSAEncryption
-         17:2b:ea:be:90:ad:98:f2:2b:ff:f5:61:d3:ea:af:fb:35:3a:
-         67:10:91:13:db:60:55:d9:09:8b:c2:1a:cf:6b:c6:1f:f2:10:
-         7a:d1:7b:9d:ff:10:f2:f2:c0:a9:f5:aa:2e:09:93:40:88:92:
-         7d:98:ff:e1:cb:dc:db:35:8d:e0:4b:21:99:76:bf:db:04:a2:
-         62:a4:18:4e:fc:bb:a7:53:be:6a:a1:ef:ec:15:86:c1:f1:1e:
-         87:6a:e9:af:fe:d1:08:eb:de:22:28:c4:5e:be:f1:41:0a:ca:
-         cf:cf:da:63:b1:c1:56:e8:0c:8e:56:7f:08:94:0d:2b:2a:08:
-</code></pre><p><code>N = 1621575882314321757502664197090844942567381491984167028188381926885851</code>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="gp">$ </span>openssl x509 -in hitbctf.crt -text -noout
+<span class="err">
+</span><span class="err"></span><span class="go">Certificate:
+</span><span class="go">    Data:
+</span><span class="go">        Version: 1 (0x0)
+</span><span class="go">        Serial Number: 18379438180976429416 (0xff10e1a5ac5a0968)
+</span><span class="go">    Signature Algorithm: sha1WithRSAEncryption
+</span><span class="go">        Issuer: C=NL, ST=Noord-Holland, L=Amsterdam, O=HITB, OU=CTF
+</span><span class="go">        Validity
+</span><span class="go">            Not Before: May 24 09:58:26 2015 GMT
+</span><span class="go">            Not After : May 23 09:58:26 2016 GMT
+</span><span class="go">        Subject: C=NL, ST=Noord-Holland, L=Amsterdam, O=HITB, OU=CTF
+</span><span class="go">        Subject Public Key Info:
+</span><span class="go">            Public Key Algorithm: rsaEncryption
+</span><span class="go">                Public-Key: (1024 bit)
+</span><span class="go">                Modulus:
+</span><span class="go">                    00:e6:eb:89:c1:8d:49:c9:a2:02:2b:e0:b4:65:14:
+</span><span class="go">                    6e:0f:90:45:1e:a3:4c:6b:60:56:00:4e:bd:15:59:
+</span><span class="go">                    55:b1:35:96:c2:d6:83:ad:2f:23:6b:0b:2c:0e:0b:
+</span><span class="go">                    88:83:b5:d6:cb:8a:0b:4f:f9:b7:eb:64:8c:95:2b:
+</span><span class="go">                    6b:ef:5a:6f:04:f5:64:17:f5:1c:a9:14:d9:ea:73:
+</span><span class="go">                    e7:dd:c5:f2:0d:ce:c3:9c:e8:4b:72:2a:0c:f3:d8:
+</span><span class="go">                    5e:80:ce:78:64:63:e1:44:f6:1d:b5:9c:cf:45:ff:
+</span><span class="go">                    0e:d3:7f:d0:ce:bd:37:a5:8d:8a:4b:08:33:9e:a3:
+</span><span class="go">                    2c:bc:ab:61:64:03:fd:2c:c5
+</span><span class="go">                Exponent:
+</span><span class="go">                    69:60:2d:93:8a:81:5f:14:cf:9f:b8:36:c2:e0:4d:
+</span><span class="go">                    4d:De:82:ba:fc:8d:56:c2:6d:8c:89:ef:3c:40:69:
+</span><span class="go">                    5d:d5:d4:ef:a7:36:36:43:15:14:95:f3:8c:bf:24:
+</span><span class="go">                    ae:94:30:92:40:79:12:00:1b:17:f5:53:33:9e:92:
+</span><span class="go">                    70:70:49
+</span><span class="go">    Signature Algorithm: sha1WithRSAEncryption
+</span><span class="go">         17:2b:ea:be:90:ad:98:f2:2b:ff:f5:61:d3:ea:af:fb:35:3a:
+</span><span class="go">         67:10:91:13:db:60:55:d9:09:8b:c2:1a:cf:6b:c6:1f:f2:10:
+</span><span class="go">         7a:d1:7b:9d:ff:10:f2:f2:c0:a9:f5:aa:2e:09:93:40:88:92:
+</span><span class="go">         7d:98:ff:e1:cb:dc:db:35:8d:e0:4b:21:99:76:bf:db:04:a2:
+</span><span class="go">         62:a4:18:4e:fc:bb:a7:53:be:6a:a1:ef:ec:15:86:c1:f1:1e:
+</span><span class="go">         87:6a:e9:af:fe:d1:08:eb:de:22:28:c4:5e:be:f1:41:0a:ca:
+</span><span class="go">         cf:cf:da:63:b1:c1:56:e8:0c:8e:56:7f:08:94:0d:2b:2a:08:
+</span></code></pre></div><p><code>N = 1621575882314321757502664197090844942567381491984167028188381926885851</code>
 <code>995558397927547394115469298694885747314992315746872071523931715177680193273</code>
 <code>386465775883129725436206653605910592810579794603402792446164893148622893121</code>
 <code>957048204358672599654432857497196823273138934901636721473789115585263150131</code>
@@ -4571,7 +4571,7 @@ will be discussed later. Finally the output is xor-ed with $k_2$.</p>
 </code></pre></div><p><code>step</code> uses a S-Box to transform the block in this way:</p>
 <p><img src="/img/step.png" alt=""></p>
 <p>$\begin{cases}
-\text{block}^{n+1}_0 = \text{SBox}(\text{block}^{n}_{10} \oplus \text{block}^{n}_{12} \oplus \text{block}^{n}_{13} \oplus \text{block}^{n+1}_{15}) &amp; k = 0 \\\<br>
+\text{block}^{n+1}_0 = \text{SBox}(\text{block}^{n}_{10} \oplus \text{block}^{n}_{12} \oplus \text{block}^{n}_{13} \oplus \text{block}^{n+1}_{15}) &amp; k = 0 \\\
 \text{block}^{n+1}_k = \text{block}^{n}_{k - 1} &amp; k &gt; 0
 \end{cases}$</p>
 <p>$\text{block}^{n}_k$ is the byte $k$ of the <em>block</em> at round $n$ ($0 \leq k &lt; 16$ and $0 \leq n &lt; 64$)</p>
@@ -4595,14 +4595,14 @@ following function, we can compute this probability:</p>
 <p>To find the flag, we will perform a differential attack. We have a message $M_1$ that we know and we have an unknown second message $M_2$
 that is the flag. We also know $C_1$ and $C_2$ such as:</p>
 <p>$$\begin{eqnarray}
-C_1 &amp; = &amp; F(M_1 \oplus k_1) \oplus k_2 \\\<br>
+C_1 &amp; = &amp; F(M_1 \oplus k_1) \oplus k_2 \\\
 C_2 &amp; = &amp; F(M_2 \oplus k_1) \oplus k_2
 \end{eqnarray}$$</p>
 <p><img src="diff.png" alt=""></p>
 <p>By xor-ing $C_1$ and $C_2$ we can get $\Delta W = W_1 \oplus W_2 = C_1 \oplus C_2$. If somehow we can resolve $\Delta V$:</p>
 <p>$$\begin{eqnarray}
-\Delta V &amp; = &amp; V_1 \oplus V_2 \\\<br>
-&amp; = &amp; M_1 \oplus k_1 \oplus M_2 \oplus k_1\\\<br>
+\Delta V &amp; = &amp; V_1 \oplus V_2 \\\
+&amp; = &amp; M_1 \oplus k_1 \oplus M_2 \oplus k_1\\\
 &amp; = &amp; M_1 \oplus M_2.
 \end{eqnarray}$$</p>
 <p>We can extract $M_2$ with:</p>
@@ -4615,8 +4615,8 @@ C_2 &amp; = &amp; F(M_2 \oplus k_1) \oplus k_2
 <p>To find $\Delta W^{n-1}_{15}$ we will use the fact that $P(\Delta X | \Delta W^{n-1}_{15}) = 1$  for a given $\Delta X$.
 Concretely, I built a table <em>diffTable</em> which maps $\delta$ to $\Delta$.</p>
 <p>$\begin{eqnarray}
-\text{diffTable}(\Delta W^{n}_{0}) &amp; = &amp; \Delta W^{n-1}_{10} \oplus \Delta W^{n-1}_{12} \oplus \Delta W^{n-1}_{13} \oplus \Delta W^{n-1}_{15} \\\<br>
-&amp; = &amp; \Delta W^{n}_{11} \oplus \Delta W^{n}_{13} \oplus \Delta W^{n}_{14} \oplus \Delta W^{n-1}_{15}\\\<br>
+\text{diffTable}(\Delta W^{n}_{0}) &amp; = &amp; \Delta W^{n-1}_{10} \oplus \Delta W^{n-1}_{12} \oplus \Delta W^{n-1}_{13} \oplus \Delta W^{n-1}_{15} \\\
+&amp; = &amp; \Delta W^{n}_{11} \oplus \Delta W^{n}_{13} \oplus \Delta W^{n}_{14} \oplus \Delta W^{n-1}_{15}\\\
 \Delta W^{n-1}_{15}                &amp; = &amp; \text{diffTable}(\Delta W^{n}_{0}) \oplus \Delta W^{n}_{11} \oplus \Delta W^{n}_{13} \oplus \Delta W^{n}_{14}
 \end{eqnarray}$</p>
 <p>Which enables to recover $\Delta W^{n - 1}$ from $\Delta W^{n}$.
@@ -4728,7 +4728,7 @@ Then, with recursion we can compute $\Delta W^{0} = \Delta V$</p>
         <span class="nb">print</span> <span class="n">d</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&#34;hex&#34;</span><span class="p">)</span>
 </code></pre></div><p>We have:</p>
 <p>\begin{eqnarray}
-F(M_1 \oplus k_1) \oplus F(M_2 \oplus k_1) &amp; = &amp; F(M_1) \oplus F(M_2)\<br>
+F(M_1 \oplus k_1) \oplus F(M_2 \oplus k_1) &amp; = &amp; F(M_1) \oplus F(M_2)\
 M_2 &amp; = &amp; F^{-1}(F(M_1) \oplus C_1 \oplus C_2)
 \end{eqnarray}</p>
 <p>Which is far more easier to resolve.</p>

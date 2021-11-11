@@ -136,16 +136,16 @@ whereas &lt;code>lief.MachO.parse&lt;/code> returns a &lt;strong>list&lt;/strong
 &lt;span class="n">driver&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">lief&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">parse&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;driver.sys&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
 &lt;span class="k">for&lt;/span> &lt;span class="n">crt&lt;/span> &lt;span class="ow">in&lt;/span> &lt;span class="n">driver&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">signature&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">certificates&lt;/span>&lt;span class="p">:&lt;/span>
 &lt;span class="nb">print&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">crt&lt;/span>&lt;span class="p">)&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;pre tabindex="0">&lt;code class="language-console" data-lang="console">
-Version: 3
-Serial Number: 61:07:02:dc:00:00:00:00:00:0b
-Signature Algorithm: SHA1_WITH_RSA_ENCRYPTION
-Valid from: 2005-9-15 21:55:41
-Valid to: 2016-3-15 22:5:41
-Issuer: DC=com, DC=microsoft, CN=Microsoft Root Certificate Authority
-Subject: C=US, ST=Washington, L=Redmond, O=Microsoft Corporation, CN=Microsoft Windows Verification PCA
-...
-&lt;/code>&lt;/pre>&lt;p>Full API documentation is available here&lt;/p>
+&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-console" data-lang="console">&lt;span class="err">
+&lt;/span>&lt;span class="err">&lt;/span>&lt;span class="go"> Version: 3
+&lt;/span>&lt;span class="go"> Serial Number: 61:07:02:dc:00:00:00:00:00:0b
+&lt;/span>&lt;span class="go"> Signature Algorithm: SHA1_WITH_RSA_ENCRYPTION
+&lt;/span>&lt;span class="go"> Valid from: 2005-9-15 21:55:41
+&lt;/span>&lt;span class="go"> Valid to: 2016-3-15 22:5:41
+&lt;/span>&lt;span class="go"> Issuer: DC=com, DC=microsoft, CN=Microsoft Root Certificate Authority
+&lt;/span>&lt;span class="go"> Subject: C=US, ST=Washington, L=Redmond, O=Microsoft Corporation, CN=Microsoft Windows Verification PCA
+&lt;/span>&lt;span class="go"> ...
+&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Full API documentation is available here&lt;/p>
 &lt;ul>
 &lt;li>
 &lt;a href="https://lief-project.github.io/doc/latest/api/python/index.html" target="_blank" rel="noopener">Python API&lt;/a>&lt;/li>

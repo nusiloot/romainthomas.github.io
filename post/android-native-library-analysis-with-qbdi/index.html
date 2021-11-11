@@ -374,15 +374,15 @@ debug detection and what kind of data is collected (i.e. process memory map).</p
 <p>Along with the QBDI ARM support, we also added ARM support to resolve <strong>memory addresses</strong> during the
 instrumentation.
 It means that QBDI is now able to resolve <strong>the effective memory address</strong> of instructions such as:</p>
-<pre tabindex=0><code class=language-armasm data-lang=armasm>LDR R0, [R1, R2];         # Resolve R1 + R2
-STR R1, [R2, R3, LSL #2]; # Resolve R2 + R3 * 4
-LDRB    [PC, #4];         # Resolve **real** PC + 4
-</code></pre><p>Moreover, QBDI is also able to get <strong>the effective memory value</strong> that is read or written. This feature
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-armasm data-lang=armasm>LDR <span class=err>R0</span>, <span class=err>[R1</span>, <span class=err>R2]</span><span class=c1>;         # Resolve R1 + R2
+</span><span class=c1></span>STR <span class=err>R1</span>, <span class=err>[R2</span>, <span class=err>R3</span>, <span class=err>LSL</span> #<span class=mi>2</span><span class=err>]</span><span class=c1>; # Resolve R2 + R3 * 4
+</span><span class=c1></span>LDRB    <span class=err>[PC</span>, #<span class=mi>4</span><span class=err>]</span><span class=c1>;         # Resolve **real** PC + 4
+</span></code></pre></div><p>Moreover, QBDI is also able to get <strong>the effective memory value</strong> that is read or written. This feature
 is quite useful in the case of conditional instructions such as:</p>
-<pre tabindex=0><code class=language-armasm data-lang=armasm>ITT LS;
-LDRLS R0, [R4];
-LDRLS R1, [R0, #4]
-</code></pre><p>The <strong>effective</strong> value of <code>R0</code> and <code>R1</code> is stored in QBDI. It may not be
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-armasm data-lang=armasm>ITT <span class=err>LS</span><span class=c1>;
+</span><span class=c1></span>LDRLS <span class=err>R0</span>, <span class=err>[R4]</span><span class=c1>;
+</span><span class=c1></span>LDRLS <span class=err>R1</span>, <span class=err>[R0</span>, #<span class=mi>4</span><span class=err>]</span>
+</code></pre></div><p>The <strong>effective</strong> value of <code>R0</code> and <code>R1</code> is stored in QBDI. It may not be
 <code>*(r4)</code> and <code>*(r0 + 4)</code> since the <code>LS</code> condition may not be verified.</p>
 <p>To add a callback on memory accesses, we can use the <code>addMemAccessCB(...)</code> function on the VM instance:</p>
 <div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=n>vm</span><span class=p>.</span><span class=n>addMemAccessCB</span><span class=p>(</span><span class=n>MEMORY_READ_WRITE</span><span class=p>,</span> <span class=n>memory_callback</span><span class=p>,</span> <span class=cm>/* data */</span> <span class=k>nullptr</span><span class=p>);</span>

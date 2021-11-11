@@ -341,26 +341,26 @@ we can use
     <span class=k>if</span> <span class=n>x</span> <span class=ow>is</span> <span class=ow>not</span> <span class=kc>None</span><span class=p>:</span>
         <span class=nb>print</span><span class=p>(</span><span class=n>x</span><span class=p>,</span> <span class=n>f</span><span class=o>.</span><span class=n>name</span><span class=p>)</span>
 </code></pre></div><p>It provides the following results which enable to retrieve the key:</p>
-<pre tabindex=0><code class=language-console data-lang=console>$ python wb_key_recovery.py
-..8D....7F............9A....79.. injection-1a930d.trace
-..8D....7F............9A....79.. injection-1a95bd.trace
-....19....62....B0............8F injection-1a91b2.trace
-....19....62....B0............8F injection-1a8fdf.trace
-76............1E....D3....E1.... injection-1a8549.trace
-......E1....A0....CD....28...... injection-1a8978.trace
-....19....62....B0............8F injection-1a90ce.trace
-....19....62....B0............8F injection-1a8efd.trace
-r 2 p 4 y 1 s N 0 w S e c u r 3
-</code></pre><p>Finally, we can verify that <strong>r2p4y1sN0wSecur3</strong> is the right key by trying to decrypt <code>9497cdf1df2600e7f63778d0ae91dcbb</code><sup id=fnref:4><a href=#fn:4 class=footnote-ref role=doc-noteref>4</a></sup>:</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-console data-lang=console><span class=gp>$ </span>python wb_key_recovery.py
+<span class=go>..8D....7F............9A....79.. injection-1a930d.trace
+</span><span class=go>..8D....7F............9A....79.. injection-1a95bd.trace
+</span><span class=go>....19....62....B0............8F injection-1a91b2.trace
+</span><span class=go>....19....62....B0............8F injection-1a8fdf.trace
+</span><span class=go>76............1E....D3....E1.... injection-1a8549.trace
+</span><span class=go>......E1....A0....CD....28...... injection-1a8978.trace
+</span><span class=go>....19....62....B0............8F injection-1a90ce.trace
+</span><span class=go>....19....62....B0............8F injection-1a8efd.trace
+</span><span class=go>r 2 p 4 y 1 s N 0 w S e c u r 3
+</span></code></pre></div><p>Finally, we can verify that <strong>r2p4y1sN0wSecur3</strong> is the right key by trying to decrypt <code>9497cdf1df2600e7f63778d0ae91dcbb</code><sup id=fnref:4><a href=#fn:4 class=footnote-ref role=doc-noteref>4</a></sup>:</p>
 <div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=kn>from</span> <span class=nn>Crypto.Cipher</span> <span class=kn>import</span> <span class=n>AES</span>
 <span class=n>WB_KEY</span> <span class=o>=</span> <span class=sa>b</span><span class=s2>&#34;r2p4y1sN0wSecur3&#34;</span>
 
 <span class=n>cipher</span> <span class=o>=</span> <span class=n>AES</span><span class=o>.</span><span class=n>new</span><span class=p>(</span><span class=n>WB_KEY</span><span class=p>,</span> <span class=n>AES</span><span class=o>.</span><span class=n>MODE_ECB</span><span class=p>)</span>
 <span class=n>output</span> <span class=o>=</span> <span class=n>cipher</span><span class=o>.</span><span class=n>decrypt</span><span class=p>(</span><span class=nb>bytes</span><span class=o>.</span><span class=n>fromhex</span><span class=p>(</span><span class=s2>&#34;9497cdf1df2600e7f63778d0ae91dcbb&#34;</span><span class=p>))</span>
 <span class=nb>print</span><span class=p>(</span><span class=n>output</span><span class=o>.</span><span class=n>decode</span><span class=p>())</span>
-</code></pre></div><pre tabindex=0><code class=language-console data-lang=console>$ python ./aes_test.py
-0000123400004567
-</code></pre><h2 id=side-note-about-the-data-section>Side note about the <code>.data</code> section</h2>
+</code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-console data-lang=console><span class=gp>$ </span>python ./aes_test.py
+<span class=go>0000123400004567
+</span></code></pre></div><h2 id=side-note-about-the-data-section>Side note about the <code>.data</code> section</h2>
 <p>Most of the obfuscators encode strings so that we don&rsquo;t have any clue about functions' logic. The obfuscator
 used in the challenge follows this rule and running the <code>strings</code> utility on the library does not reveal any interesting information.</p>
 <p>Nevertheless, we can find a lot of <code>.datadiv_decode&lt;random hex></code> in the ELF constructors of the library.

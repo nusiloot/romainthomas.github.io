@@ -158,7 +158,7 @@ It adds another layer to reverse, as we need to understand the VM architecture b
 But what about using an interpreted language (like Python) and obfuscate its VM or its interpreter with O-LLVM?
 &lt;/b>&lt;br />
 &lt;/center>
-&lt;p>This is what PGSharp does with Lua. Some parts of the cheat are written in Lua whose the VM has been modified to:&lt;/p>
+&lt;p>This is what PGSharp does with Lua. Some parts of the cheat are written in Lua whose VM has been modified to:&lt;/p>
 &lt;ol>
 &lt;li>Fake the version: try to make believe &lt;code>Lua 5.1&lt;/code> while it&amp;rsquo;s &lt;code>Lua 5.3&lt;/code>&lt;/li>
 &lt;li>Add new opcodes (&lt;code>OP_RUN&lt;/code>, &lt;code>OP_GETDOWNVAL&lt;/code>, &lt;code>OP_OLDTABLE&lt;/code>, and &lt;code>OP_XXOR&lt;/code>) to break decompilation and
@@ -385,7 +385,7 @@ confirms that PGSharp repackaged the original application.&lt;/p>
 &lt;h4 id="dex-files-diff">
 &lt;a href="#toc">&lt;i class='fas fa-angle-up'>&lt;/i>  DEX Files Comparison&lt;/a>&lt;/h4>
 &lt;p>To figure out which parts of the DEX files have been modified, we can use LIEF (yes, LIEF can &lt;u>&lt;b>read&lt;/b>&lt;/u> the DEX format).
-Basically, the idea is to check which method(s) has a bytecode whose the size is different from the real PokemonGO
+Basically, the idea is to check which method(s) has a bytecode whose size is different from the real PokemonGO
 application:&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-python" data-lang="python">&lt;span class="kn">import&lt;/span> &lt;span class="nn">zipfile&lt;/span>
 &lt;span class="kn">import&lt;/span> &lt;span class="nn">lief&lt;/span>
@@ -445,11 +445,11 @@ used in the output. On the other hand, the size bytecode for this kind of repack
 &lt;a href="#toc">&lt;i class='fas fa-angle-up'>&lt;/i>  libmain.so&lt;/a>&lt;/h4>
 &lt;p>Compared to the original PokemonGO APK, &lt;b class="red">libmain.so&lt;/b> in PGSharp is substantially larger. Moreover,
 the ELF metadata leaks the original file name of the file:&lt;/p>
-&lt;pre tabindex="0">&lt;code class="language-console" data-lang="console">$ readelf -d libmain.so
-...
-0x000000000000000e (SONAME) Library soname: [libhela.so]
-...
-&lt;/code>&lt;/pre>&lt;p>During the analysis of PGSharp, we find references to
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-console" data-lang="console">&lt;span class="gp">$ &lt;/span>readelf -d libmain.so
+&lt;span class="go">...
+&lt;/span>&lt;span class="go">0x000000000000000e (SONAME) Library soname: [libhela.so]
+&lt;/span>&lt;span class="go">...
+&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>During the analysis of PGSharp, we find references to
 &lt;a href="https://en.wikipedia.org/wiki/Hela_%28comics%29" target="_blank" rel="noopener">Hela&lt;/a>
 in different places, like the package name
 of the dynamically-loaded APK:&lt;br /> &lt;code>me.underworld.helaplugin&lt;/code>.&lt;/p>
@@ -1107,14 +1107,14 @@ that is &lt;em>compiled&lt;/em> into &lt;code>libil2cpp.so&lt;/code>.&lt;/p>
 &lt;p>To perform these functionalities, PGSharp hooks (hooking like Frida) some of these Unity functions.&lt;/p>
 &lt;p>They tried to hide&lt;sup id="fnref:6">&lt;a href="#fn:6" class="footnote-ref" role="doc-noteref">6&lt;/a>&lt;/sup> the underlying hooking framework used to perform these hooks, unfortunately they missed
 to remove important strings:&lt;/p>
-&lt;pre tabindex="0">&lt;code class="language-console" data-lang="console">$ strings ./libmain.so|grep -i -E &amp;quot;\w\+\.cc&amp;quot;
-E:/work/code/Hela/app/src/main/cpp/Dobby/source/InterceptRouting/Routing/FunctionInlineReplace/FunctionInlineReplaceExport.cc
-E:/work/code/Hela/app/src/main/cpp/Dobby/source/TrampolineBridge/Trampoline/arm64/trampoline-arm64.cc
-E:/work/code/Hela/app/src/main/cpp/Dobby/source/MemoryAllocator/MemoryArena.cc
-E:/work/code/Hela/app/src/main/cpp/Dobby/source/InstructionRelocation/arm64/ARM64InstructionRelocation.cc
-E:/work/code/Hela/app/src/main/cpp/Dobby/source/UserMode/PlatformUtil/Linux/ProcessRuntimeUtility.cc
-E:/work/code/Hela/app/src/main/cpp/Dobby/source/UserMode/UnifiedInterface/platform-posix.cc
-&lt;/code>&lt;/pre>&lt;p>So the hooking framework is Dobby:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-console" data-lang="console">&lt;span class="gp">$ &lt;/span>strings ./libmain.so&lt;span class="p">|&lt;/span>grep -i -E &lt;span class="s2">&amp;#34;\w\+\.cc&amp;#34;&lt;/span>
+&lt;span class="go">E:/work/code/Hela/app/src/main/cpp/Dobby/source/InterceptRouting/Routing/FunctionInlineReplace/FunctionInlineReplaceExport.cc
+&lt;/span>&lt;span class="go">E:/work/code/Hela/app/src/main/cpp/Dobby/source/TrampolineBridge/Trampoline/arm64/trampoline-arm64.cc
+&lt;/span>&lt;span class="go">E:/work/code/Hela/app/src/main/cpp/Dobby/source/MemoryAllocator/MemoryArena.cc
+&lt;/span>&lt;span class="go">E:/work/code/Hela/app/src/main/cpp/Dobby/source/InstructionRelocation/arm64/ARM64InstructionRelocation.cc
+&lt;/span>&lt;span class="go">E:/work/code/Hela/app/src/main/cpp/Dobby/source/UserMode/PlatformUtil/Linux/ProcessRuntimeUtility.cc
+&lt;/span>&lt;span class="go">E:/work/code/Hela/app/src/main/cpp/Dobby/source/UserMode/UnifiedInterface/platform-posix.cc
+&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>So the hooking framework is Dobby:&lt;/p>
 &lt;center>
 &lt;i class='fas fa-github'>&lt;/i>&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;a href="https://github.com/jmpews/Dobby" target="_blank" rel="noopener">https://github.com/jmpews/Dobby&lt;/a>
 &lt;br /> &lt;br />
@@ -1370,7 +1370,7 @@ PGSharp intercepts the nonce and forward the request to its servers:&lt;/p>
 &lt;center>
 &lt;span class="red">https://tens.pgsharp.com/v1/scc-2-eg[...]4/&lt;/span>&lt;br />&lt;br />
 &lt;/center>
-&lt;p>The request is performed through a http POST, whose the data are encrypted with AES. The clear payload
+&lt;p>The request is performed through a http POST, whose data are encrypted with AES. The clear payload
 has the following layout:&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-json" data-lang="json">&lt;span class="p">{&lt;/span>
 &lt;span class="nt">&amp;#34;n&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="s2">&amp;#34;Cy[...]&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span>
@@ -1767,7 +1767,7 @@ get the base address by iterating over &lt;code>/proc/&amp;lt;pid&amp;gt;/maps&l
 &lt;p>O-LLVM seems not applied on this function&amp;#160;&lt;a href="#fnref:8" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
 &lt;/li>
 &lt;li id="fn:9" role="doc-endnote">
-&lt;p>One can also hook the AES encrypt/decrypt functions whose the prototype is &lt;code>(uint8_*t key_schedule, uint8_t* inout_buffer, size_t size)&lt;/code>&amp;#160;&lt;a href="#fnref:9" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;p>One can also hook the AES encrypt/decrypt functions whose prototype is &lt;code>(uint8_*t key_schedule, uint8_t* inout_buffer, size_t size)&lt;/code>&amp;#160;&lt;a href="#fnref:9" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
 &lt;/li>
 &lt;/ol>
 &lt;/section></description></item><item><title>Gotta Catch 'Em All: Frida &amp; jailbreak detection</title><link>https://www.romainthomas.fr/post/21-07-pokemongo-anti-frida-jailbreak-bypass/</link><pubDate>Sun, 18 Jul 2021 00:00:00 +0000</pubDate><guid>https://www.romainthomas.fr/post/21-07-pokemongo-anti-frida-jailbreak-bypass/</guid><description>&lt;style>
@@ -2813,25 +2813,25 @@ we can use
 &lt;span class="k">if&lt;/span> &lt;span class="n">x&lt;/span> &lt;span class="ow">is&lt;/span> &lt;span class="ow">not&lt;/span> &lt;span class="kc">None&lt;/span>&lt;span class="p">:&lt;/span>
 &lt;span class="nb">print&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">x&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">f&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">name&lt;/span>&lt;span class="p">)&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>It provides the following results which enable to retrieve the key:&lt;/p>
-&lt;pre tabindex="0">&lt;code class="language-console" data-lang="console">$ python wb_key_recovery.py
-..8D....7F............9A....79.. injection-1a930d.trace
-..8D....7F............9A....79.. injection-1a95bd.trace
-....19....62....B0............8F injection-1a91b2.trace
-....19....62....B0............8F injection-1a8fdf.trace
-76............1E....D3....E1.... injection-1a8549.trace
-......E1....A0....CD....28...... injection-1a8978.trace
-....19....62....B0............8F injection-1a90ce.trace
-....19....62....B0............8F injection-1a8efd.trace
-r 2 p 4 y 1 s N 0 w S e c u r 3
-&lt;/code>&lt;/pre>&lt;p>Finally, we can verify that &lt;strong>r2p4y1sN0wSecur3&lt;/strong> is the right key by trying to decrypt &lt;code>9497cdf1df2600e7f63778d0ae91dcbb&lt;/code>&lt;sup id="fnref:4">&lt;a href="#fn:4" class="footnote-ref" role="doc-noteref">4&lt;/a>&lt;/sup>:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-console" data-lang="console">&lt;span class="gp">$ &lt;/span>python wb_key_recovery.py
+&lt;span class="go">..8D....7F............9A....79.. injection-1a930d.trace
+&lt;/span>&lt;span class="go">..8D....7F............9A....79.. injection-1a95bd.trace
+&lt;/span>&lt;span class="go">....19....62....B0............8F injection-1a91b2.trace
+&lt;/span>&lt;span class="go">....19....62....B0............8F injection-1a8fdf.trace
+&lt;/span>&lt;span class="go">76............1E....D3....E1.... injection-1a8549.trace
+&lt;/span>&lt;span class="go">......E1....A0....CD....28...... injection-1a8978.trace
+&lt;/span>&lt;span class="go">....19....62....B0............8F injection-1a90ce.trace
+&lt;/span>&lt;span class="go">....19....62....B0............8F injection-1a8efd.trace
+&lt;/span>&lt;span class="go">r 2 p 4 y 1 s N 0 w S e c u r 3
+&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Finally, we can verify that &lt;strong>r2p4y1sN0wSecur3&lt;/strong> is the right key by trying to decrypt &lt;code>9497cdf1df2600e7f63778d0ae91dcbb&lt;/code>&lt;sup id="fnref:4">&lt;a href="#fn:4" class="footnote-ref" role="doc-noteref">4&lt;/a>&lt;/sup>:&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-python" data-lang="python">&lt;span class="kn">from&lt;/span> &lt;span class="nn">Crypto.Cipher&lt;/span> &lt;span class="kn">import&lt;/span> &lt;span class="n">AES&lt;/span>
 &lt;span class="n">WB_KEY&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="sa">b&lt;/span>&lt;span class="s2">&amp;#34;r2p4y1sN0wSecur3&amp;#34;&lt;/span>
 &lt;span class="n">cipher&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">AES&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">new&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">WB_KEY&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">AES&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">MODE_ECB&lt;/span>&lt;span class="p">)&lt;/span>
 &lt;span class="n">output&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">cipher&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">decrypt&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nb">bytes&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">fromhex&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;9497cdf1df2600e7f63778d0ae91dcbb&amp;#34;&lt;/span>&lt;span class="p">))&lt;/span>
 &lt;span class="nb">print&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">output&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">decode&lt;/span>&lt;span class="p">())&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;pre tabindex="0">&lt;code class="language-console" data-lang="console">$ python ./aes_test.py
-0000123400004567
-&lt;/code>&lt;/pre>&lt;h2 id="side-note-about-the-data-section">Side note about the &lt;code>.data&lt;/code> section&lt;/h2>
+&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-console" data-lang="console">&lt;span class="gp">$ &lt;/span>python ./aes_test.py
+&lt;span class="go">0000123400004567
+&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="side-note-about-the-data-section">Side note about the &lt;code>.data&lt;/code> section&lt;/h2>
 &lt;p>Most of the obfuscators encode strings so that we don&amp;rsquo;t have any clue about functions' logic. The obfuscator
 used in the challenge follows this rule and running the &lt;code>strings&lt;/code> utility on the library does not reveal any interesting information.&lt;/p>
 &lt;p>Nevertheless, we can find a lot of &lt;code>.datadiv_decode&amp;lt;random hex&amp;gt;&lt;/code> in the ELF constructors of the library.
@@ -3258,14 +3258,15 @@ at the following locations:&lt;/p>
 the checks in the ELF constructors are annoying.&lt;/p>
 &lt;p>One way to disable the checks in the thread&amp;rsquo;s routines is to disable the &lt;code>pthread_create(...)&lt;/code>. It can
 be achieved by patching the &lt;code>.plt&lt;/code> entry associated with the function:&lt;/p>
-&lt;pre tabindex="0">&lt;code class="language-armasm" data-lang="armasm">mov x0, xzr;
-ret;
-&lt;/code>&lt;/pre>&lt;p>Thanks to &lt;code>llvm-mc&lt;/code>, we can get the raw bytes of these instructions:&lt;/p>
-&lt;pre tabindex="0">&lt;code class="language-console" data-lang="console">$ echo &amp;quot;mov x0, xzr;ret;&amp;quot;|llvm-mc -arch=aarch64 -show-encoding
-.text
-mov x0, xzr // encoding: [0xe0,0x03,0x1f,0xaa]
-ret // encoding: [0xc0,0x03,0x5f,0xd6]
-&lt;/code>&lt;/pre>&lt;p>Finally, we can patch the &lt;code>.plt&lt;/code> with
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-armasm" data-lang="armasm">mov &lt;span class="nc">x0&lt;/span>, &lt;span class="err">xzr&lt;/span>&lt;span class="c1">;
+&lt;/span>&lt;span class="c1">&lt;/span>ret&lt;span class="c1">;
+&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Thanks to &lt;code>llvm-mc&lt;/code>, we can get the raw bytes of these instructions:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-console" data-lang="console">&lt;span class="gp">$ &lt;/span>&lt;span class="nb">echo&lt;/span> &lt;span class="s2">&amp;#34;mov x0, xzr;ret;&amp;#34;&lt;/span>&lt;span class="p">|&lt;/span>llvm-mc -arch&lt;span class="o">=&lt;/span>aarch64 -show-encoding
+&lt;span class="err">
+&lt;/span>&lt;span class="err">&lt;/span>&lt;span class="go">.text
+&lt;/span>&lt;span class="go">mov x0, xzr // encoding: [0xe0,0x03,0x1f,0xaa]
+&lt;/span>&lt;span class="go">ret // encoding: [0xc0,0x03,0x5f,0xd6]
+&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Finally, we can patch the &lt;code>.plt&lt;/code> with
 &lt;a href="https://lief.quarkslab.com" target="_blank" rel="noopener">LIEF&lt;/a>:&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-python" data-lang="python">&lt;span class="kn">import&lt;/span> &lt;span class="nn">lief&lt;/span>
 &lt;span class="n">lib&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">lief&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">parse&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;./libnative-lib.so&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>

@@ -449,15 +449,15 @@ at the following locations:</p>
 the checks in the ELF constructors are annoying.</p>
 <p>One way to disable the checks in the thread&rsquo;s routines is to disable the <code>pthread_create(...)</code>. It can
 be achieved by patching the <code>.plt</code> entry associated with the function:</p>
-<pre tabindex=0><code class=language-armasm data-lang=armasm>mov x0, xzr;
-ret;
-</code></pre><p>Thanks to <code>llvm-mc</code>, we can get the raw bytes of these instructions:</p>
-<pre tabindex=0><code class=language-console data-lang=console>$ echo &quot;mov x0, xzr;ret;&quot;|llvm-mc -arch=aarch64 -show-encoding
-
-.text
-mov     x0, xzr                 // encoding: [0xe0,0x03,0x1f,0xaa]
-ret                             // encoding: [0xc0,0x03,0x5f,0xd6]
-</code></pre><p>Finally, we can patch the <code>.plt</code> with
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-armasm data-lang=armasm>mov <span class=nc>x0</span>, <span class=err>xzr</span><span class=c1>;
+</span><span class=c1></span>ret<span class=c1>;
+</span></code></pre></div><p>Thanks to <code>llvm-mc</code>, we can get the raw bytes of these instructions:</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-console data-lang=console><span class=gp>$ </span><span class=nb>echo</span> <span class=s2>&#34;mov x0, xzr;ret;&#34;</span><span class=p>|</span>llvm-mc -arch<span class=o>=</span>aarch64 -show-encoding
+<span class=err>
+</span><span class=err></span><span class=go>.text
+</span><span class=go>mov     x0, xzr                 // encoding: [0xe0,0x03,0x1f,0xaa]
+</span><span class=go>ret                             // encoding: [0xc0,0x03,0x5f,0xd6]
+</span></code></pre></div><p>Finally, we can patch the <code>.plt</code> with
 <a href=https://lief.quarkslab.com target=_blank rel=noopener>LIEF</a>:</p>
 <div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=kn>import</span> <span class=nn>lief</span>
 <span class=n>lib</span> <span class=o>=</span> <span class=n>lief</span><span class=o>.</span><span class=n>parse</span><span class=p>(</span><span class=s2>&#34;./libnative-lib.so&#34;</span><span class=p>)</span>
