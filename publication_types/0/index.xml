@@ -5,8 +5,10 @@
 &lt;/div>
 &lt;h2 id="hahahugoshortcode-s2-hbhb-talk">
 &lt;i class="fas fa-laptop-code pr-1 fa-fw">&lt;/i> Talk&lt;/h2>
-&lt;p>&lt;em>to be published&lt;/em>&lt;/p>
-&lt;h2 id="hahahugoshortcode-s3-hbhb-blog-post">
+&lt;div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;">
+&lt;iframe src="https://www.youtube.com/embed/gcMQgjgajPk" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border:0;" allowfullscreen title="YouTube Video">&lt;/iframe>
+&lt;/div>
+&lt;h2 id="hahahugoshortcode-s4-hbhb-blog-post">
 &lt;i class="fas fa-newspaper pr-1 fa-fw">&lt;/i> Blog Post&lt;/h2>
 &lt;p>
 &lt;a href="https://www.romainthomas.fr/post/21-11-pgsharp-analysis/">&lt;em>PGSharp: Analysis of a Cheating App for PokemonGO&lt;/em>&lt;/a>&lt;/p></description></item><item><title>QBDL: QuarkslaB Dynamic Loader</title><link>https://www.romainthomas.fr/publication/21-sstic-qbdl/</link><pubDate>Thu, 03 Jun 2021 00:00:00 +0000</pubDate><guid>https://www.romainthomas.fr/publication/21-sstic-qbdl/</guid><description>&lt;h2 id="hahahugoshortcode-s0-hbhb-slides">
